@@ -57,7 +57,6 @@ export function App() {
             <div className="hero-copy">
               <p className="kicker">{site.kicker}</p>
               <h1>{site.title}</h1>
-              <p className="lede">{site.lede}</p>
               {reduced ? <p className="reduced-note">{site.reduced}</p> : null}
             </div>
             <div className="stage-slot">
