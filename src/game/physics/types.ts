@@ -66,7 +66,8 @@ export interface LandingPulse {
 
 export interface StepEvents {
   finale: boolean;
-  respawned: boolean;
+  /** He missed every plank and dropped out of view. The run is over. */
+  fell: boolean;
   milestoneChanged: boolean;
   landed: LandingPulse | null;
 }

@@ -196,7 +196,7 @@
   margin: 0;
   color: var(--color-ink);
   font-family: var(--display);
-  font-size: clamp(var(--text-md), 2.2vw, var(--text-lg));
+  font-size: clamp(var(--text-md), 2.4vw, var(--text-xl));
   line-height: 1.3;
 }
 
@@ -252,15 +252,16 @@
   grid-area: pig;
   position: relative;
   overflow: hidden;
-  width: 58px;
-  height: 48px;
+  /* Sized to the idle drawing (122×84 at --wilbur-fit) so the row's centering lines the pig up with the text. */
+  width: 37px;
+  height: 26px;
 }
 
 .guide-notice-view { grid-area: view; }
 .guide-notice-dismiss { grid-area: close; }
 
 .guide-notice-pig .wilbur-sprite {
-  --wilbur-fit: 0.26;
+  --wilbur-fit: 0.3;
 }
 
 .guide-panel {
@@ -545,11 +546,33 @@
 }
 
 .guide-find {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
   padding: var(--space-3) var(--space-4);
   border: var(--border-pixel);
   background: var(--color-surface);
   box-shadow: var(--shadow-pixel-sm);
 }
+
+/* The sticker itself, stuck on the card at a slight angle. */
+.guide-find-sticker {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 6px;
+  border: var(--border-pixel);
+  border-radius: 10px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-pixel-sm);
+  transform: rotate(-6deg);
+}
+
+.guide-find:nth-child(even) .guide-find-sticker { transform: rotate(5deg); }
+
+.guide-find-sticker .sticker-icon { width: 100%; height: 100%; }
 
 .guide-find strong {
   display: block;
@@ -566,7 +589,16 @@
   color: var(--color-ink-muted);
 }
 
+.guide-find.is-locked { align-items: center; }
 .guide-find.is-locked strong { margin: 0; }
+
+.guide-find.is-locked .guide-find-sticker {
+  border-style: dashed;
+  background: transparent;
+  box-shadow: none;
+  font-family: var(--display);
+  font-size: var(--text-lg);
+}
 
 .guide-finds .guide-finds-hint {
   margin-top: var(--space-3);

@@ -2,7 +2,6 @@ import { growthAt, impactForLanding, milestoneAt, runProgress, strainTierAt } fr
 import { clamp, clamp01 } from "../../utils/math";
 import {
   BASE_HALF_WIDTH,
-  BOUNCE_VY,
   FINALE_HEIGHT,
   FINALE_SECONDS,
   FRICTION,
@@ -16,7 +15,7 @@ import type { Platform, StepEvents, World } from "./types";
 
 const emptyEvents = (): StepEvents => ({
   finale: false,
-  respawned: false,
+  fell: false,
   milestoneChanged: false,
   landed: null,
 });
@@ -129,16 +128,16 @@ export function stepWorld(world: World, dtSeconds: number): StepEvents {
   }
 
   if (pig.y < world.cameraBottom - 48) {
-    // A late miss is the collapse. Earlier misses get a gentle put-back
-    // so the ending doesn't depend on a flawless run.
+    // A late miss is the collapse. Any earlier miss ends the run.
     if (world.progress >= 0.97) {
       pig.y = world.cameraBottom + 12;
       pig.vy = -180;
       events.finale = true;
       return events;
     }
-    respawn(world);
-    events.respawned = true;
+    world.over = true;
+    events.fell = true;
+    return events;
   }
 
   cullPlatforms(world);
@@ -161,39 +160,6 @@ function highestLanding(
     if (!hit || platform.y > hit.y) hit = platform;
   }
   return hit;
-}
-
-function respawn(world: World): void {
-  const pig = world.pig;
-  let platform: Platform | null = null;
-  const low = world.cameraBottom + 24;
-  const high = world.cameraBottom + world.height * 0.48;
-  for (const candidate of world.platforms) {
-    if (candidate.broken || candidate.falling) continue;
-    if (candidate.y < low || candidate.y > high) continue;
-    if (!platform || candidate.y < platform.y) platform = candidate;
-  }
-  if (!platform) {
-    platform = {
-      id: `safe-${world.nextId++}`,
-      x: world.width / 2 - 70,
-      y: world.cameraBottom + 80,
-      width: 140,
-      thickness: 16,
-      integrity: 1.4,
-      stage: "major",
-      broken: false,
-      wobbleUntil: 0,
-      falling: false,
-      fellAt: 0,
-    };
-    world.platforms.push(platform);
-  }
-  pig.x = clamp(platform.x + platform.width / 2, 36, world.width - 36);
-  pig.y = platform.y;
-  pig.vy = BOUNCE_VY;
-  pig.vx *= 0.2;
-  pig.landUntil = world.time + 0.12;
 }
 
 function cullPlatforms(world: World): void {

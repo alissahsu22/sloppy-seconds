@@ -121,15 +121,21 @@ describe("a full run", () => {
     expect(world.elapsed).toBeLessThan(FINALE_SECONDS + 8);
   });
 
-  it("still collapses if the visitor never steers", () => {
+  it("ends the run when he misses a plank early", () => {
     const world = createWorld({ width: 520, height: 560, rng: mulberry32(9) });
+    let fell = false;
     let finale = false;
-    for (let frame = 0; frame < 60 * 55 && !finale; frame += 1) {
+    for (let frame = 0; frame < 60 * 55 && !fell && !finale; frame += 1) {
       world.input.left = false;
       world.input.right = false;
-      finale = stepWorld(world, 1 / 60).finale;
+      const events = stepWorld(world, 1 / 60);
+      fell = events.fell;
+      finale = events.finale;
     }
-    expect(finale).toBe(true);
+    expect(fell).toBe(true);
+    expect(finale).toBe(false);
+    expect(world.over).toBe(true);
+    expect(stepWorld(world, 1 / 60).fell).toBe(false);
   });
 });
 

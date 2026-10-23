@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { NPC_SCALE, PIG_DRAW } from "../assets/pig/metrics";
 import { PigCharacter } from "../components/PigCharacter/PigCharacter";
-import type { AnimalDefinition } from "../content/animals/types";
+import { StickerIcon } from "../components/Sticker/Sticker";
+import type { AnimalDefinition, Discovery } from "../content/animals/types";
 import type { Facing, NpcStateId, PigPose } from "../model/types";
 import type { FoundDiscovery } from "../progress/storage";
 import { clamp } from "../utils/math";
@@ -24,6 +25,18 @@ interface View {
   walkTarget: number | null;
   token: number;
 }
+
+/** A sticker on the grass, waiting for the visitor to pick it up. */
+interface Dropped {
+  discovery: Discovery;
+  x: number;
+  /** Where it popped out of the pig, relative to where it lands. */
+  fromX: number;
+  tilt: number;
+  collected: boolean;
+}
+
+const COLLECT_MS = 900;
 
 export function Pasture({
   animal,
@@ -62,6 +75,9 @@ export function Pasture({
   const holdRef = useRef(holdState);
   const suspendedRef = useRef(suspended);
   const pointerRef = useRef<{ x: number; y: number } | null>(null);
+  const [dropped, setDropped] = useState<Dropped[]>([]);
+  const droppedRef = useRef(dropped);
+  droppedRef.current = dropped;
   const [view, setView] = useState<View>({
     pose: "idle",
     facing: startFacing,
@@ -98,6 +114,11 @@ export function Pasture({
     }));
   };
 
+  // Found, or already lying on the grass. Either way he should not dig it up again.
+  const isTaken = (id: string) =>
+    foundRef.current.some((item) => item.id === id) ||
+    droppedRef.current.some((item) => item.discovery.id === id);
+
   const makeCtx = (): NpcContext => {
     const pointer = pointerRef.current;
     return {
@@ -106,9 +127,7 @@ export function Pasture({
       pointerX: pointer?.x ?? null,
       pointerNear: pointer ? pointerIsNearPig(pointer.x, pointer.y, motionRef.current.x) : false,
       enrichmentX: null,
-      discoveriesLeft: animal.discoveries.filter(
-        (item) => !foundRef.current.some((foundItem) => foundItem.id === item.id),
-      ).length,
+      discoveriesLeft: animal.discoveries.filter((item) => !isTaken(item.id)).length,
       paused: !visibleRef.current || document.hidden || suspendedRef.current,
       holdState: holdRef.current,
     };
@@ -146,19 +165,29 @@ export function Pasture({
       const result = stepNpc(previous, makeCtx(), profile, now, Math.random);
       memoryRef.current = result.memory;
       if (result.unearthed) {
-        const next = animal.discoveries.find(
-          (item) => !foundRef.current.some((foundItem) => foundItem.id === item.id),
-        );
+        const next = animal.discoveries.find((item) => !isTaken(item.id));
         if (next) {
-          const x = clamp(motionRef.current.x + (Math.random() * 36 - 18), 64, window.innerWidth - 64);
-          onFindRef.current({ id: next.id, x });
+          // Pop it out to one side so it lands clear of the pig and can be clicked.
+          const pigX = motionRef.current.x;
+          const side = Math.random() < 0.5 ? -1 : 1;
+          const fling = 70 + Math.random() * 40;
+          let x = pigX + side * fling;
+          if (x < 40 || x > window.innerWidth - 40) x = pigX - side * fling;
+          x = clamp(x, 40, window.innerWidth - 40);
+          const sticker: Dropped = {
+            discovery: next,
+            x,
+            fromX: pigX - x,
+            tilt: Math.round(Math.random() * 24 - 12),
+            collected: false,
+          };
+          droppedRef.current = [...droppedRef.current, sticker];
+          setDropped(droppedRef.current);
           const lines = profile.lines.found;
-          const line = lines[Math.floor(Math.random() * lines.length)] ?? "look";
-          // Name the find so the visitor knows it went into the Field Guide.
           memoryRef.current = {
             ...memoryRef.current,
-            bubble: `${line}! ${next.title}`,
-            bubbleUntil: now + 3200,
+            bubble: lines[Math.floor(Math.random() * lines.length)] ?? "look!",
+            bubbleUntil: now + 2600,
           };
         }
       }
@@ -202,8 +231,46 @@ export function Pasture({
     publish(next);
   };
 
+  const collect = (sticker: Dropped) => {
+    if (sticker.collected) return;
+    onFindRef.current({ id: sticker.discovery.id, x: sticker.x });
+    setDropped((current) =>
+      current.map((item) => (item === sticker ? { ...item, collected: true } : item)),
+    );
+    window.setTimeout(
+      () => setDropped((current) => current.filter((item) => item.discovery.id !== sticker.discovery.id)),
+      reduced ? 1400 : COLLECT_MS,
+    );
+  };
+
   return (
     <>
+      {dropped.map((sticker) => (
+        <button
+          key={sticker.discovery.id}
+          type="button"
+          className={`sticker-drop${sticker.collected ? " is-collected" : ""}`}
+          style={
+            {
+              left: `${sticker.x}px`,
+              "--from-x": `${sticker.fromX}px`,
+              "--tilt": `${sticker.tilt}deg`,
+            } as CSSProperties
+          }
+          onClick={() => collect(sticker)}
+          disabled={sticker.collected}
+          aria-label={`Sticker: ${sticker.discovery.title}. Pick it up for your Field Guide.`}
+        >
+          <span className="sticker-drop-face">
+            <StickerIcon art={sticker.discovery.sticker} />
+          </span>
+          {sticker.collected ? (
+            <span className="sticker-drop-toast" role="status">
+              Added to Field Guide
+            </span>
+          ) : null}
+        </button>
+      ))}
       <div
         ref={anchorRef}
         className={`pig-anchor${visible ? "" : " is-hidden"}`}

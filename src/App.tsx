@@ -258,6 +258,7 @@ export function App() {
                     active={(phase === "playing" || phase === "collapsing") && dialog === "game"}
                     reduced={reduced}
                     onStart={() => setPhase("playing")}
+                    onRetry={replay}
                     onLanding={(landing) => reactionsRef.current?.land(landing)}
                     onCollapse={(payload) => {
                       try {

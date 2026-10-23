@@ -61,22 +61,25 @@ export const wilbur: AnimalDefinition = {
       click: ["oink", "hey", "mmhm", "I see you"],
       refuse: ["busy", "nap", "not now", "mmm"],
       curious: ["huh", "oh?"],
-      found: ["look", "aha", "mine?"],
+      found: ["look!", "for you", "ooh, a sticker"],
     },
   },
   discoveries: [
     {
       id: "teacup",
+      sticker: "teacup",
       title: "Teacup, briefly",
       body: "Wilbur was purchased as a teacup piglet. He lives at about 175 pounds now. An animal doesn't stay small just because someone expected it to.",
     },
     {
       id: "herd",
+      sticker: "crown",
       title: "Sixty seconds",
       body: "The sanctuary says that within a minute of meeting the other pigs, Wilbur made himself the herd's alpha. He has mellowed, and he still steps in when Toodles gets rowdy. They describe him as cool, confident, and devoted to his herd.",
     },
     {
       id: "sun-dirt",
+      sticker: "sun",
       title: "Lawns, sun, dinner",
       body: "Wilbur likes rooting in dirt — freshly manicured lawns especially — plus long naps in the sun and a good meal.",
     },

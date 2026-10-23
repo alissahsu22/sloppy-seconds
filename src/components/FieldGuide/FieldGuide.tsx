@@ -1,8 +1,9 @@
 import { WilburSprite } from "../../assets/pig/WilburSprite";
+import { StickerIcon } from "../Sticker/Sticker";
 import type { Discovery } from "../../content/animals/types";
 import { collectedFieldGuide, fieldGuideEntries } from "../../content/fieldGuide";
 
-/** Found discoveries read in full. The rest stay as locked slots with a hint, so the roaming has a goal. */
+/** Stickers the visitor picked up read in full. The rest stay as blank slots with a hint, so the roaming has a goal. */
 function Finds({
   name,
   discoveries,
@@ -18,7 +19,7 @@ function Finds({
   return (
     <section className="guide-finds">
       <h4>
-        Found in the pasture{" "}
+        {`${name}’s stickers`}{" "}
         <span className="guide-finds-count">
           {found.length}/{discoveries.length}
         </span>
@@ -26,19 +27,25 @@ function Finds({
       <ul>
         {found.map((item) => (
           <li key={item.id} className="guide-find">
-            <strong>{item.title}</strong>
-            <p>{item.body}</p>
+            <span className="guide-find-sticker">
+              <StickerIcon art={item.sticker} />
+            </span>
+            <div>
+              <strong>{item.title}</strong>
+              <p>{item.body}</p>
+            </div>
           </li>
         ))}
         {Array.from({ length: left }, (_, index) => (
           <li key={`locked-${index}`} className="guide-find is-locked" aria-hidden="true">
+            <span className="guide-find-sticker">?</span>
             <strong>???</strong>
           </li>
         ))}
       </ul>
       {left > 0 ? (
         <p className="guide-finds-hint">
-          {`${left} more to find. Close this window and watch ${name} roam the page. He roots around for them on his own.`}
+          {`${left} more to collect. Learn about ${name} by finding stickers.`}
         </p>
       ) : null}
     </section>

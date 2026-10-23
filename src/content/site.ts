@@ -9,6 +9,8 @@ export const site = {
 
   endingTitle: "Still think he's a teacup?",
   replay: "Try again",
+  fellTitle: "Whoops! Wilbur slipped.",
+  fellNote: "He's fine, just a little muddy. Give it another hop?",
 
   helpLabel: "Help pigs like Wilbur",
   helpHref: "https://www.sloppysecondsinc.org/ways-to-help",
@@ -16,7 +18,7 @@ export const site = {
 
   heroPlay: "Start exploring",
   heroReplay: "Play again",
-  heroPlayNote: "Begin with a short game, then meet the animals who call the sanctuary home.",
+  heroPlayNote: "Play a game to learn more about each of the animals who call the sanctuary home.",
 
   reduced: "Animations are simplified to match your system settings.",
   ageLabel: "Wilbur's age",

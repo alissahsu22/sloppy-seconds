@@ -1,8 +1,12 @@
 import type { BehaviorProfile } from "../../npc/behaviorMachine/types";
 
+/** The pixel art on the sticker that pops out of the animal. */
+export type StickerArt = "teacup" | "crown" | "sun";
+
 export interface Discovery {
   id: string;
   title: string;
+  sticker: StickerArt;
   /** Short, optional, and editable. Keep claims inside the sanctuary's published bio. */
   body: string;
 }

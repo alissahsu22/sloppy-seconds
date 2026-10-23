@@ -28,6 +28,7 @@ interface PigJumpGameProps {
   onCollapse: (payload: EscapePayload) => void;
   onLanding?: (landing: LandingPulse) => void;
   onStart?: () => void;
+  onRetry: () => void;
 }
 
 /** Game seconds a milestone note stays under the age. Game time, so it holds while the tab is hidden. */
@@ -48,7 +49,7 @@ const coarsePointer = () =>
  * React state changes only when a plank's crack state changes. The age readout, its note, and the growth echo are written directly.
  */
 export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function PigJumpGame(
-  { active, reduced, onCollapse, onLanding, onStart },
+  { active, reduced, onCollapse, onLanding, onStart, onRetry },
   ref,
 ) {
   const frameRef = useRef<HTMLElement>(null);
@@ -58,6 +59,7 @@ export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function Pig
   const echoNodeRef = useRef<HTMLDivElement>(null);
   const ageLiveRef = useRef<HTMLParagraphElement>(null);
   const readoutRef = useRef<HTMLDivElement>(null);
+  const retryRef = useRef<HTMLButtonElement>(null);
   const readoutTurnRef = useRef<ReturnType<typeof flipReadout>>(null);
   /** Drawn size: eases from `from` to `to` starting at `startedAt` (game time). */
   const growRef = useRef({ from: MILESTONES[0].scale, to: MILESTONES[0].scale, startedAt: 0 });
@@ -79,6 +81,7 @@ export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function Pig
   const [holding, setHolding] = useState(true);
   const [ready, setReady] = useState(false);
   const [pose, setPose] = useState<PigPose>("idle");
+  const [fell, setFell] = useState(false);
   const [platforms, setPlatforms] = useState<{ id: string; stage: World["platforms"][number]["stage"]; falling: boolean; wobble: boolean }[]>([]);
 
   onCollapseRef.current = onCollapse;
@@ -234,7 +237,14 @@ export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function Pig
           if (milestone.at >= 1) grow(world, milestone);
           else pendingGrowthRef.current = milestone;
         }
-        const safe = events.respawned || (events.landed !== null && events.landed.outcome !== "break");
+        if (events.fell) {
+          stopReadout();
+          hideNote();
+          announce(`${site.fellTitle} ${site.fellNote}`);
+          setFell(true);
+          return;
+        }
+        const safe = events.landed !== null && events.landed.outcome !== "break";
         if (pendingGrowthRef.current && safe) grow(world, pendingGrowthRef.current);
         const pendingAge = pendingAgeRef.current;
         if (pendingAge && world.time >= pendingAge.at) showAge(world, pendingAge.milestone);
@@ -273,6 +283,10 @@ export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function Pig
     observer.observe(worldEl);
     return () => observer.disconnect();
   }, [ready]);
+
+  useEffect(() => {
+    if (fell) retryRef.current?.focus({ preventScroll: true });
+  }, [fell]);
 
   useEffect(() => {
     if (!ready || !holding) return;
@@ -348,7 +362,8 @@ export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function Pig
       sync();
     };
     const onPointerDown = (event: PointerEvent) => {
-      if (!activeRef.current) return;
+      // Capturing the pointer would steal the click from the try-again button.
+      if (!activeRef.current || worldRef.current?.over) return;
       frame.setPointerCapture(event.pointerId);
       pointers.set(event.pointerId, event.clientX);
       sync();
@@ -385,6 +400,7 @@ export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function Pig
       ref={frameRef}
       tabIndex={0}
       data-holding={holding ? "1" : undefined}
+      data-fallen={fell ? "1" : undefined}
       data-strain="frame"
       data-autofocus=""
       aria-label={site.gameLabel}
@@ -448,6 +464,19 @@ export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function Pig
           <p className="intro-steer">{touch ? site.steerTouch : site.steer}</p>
         </div>
       </div>
+      {fell ? (
+        <div className="intro game-over" role="group" aria-labelledby="game-over-title">
+          <div className="intro-story">
+            <p className="intro-title" id="game-over-title">{site.fellTitle}</p>
+            <p className="intro-tag">{site.fellNote}</p>
+          </div>
+          <div className="intro-action">
+            <button type="button" className="btn btn-primary" ref={retryRef} onClick={onRetry}>
+              {site.replay}
+            </button>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 });
