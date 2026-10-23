@@ -5,6 +5,12 @@ import { fieldGuideButtonLabel } from "../../content/fieldGuide";
 import { site } from "../../content/site";
 import type { Phase } from "../../App";
 
+/** The crew heading. The ending's "meet the other animals" scrolls here. */
+export const CREW_ANCHOR = "animals";
+
+/** The one card with a game. The hero teaser opens the same story. */
+const GAME_ID = crew.find((animal) => animal.game)?.id;
+
 const NAV = [
   { label: "About", href: "https://www.sloppysecondsinc.org/" },
   { label: "Our Animals", href: "#top", current: true },
@@ -22,13 +28,7 @@ const FOOTER_NAV = [
   { label: "Donate", href: "https://www.sloppysecondsinc.org/ways-to-help" },
 ] as const;
 
-function SiteHeader({
-  guideLabel,
-  onOpenGuide,
-}: {
-  guideLabel: string;
-  onOpenGuide: (opener: HTMLButtonElement) => void;
-}) {
+function SiteHeader() {
   const [solid, setSolid] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -59,14 +59,6 @@ function SiteHeader({
         <div className="site-header-tools">
           <button
             type="button"
-            className="guide-button"
-            aria-haspopup="dialog"
-            onClick={(event) => onOpenGuide(event.currentTarget)}
-          >
-            {guideLabel}
-          </button>
-          <button
-            type="button"
             className="nav-toggle"
             aria-expanded={open}
             aria-controls="site-nav"
@@ -91,6 +83,38 @@ function SiteHeader({
         </div>
       </div>
     </header>
+  );
+}
+
+/** Floats in the bottom right corner so the guide stays one tap away while scrolling. */
+function GuideButton({
+  count,
+  onOpenGuide,
+}: {
+  count: number;
+  onOpenGuide: (opener: HTMLButtonElement) => void;
+}) {
+  const label = fieldGuideButtonLabel(count);
+  return (
+    <button
+      type="button"
+      className="guide-button"
+      aria-haspopup="dialog"
+      aria-label={label}
+      title={label}
+      onClick={(event) => onOpenGuide(event.currentTarget)}
+    >
+      <svg className="guide-button-icon" viewBox="0 0 16 16" aria-hidden="true" shapeRendering="crispEdges">
+        <path d="M2 3h5v1h1V3h6v10H9v1H7v-1H2z" fill="currentColor" />
+        <path d="M3 4h4v8H3zM9 4h4v8H9z" fill="var(--guide-page)" />
+        <path d="M4 6h2v1H4zM4 8h2v1H4zM10 6h2v1h-2zM10 8h2v1h-2z" fill="currentColor" />
+      </svg>
+      {count > 0 ? (
+        <span className="guide-button-count" aria-hidden="true">
+          {count}
+        </span>
+      ) : null}
+    </button>
   );
 }
 
@@ -139,7 +163,7 @@ function SplitText({
 
 function CrewTitle() {
   return (
-    <h1 className="crew-title" data-strain="heading">
+    <h1 className="crew-title" id={CREW_ANCHOR} data-strain="heading">
       <span className="sr-only">{crewHeading}</span>
       <SplitText text={crewHeading} hangerWord={{ word: "sanctuary", character: "y" }} />
     </h1>
@@ -167,27 +191,29 @@ function StoryLaunch({
   played: boolean;
   onPlay: (opener: HTMLButtonElement) => void;
 }) {
-  const [hot, setHot] = useState(false);
+  const [hops, setHops] = useState(0);
+  const hop = () => {
+    if (!reduced) setHops((count) => count + 1);
+  };
+
   return (
-    <div
-      className="story-launch"
-      onMouseEnter={() => setHot(true)}
-      onMouseLeave={() => setHot(false)}
-      onFocus={() => setHot(true)}
-      onBlur={() => setHot(false)}
-    >
-      <span className={`story-launch-pig${hot ? " is-hot" : ""}`} aria-hidden="true">
-        <WilburSprite pose={hot ? "curious" : "idle"} playing={false} reduced={reduced} />
+    <div className="story-launch" onMouseEnter={hop} onFocus={hop}>
+      <span className="story-launch-pig" aria-hidden="true">
+        <span className="story-launch-hop" key={hops} data-hop={hops > 0 ? "" : undefined}>
+          <WilburSprite pose="idle" playing={false} reduced={reduced} />
+        </span>
       </span>
-      <button
-        type="button"
-        className="story-launch-button"
-        aria-haspopup="dialog"
-        onClick={(event) => onPlay(event.currentTarget)}
-      >
-        {`Play ${name}'s story`}
-      </button>
-      {played ? <span className="story-played">{site.played}</span> : null}
+      <div className="story-launch-actions">
+        <button
+          type="button"
+          className="btn btn-secondary story-launch-button"
+          aria-haspopup="dialog"
+          onClick={(event) => onPlay(event.currentTarget)}
+        >
+          {`Play ${name}'s story`}
+        </button>
+        {played ? <span className="status-label story-played">{site.played}</span> : null}
+      </div>
     </div>
   );
 }
@@ -213,19 +239,21 @@ function Profiles({ reduced, activeId, phase, playedIds, onPlay }: PlayProps) {
                   >
                     <img
                       src={animal.image}
-                      alt={animal.name}
+                      alt={animal.alt}
+                      loading="lazy"
+                      decoding="async"
                       {...(straining ? { "data-strain": "photo" } : {})}
                     />
                   </div>
+                  {animal.game ? (
+                    <StoryLaunch
+                      name={animal.name}
+                      reduced={reduced}
+                      played={played}
+                      onPlay={(opener) => onPlay(animal.id, opener)}
+                    />
+                  ) : null}
                 </div>
-                {animal.game ? (
-                  <StoryLaunch
-                    name={animal.name}
-                    reduced={reduced}
-                    played={played}
-                    onPlay={(opener) => onPlay(animal.id, opener)}
-                  />
-                ) : null}
                 <p className="profile-name" {...(straining ? { "data-strain": "heading" } : {})}>
                   {straining ? (
                     <>
@@ -248,17 +276,55 @@ function Profiles({ reduced, activeId, phase, playedIds, onPlay }: PlayProps) {
   );
 }
 
+/** Puts the game above the fold. Without it, the only way in is a card a screen below the hero. */
+function HeroPlay({
+  reduced,
+  played,
+  onPlay,
+}: {
+  reduced: boolean;
+  played: boolean;
+  onPlay: (opener: HTMLButtonElement) => void;
+}) {
+  return (
+    <div className="hero-play">
+      <span className="hero-play-pig" aria-hidden="true">
+        <WilburSprite pose="idle" playing={!reduced} reduced={reduced} />
+      </span>
+      <button
+        type="button"
+        className="btn btn-secondary hero-play-button"
+        aria-haspopup="dialog"
+        onClick={(event) => onPlay(event.currentTarget)}
+      >
+        {played ? site.heroReplay : site.heroPlay}
+      </button>
+      <p className="hero-play-note">{site.heroPlayNote}</p>
+    </div>
+  );
+}
+
 export function AnimalsPage(props: PlayProps) {
-  const { reduced, guideCount, onOpenGuide } = props;
+  const { reduced, guideCount, onOpenGuide, onPlay, playedIds } = props;
   return (
     <>
-      <SiteHeader guideLabel={fieldGuideButtonLabel(guideCount)} onOpenGuide={onOpenGuide} />
+      <SiteHeader />
+      <GuideButton count={guideCount} onOpenGuide={onOpenGuide} />
       <section className="crew-hero" aria-label={crewHeroCaption}>
-        <img src={crewHeroImage} alt="" />
+        <img src={crewHeroImage} alt="" fetchPriority="high" />
         <div className="crew-hero-shade" aria-hidden="true" />
-        <p className="crew-hero-caption">
-          <strong>{crewHeroCaption}</strong>
-        </p>
+        <div className="crew-hero-content">
+          <p className="crew-hero-caption">
+            <strong>{crewHeroCaption}</strong>
+          </p>
+          {GAME_ID ? (
+            <HeroPlay
+              reduced={reduced}
+              played={playedIds.includes(GAME_ID)}
+              onPlay={(opener) => onPlay(GAME_ID, opener)}
+            />
+          ) : null}
+        </div>
       </section>
       <main className="animals-main">
         <CrewTitle />

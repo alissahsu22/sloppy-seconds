@@ -36,7 +36,7 @@ export function createCollapseTimeline(options: {
   onComplete: () => void;
 }): gsap.core.Timeline {
   const { pig, art, line, frame, debris, dust, motion, landing, reduced } = options;
-  options.frame.querySelectorAll<HTMLElement>(".world, .age-card, .how").forEach((element) => {
+  options.frame.querySelectorAll<HTMLElement>(".world, .age-panel, .intro").forEach((element) => {
     element.style.visibility = "hidden";
   });
   applyPigFoot(pig, motion);
@@ -61,7 +61,21 @@ export function createCollapseTimeline(options: {
   timeline.addLabel("fall", 0.16);
   timeline.addLabel("land", 1.02);
 
-  timeline.to(frame, { x: -7, duration: 0.045, yoyo: true, repeat: 9, ease: "none" }, 0);
+  timeline.to(
+    frame,
+    {
+      keyframes: [
+        { x: -14, y: 6, rotation: -1.2, duration: 0.05 },
+        { x: 12, y: -5, rotation: 1, duration: 0.05 },
+        { x: -10, y: 4, rotation: -0.8, duration: 0.05 },
+        { x: 9, y: -3, rotation: 0.6, duration: 0.05 },
+        { x: -6, y: 2, rotation: -0.4, duration: 0.05 },
+        { x: 4, y: 0, rotation: 0.2, duration: 0.05 },
+      ],
+      ease: "none",
+    },
+    0,
+  );
   timeline.to(frame, { opacity: 0, duration: 0.55, ease: "power1.in" }, 0.62);
 
   debris.forEach((piece, index) => {

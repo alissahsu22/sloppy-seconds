@@ -153,10 +153,12 @@ export function Pasture({
           const x = clamp(motionRef.current.x + (Math.random() * 36 - 18), 64, window.innerWidth - 64);
           onFindRef.current({ id: next.id, x });
           const lines = profile.lines.found;
+          const line = lines[Math.floor(Math.random() * lines.length)] ?? "look";
+          // Name the find so the visitor knows it went into the Field Guide.
           memoryRef.current = {
             ...memoryRef.current,
-            bubble: lines[Math.floor(Math.random() * lines.length)] ?? "look",
-            bubbleUntil: now + 1700,
+            bubble: `${line}! ${next.title}`,
+            bubbleUntil: now + 3200,
           };
         }
       }

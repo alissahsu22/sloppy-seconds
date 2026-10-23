@@ -15,7 +15,7 @@ export const wilbur: AnimalDefinition = {
     label: "Grass, with dirt worth investigating",
   },
   endingLead:
-    "Wilbur was rescued in November 2013 after his former owner, who had purchased him as a “teacup” piglet three years earlier, could no longer keep him. With nowhere else to go, Wilbur was out of options and facing homelessness—until he found his permanent home with us.",
+    "“Teacup” is a sales label, not a breed. Wilbur kept growing like any other pig, to around 175 pounds, and three years in, his owner could no longer keep him.",
   behavior: {
     tickMs: 480,
     hoverCuriosityChance: 0.42,

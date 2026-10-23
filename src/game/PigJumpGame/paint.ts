@@ -1,6 +1,6 @@
 import { PIG_DRAW } from "../../assets/pig/metrics";
 import type { PigPose } from "../../model/types";
-import { LIFE_STAGES, MILESTONES, lifeStageAt, milestoneAt, type LifeStageId } from "../progression/age";
+import type { AgeMilestone } from "../progression/age";
 import { BOUNCE_VY, MAX_VX } from "../physics/constants";
 import type { World } from "../physics/types";
 import { clamp } from "../../utils/math";
@@ -26,11 +26,16 @@ export function poseForBody(world: World): PigPose {
   return poseForJump(world.pig.vy, world.time < world.pig.landUntil);
 }
 
+/**
+ * `scale` is the drawn size, which steps at milestones. Physics keeps its own
+ * smooth `pig.scale` for collisions and mass, untouched by the drawing.
+ */
 export function paintWorld(
   world: World,
   nodes: Map<string, HTMLElement>,
   pigSlot: HTMLElement,
   reduced: boolean,
+  scale: number,
 ): void {
   const height = world.height;
   const camera = world.cameraBottom;
@@ -42,44 +47,46 @@ export function paintWorld(
     node.style.height = `${platform.thickness}px`;
     node.style.transform = `translate3d(${platform.x}px, ${screenTop}px, 0)`;
   }
-  const footY = height - (world.pig.y - camera);
+  pigSlot.style.transform = pigTransform(world, reduced, scale);
+}
+
+/** Feet on the body's position, tilted with his run. Shared so the echo stays on him. */
+function pigTransform(world: World, reduced: boolean, scale: number): string {
+  const footY = world.height - (world.pig.y - world.cameraBottom);
   const tilt = reduced ? 0 : clamp((-world.pig.vx / MAX_VX) * 12, -12, 12);
-  pigSlot.style.transform = `translate3d(${world.pig.x - PIG_DRAW.width / 2}px, ${footY - PIG_DRAW.height}px, 0) rotate(${tilt}deg) scale(${world.pig.facing * world.pig.scale}, ${world.pig.scale})`;
+  return `translate3d(${world.pig.x - PIG_DRAW.width / 2}px, ${footY - PIG_DRAW.height}px, 0) rotate(${tilt}deg) scale(${world.pig.facing * scale}, ${scale})`;
 }
 
-/** Size comparison inside the age card. The cap keeps the adult mark inside the indicator. */
-const AGE_COMPARE_CAP = 3.4;
-
-export function paintAgeCue(world: World, card: HTMLElement | null): void {
-  if (!card) return;
-  const ratio = clamp(world.pig.scale / MILESTONES[0].scale, 1, AGE_COMPARE_CAP);
-  card.style.setProperty("--growth", ratio.toFixed(3));
+/** The size he grew from, and when (game time). */
+export interface GrowthEcho {
+  scale: number;
+  startedAt: number;
 }
 
-export function writeAge(world: World, card: HTMLElement | null): void {
-  if (!card) return;
-  const milestone = milestoneAt(world.progress);
-  const stage = lifeStageAt(world.progress);
-  const previous = card.dataset.stage;
-  card.dataset.stage = stage.id;
-  card.dataset.label = `${stage.label}. ${milestone.tagline}`;
-  const live = card.querySelector<HTMLElement>("[data-age-live]");
-  if (live) live.textContent = `Age: ${stage.label}. ${milestone.tagline}`;
-  const tag = card.querySelector<HTMLElement>(".age-tag");
-  if (tag) tag.textContent = milestone.tagline;
-  const order = LIFE_STAGES.map((item) => item.id);
-  const currentIndex = order.indexOf(stage.id);
-  card.querySelectorAll<HTMLElement>("[data-life]").forEach((node) => {
-    const id = (node.dataset.life ?? "") as LifeStageId;
-    const index = order.indexOf(id);
-    node.classList.toggle("is-current", id === stage.id);
-    node.classList.toggle("is-past", index > -1 && index < currentIndex);
-    node.classList.remove("is-arrived");
-  });
-  if (previous && previous !== stage.id) {
-    card.querySelector<HTMLElement>(`[data-life="${stage.id}"]`)?.classList.add("is-arrived");
+export const ECHO_SECONDS = 0.9;
+
+/**
+ * His old size, riding on him feet to feet so he never looks held in place,
+ * fading as game time passes. Reduced motion holds it steady, then drops it.
+ */
+export function paintEcho(world: World, echo: GrowthEcho | null, node: HTMLElement, reduced: boolean): void {
+  const age = echo ? world.time - echo.startedAt : ECHO_SECONDS;
+  if (!echo || age >= ECHO_SECONDS) {
+    node.dataset.on = "0";
+    return;
   }
-  paintAgeCue(world, card);
+  node.dataset.on = "1";
+  node.style.opacity = reduced ? "1" : String(1 - age / ECHO_SECONDS);
+  node.style.transform = pigTransform(world, reduced, echo.scale);
+}
+
+/** Milestone copy for the note under the age. Wording comes straight from the milestone. */
+export function writeCaption(narrative: HTMLElement, milestone: AgeMilestone): void {
+  narrative.dataset.label = `${milestone.label} ${milestone.tagline}`;
+  const headline = narrative.querySelector<HTMLElement>(".age-headline");
+  if (headline) headline.textContent = milestone.label;
+  const tag = narrative.querySelector<HTMLElement>(".age-tag");
+  if (tag) tag.textContent = milestone.tagline;
 }
 
 export function measureEscape(
@@ -88,6 +95,7 @@ export function measureEscape(
   frame: HTMLElement,
   nodes: Map<string, HTMLElement>,
   reduced: boolean,
+  scale: number,
 ): EscapePayload {
   const worldRect = worldEl.getBoundingClientRect();
   const footY = world.height - (world.pig.y - world.cameraBottom);
@@ -110,6 +118,8 @@ export function measureEscape(
   }
 
   frame.querySelectorAll<HTMLElement>("[data-debris]").forEach((element, index) => {
+    // A note that has already faded out shouldn't fly off as a chip.
+    if (element.dataset.show === "0") return;
     const rect = element.getBoundingClientRect();
     if (rect.width < 2 || rect.height < 2) return;
     const kind = element.dataset.debris === "cloud" ? "cloud" : "chip";
@@ -128,7 +138,7 @@ export function measureEscape(
   return {
     footX: worldRect.left + world.pig.x,
     footY: worldRect.top + footY,
-    scale: world.pig.scale,
+    scale,
     facing: world.pig.facing,
     tilt: reduced ? 0 : clamp((-world.pig.vx / MAX_VX) * 12, -12, 12),
     pieces,

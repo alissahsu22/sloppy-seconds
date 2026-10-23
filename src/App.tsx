@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import gsap from "gsap";
 import { EscapeSequence } from "./animations/EscapeSequence";
-import { AnimalsPage } from "./components/AnimalsPage/AnimalsPage";
+import { AnimalsPage, CREW_ANCHOR } from "./components/AnimalsPage/AnimalsPage";
 import { FieldGuide } from "./components/FieldGuide/FieldGuide";
 import { GuideNotice } from "./components/FieldGuide/GuideNotice";
 import { GroundStrip } from "./components/GroundStrip/GroundStrip";
@@ -42,6 +42,7 @@ export function App() {
   const openerRef = useRef<HTMLElement | null>(null);
   const scrollRef = useRef(0);
   const restoreArmed = useRef(false);
+  const revealRef = useRef<string | null>(null);
   collectedRef.current = progress.collectedIds;
 
   useEffect(() => {
@@ -55,6 +56,21 @@ export function App() {
       gsap.globalTimeline.resume();
     };
   }, []);
+
+  // The open window is a modal dialog in the top layer, so no z-index can lift the
+  // pasture over it. Promote the ground strip into the top layer after the dialog
+  // opens, so Wilbur stays in front of the window once he lands.
+  const windowOpen = dialog !== null;
+  useLayoutEffect(() => {
+    const strip = groundRef.current;
+    if (!windowOpen || !strip || typeof strip.showPopover !== "function") return;
+    strip.popover = "manual";
+    strip.showPopover();
+    return () => {
+      if (strip.matches(":popover-open")) strip.hidePopover();
+      strip.removeAttribute("popover");
+    };
+  }, [windowOpen]);
 
   // Landings strain the card that is playing, not the whole page.
   useEffect(() => {
@@ -75,9 +91,12 @@ export function App() {
     restoreArmed.current = false;
     const y = scrollRef.current;
     const opener = openerRef.current;
-    window.scrollTo({ top: y, left: 0, behavior: "auto" });
+    const reveal = revealRef.current ? document.getElementById(revealRef.current) : null;
+    revealRef.current = null;
+    if (reveal) reveal.scrollIntoView({ block: "start", behavior: reduced ? "auto" : "smooth" });
+    else window.scrollTo({ top: y, left: 0, behavior: "auto" });
     opener?.focus({ preventScroll: true });
-  }, [dialog]);
+  }, [dialog, reduced]);
 
   const rememberOpener = (opener: HTMLElement) => {
     openerRef.current = opener;
@@ -109,6 +128,12 @@ export function App() {
     setReturnToEnding(false);
     setDialog(null);
     setActiveId(null);
+  };
+
+  /** Closes the window and scrolls to the target, e.g. the top of the crew list. */
+  const meetAnimal = (id: string) => {
+    revealRef.current = id;
+    closeDialog();
   };
 
   const finish = (id: string, x: number, facing: 1 | -1 = 1) => {
@@ -157,7 +182,12 @@ export function App() {
   const guideCount = collectedFieldGuide(progress.collectedIds).length;
 
   return (
-    <div className="page sanctuary" id="top" data-motion={reduced ? "reduce" : "full"} data-phase={pagePhase}>
+    <div
+      className="page sanctuary"
+      id="top"
+      data-motion={reduced ? "reduce" : "full"}
+      data-phase={pagePhase}
+    >
       <div {...(dialog ? { inert: true } : {})}>
         <AnimalsPage
           reduced={reduced}
@@ -168,7 +198,10 @@ export function App() {
           onPlay={openGame}
           onOpenGuide={openGuide}
         />
-        <GroundStrip ref={groundRef}>
+        <GroundStrip
+          ref={groundRef}
+          name={roaming ? wilbur.displayName : undefined}
+        >
           {roaming ? (
             <Pasture
               animal={wilbur}
@@ -207,20 +240,17 @@ export function App() {
           {dialog === "guide" ? (
             <FieldGuide
               ids={progress.collectedIds}
+              foundIds={progress.found.map((item) => item.id)}
               reduced={reduced}
               onBack={returnToEnding ? backToEnding : null}
             />
           ) : (
             <>
-              {phase === "begin" ? (
-                <div className="story-instructions">
-                  <p>{site.gameLabel}</p>
-                  <p>{site.begin}</p>
-                </div>
-              ) : null}
               {reduced ? <p className="story-reduced">{site.reduced}</p> : null}
               <div className="stage-slot story-stage">
-                <EndedCard hidden={phase !== "ended"} inert={phase !== "ended"} onReplay={replay} />
+                <EndedCard hidden={phase !== "ended"} inert={phase !== "ended"} onReplay={replay}
+                  onMeet={() => meetAnimal(CREW_ANCHOR)}
+                />
                 {phase !== "ended" ? (
                   <PigJumpGame
                     key={runId}
@@ -248,13 +278,10 @@ export function App() {
               {phase !== "collapsing" ? (
                 <div className="skip-row">
                   {phase !== "ended" && activeId ? (
-                    <button type="button" className="text-button" onClick={() => skip(activeId)}>
+                    <button type="button" className="link-button skip-link" onClick={() => skip(activeId)}>
                       {site.skip}
                     </button>
                   ) : null}
-                  <button type="button" className="text-button" onClick={closeDialog}>
-                    {site.backToStory}
-                  </button>
                 </div>
               ) : null}
             </>

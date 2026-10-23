@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { NPC_SCALE } from "../../assets/pig/metrics";
 import { MAX_GAP, WOBBLE_BOUNCE_SCALE, jumpApex } from "../physics/constants";
-import { MILESTONES, growthAt, impactForLanding, lifeStageAt, milestoneAt, runProgress, strainTierAt } from "./age";
+import { MILESTONES, growthAt, impactForLanding, lifeStageAt, milestoneAt, runProgress, strainTierAt, gameAgeLabel } from "./age";
 
 describe("age and growth", () => {
   it("starts as a piglet and ends at the sanctuary weight milestone", () => {
@@ -28,6 +28,16 @@ describe("age and growth", () => {
     expect(runProgress(0, 36)).toBe(1);
     expect(runProgress(2300, 1)).toBe(1);
     expect(runProgress(1150, 0)).toBeCloseTo(0.5);
+  });
+
+  it("gives every milestone an age with its unit", () => {
+    expect(MILESTONES.map(gameAgeLabel)).toEqual([
+      "3 months old",
+      "6 months old",
+      "1 year old",
+      "2 years old",
+      "3 years old",
+    ]);
   });
 
   it("maps milestones onto piglet, growing up, and adult together", () => {

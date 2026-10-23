@@ -8,7 +8,7 @@ import {
 } from "react";
 import { PlatformArt } from "../../assets/environment/scenery";
 import { site } from "../../content/site";
-import { LIFE_STAGES, MILESTONES } from "../progression/age";
+import { MILESTONES, gameAgeLabel, milestoneAt, type AgeMilestone } from "../progression/age";
 import { WilburSprite } from "../../assets/pig/WilburSprite";
 import { PIG_DRAW } from "../../assets/pig/metrics";
 import type { PigPose } from "../../model/types";
@@ -16,7 +16,9 @@ import { platformSignature, resizeWorld } from "../physics/platforms";
 import { BOUNCE_VY } from "../physics/constants";
 import { createWorld, jumpProgress, stepWorld } from "../physics/step";
 import type { World } from "../physics/types";
-import { measureEscape, paintAgeCue, paintWorld, poseForBody, writeAge } from "./paint";
+import { flipReadout, settleReadout } from "./readout";
+import { measureEscape, paintEcho, paintWorld, poseForBody, writeCaption, type GrowthEcho } from "./paint";
+import { clamp01, lerp } from "../../utils/math";
 import type { EscapePayload, GameHandle } from "./types";
 import type { LandingPulse } from "../physics/types";
 
@@ -28,9 +30,22 @@ interface PigJumpGameProps {
   onStart?: () => void;
 }
 
+/** Game seconds a milestone note stays under the age. Game time, so it holds while the tab is hidden. */
+const NOTE_SECONDS = 4.5;
+/** The size change plays first. The age turns once he has finished growing. */
+const GROW_SECONDS = 0.35;
+const AGE_DELAY = 0.45;
+const START_AGE = gameAgeLabel(MILESTONES[0]);
+
+/** Phones and tablets get tap wording. A laptop with a touchscreen still has a fine pointer, so it keeps the keys. */
+const coarsePointer = () =>
+  typeof window !== "undefined" && typeof window.matchMedia === "function"
+    ? window.matchMedia("(pointer: coarse)").matches
+    : false;
+
 /**
  * Rendering is a copy of the physics world onto transforms.
- * React state changes only when a plank's crack state changes or the age label does.
+ * React state changes only when a plank's crack state changes. The age readout, its note, and the growth echo are written directly.
  */
 export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function PigJumpGame(
   { active, reduced, onCollapse, onLanding, onStart },
@@ -39,7 +54,18 @@ export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function Pig
   const frameRef = useRef<HTMLElement>(null);
   const worldElRef = useRef<HTMLDivElement>(null);
   const pigRef = useRef<HTMLDivElement>(null);
-  const ageCardRef = useRef<HTMLDivElement>(null);
+  const noteRef = useRef<HTMLDivElement>(null);
+  const echoNodeRef = useRef<HTMLDivElement>(null);
+  const ageLiveRef = useRef<HTMLParagraphElement>(null);
+  const readoutRef = useRef<HTMLDivElement>(null);
+  const readoutTurnRef = useRef<ReturnType<typeof flipReadout>>(null);
+  /** Drawn size: eases from `from` to `to` starting at `startedAt` (game time). */
+  const growRef = useRef({ from: MILESTONES[0].scale, to: MILESTONES[0].scale, startedAt: 0 });
+  const echoRef = useRef<GrowthEcho | null>(null);
+  /** A milestone reached in the air waits here for a safe landing. */
+  const pendingGrowthRef = useRef<AgeMilestone | null>(null);
+  const pendingAgeRef = useRef<{ milestone: AgeMilestone; at: number } | null>(null);
+  const noteUntilRef = useRef(0);
   const worldRef = useRef<World | null>(null);
   const nodesRef = useRef(new Map<string, HTMLElement>());
   const onCollapseRef = useRef(onCollapse);
@@ -49,6 +75,7 @@ export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function Pig
   const poseRef = useRef<PigPose>("idle");
   const holdingRef = useRef(true);
   const onStartRef = useRef(onStart);
+  const [touch] = useState(coarsePointer);
   const [holding, setHolding] = useState(true);
   const [ready, setReady] = useState(false);
   const [pose, setPose] = useState<PigPose>("idle");
@@ -71,16 +98,68 @@ export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function Pig
     );
   };
 
+  const drawScale = (world: World) => {
+    const grow = growRef.current;
+    const t = reducedRef.current ? 1 : clamp01((world.time - grow.startedAt) / GROW_SECONDS);
+    return lerp(grow.from, grow.to, 1 - (1 - t) ** 3);
+  };
+
   const paint = (world: World) => {
     const pig = pigRef.current;
     if (!pig) return;
-    paintWorld(world, nodesRef.current, pig, reducedRef.current);
-    paintAgeCue(world, ageCardRef.current);
+    paintWorld(world, nodesRef.current, pig, reducedRef.current, drawScale(world));
+    if (echoNodeRef.current) paintEcho(world, echoRef.current, echoNodeRef.current, reducedRef.current);
     const nextPose = holdingRef.current ? "idle" : poseForBody(world);
     if (nextPose !== poseRef.current) {
       poseRef.current = nextPose;
       setPose(nextPose);
     }
+  };
+
+  const stopReadout = () => {
+    readoutTurnRef.current?.kill();
+    readoutTurnRef.current = null;
+    settleReadout(readoutRef.current);
+  };
+
+  const announce = (text: string) => {
+    const live = ageLiveRef.current;
+    if (live && live.textContent !== text) live.textContent = text;
+  };
+
+  const hideNote = () => {
+    noteUntilRef.current = 0;
+    if (noteRef.current) noteRef.current.dataset.show = "0";
+  };
+
+  /**
+   * One call per milestone, with his feet on a plank (or in the air for the last
+   * one, whose landing ends the run). He expands from the size he was, a faint
+   * echo of that size rides on him, and the age waits until he has grown.
+   */
+  const grow = (world: World, milestone: AgeMilestone) => {
+    pendingGrowthRef.current = null;
+    const from = drawScale(world);
+    growRef.current = { from, to: milestone.scale, startedAt: world.time };
+    echoRef.current = { scale: from, startedAt: world.time };
+    pendingAgeRef.current = { milestone, at: world.time + (reducedRef.current ? 0 : AGE_DELAY) };
+  };
+
+  const showAge = (world: World, milestone: AgeMilestone) => {
+    pendingAgeRef.current = null;
+    const age = gameAgeLabel(milestone);
+    const readout = readoutRef.current;
+    if (readout) {
+      stopReadout();
+      readoutTurnRef.current = flipReadout(readout, age, reducedRef.current);
+    }
+    const note = noteRef.current;
+    if (note) {
+      writeCaption(note, milestone);
+      note.dataset.show = "1";
+      noteUntilRef.current = world.time + NOTE_SECONDS;
+    }
+    announce(`${site.ageLabel}: ${age}. ${milestone.label} ${milestone.tagline}`);
   };
 
   useLayoutEffect(() => {
@@ -92,10 +171,10 @@ export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function Pig
     });
     worldRef.current = world;
     syncPlatforms(world);
-    writeAge(world, ageCardRef.current);
     setReady(true);
     return () => {
       world.over = true;
+      stopReadout();
       setReady(false);
     };
   }, []);
@@ -111,6 +190,7 @@ export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function Pig
     if (!world || world.over || !holdingRef.current) return;
     holdingRef.current = false;
     world.pig.vy = BOUNCE_VY;
+    announce(`${site.ageLabel}: ${START_AGE}.`);
     setHolding(false);
     onStartRef.current?.();
   };
@@ -121,7 +201,8 @@ export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function Pig
       if (!world || world.over) return;
       release();
       jumpProgress(world, progress);
-      writeAge(world, ageCardRef.current);
+      const milestone = milestoneAt(world.progress);
+      if (milestone.scale !== growRef.current.to) grow(world, milestone);
       paint(world);
       syncPlatforms(world);
     },
@@ -148,12 +229,26 @@ export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function Pig
         const before = platformSignature(world.platforms, world.time);
         const events = stepWorld(world, dt);
         paint(world);
-        if (events.milestoneChanged) writeAge(world, ageCardRef.current);
+        if (events.milestoneChanged) {
+          const milestone = milestoneAt(world.progress);
+          if (milestone.at >= 1) grow(world, milestone);
+          else pendingGrowthRef.current = milestone;
+        }
+        const safe = events.respawned || (events.landed !== null && events.landed.outcome !== "break");
+        if (pendingGrowthRef.current && safe) grow(world, pendingGrowthRef.current);
+        const pendingAge = pendingAgeRef.current;
+        if (pendingAge && world.time >= pendingAge.at) showAge(world, pendingAge.milestone);
+        if (noteUntilRef.current && world.time >= noteUntilRef.current) hideNote();
         if (events.landed) onLandingRef.current?.(events.landed);
         if (platformSignature(world.platforms, world.time) !== before) syncPlatforms(world);
         if (events.finale) {
           world.over = true;
-          onCollapseRef.current(measureEscape(world, worldEl, frame, nodesRef.current, reducedRef.current));
+          // He leaves at the size he is growing into, even if the expansion hasn't finished.
+          const milestone = milestoneAt(world.progress);
+          if (milestone.scale !== growRef.current.to) grow(world, milestone);
+          onCollapseRef.current(
+            measureEscape(world, worldEl, frame, nodesRef.current, reducedRef.current, growRef.current.to),
+          );
           return;
         }
       }
@@ -285,7 +380,7 @@ export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function Pig
   }, [ready]);
 
   return (
-      <section
+    <section
       className="stage"
       ref={frameRef}
       tabIndex={0}
@@ -294,37 +389,20 @@ export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function Pig
       data-autofocus=""
       aria-label={site.gameLabel}
     >
-      <div
-        className="age-card"
-        ref={ageCardRef}
-        data-debris="badge"
-        data-stage="piglet"
-        data-label={`${LIFE_STAGES[0].label}. ${MILESTONES[0].tagline}`}
-      >
-        <p className="sr-only" data-age-live aria-live="polite">
-          {`Age: ${LIFE_STAGES[0].label}. ${MILESTONES[0].tagline}`}
-        </p>
-        <div aria-hidden="true">
-          <p className="age-kicker">{site.ageKicker}</p>
-          <div className="age-compare">
-            <span className="age-sil age-sil-ref">
-              <WilburSprite pose="idle" playing={false} reduced={reduced} />
-            </span>
-            <span className="age-sil age-sil-now">
-              <WilburSprite pose="idle" playing={false} reduced={reduced} />
-            </span>
-          </div>
-          <p className="age-track">
-            {LIFE_STAGES.map((stage, index) => (
-              <span className="age-stage-wrap" key={stage.id}>
-                {index > 0 ? <span className="age-arrow">→</span> : null}
-                <span className={`age-stage${index === 0 ? " is-current" : ""}`} data-life={stage.id}>
-                  {stage.label}
-                </span>
-              </span>
+      <p className="sr-only" ref={ageLiveRef} aria-live="polite" />
+      <div className="age-panel" aria-hidden="true">
+        <div className="age-readout" ref={readoutRef} data-debris="badge" data-label={START_AGE}>
+          <span className="age-readout-label">{site.ageLabel}</span>
+          <span className="age-readout-page">
+            {MILESTONES.map((milestone) => (
+              <span className="age-readout-sizer" key={milestone.id}>{gameAgeLabel(milestone)}</span>
             ))}
-          </p>
-          <p className="age-tag">{MILESTONES[0].tagline}</p>
+            <span className="age-readout-value">{START_AGE}</span>
+          </span>
+        </div>
+        <div className="age-note" ref={noteRef} data-show="0" data-debris="badge">
+          <p className="age-headline" />
+          <p className="age-tag" />
         </div>
       </div>
       <div className="world" ref={worldElRef}>
@@ -351,11 +429,25 @@ export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function Pig
         >
           <WilburSprite pose={pose} reduced={reduced} />
         </div>
+        <div
+          className="growth-echo"
+          ref={echoNodeRef}
+          data-on="0"
+          style={{ width: PIG_DRAW.width, height: PIG_DRAW.height }}
+        >
+          <WilburSprite pose={pose} playing={false} reduced />
+        </div>
       </div>
-      <p className="how" data-debris="note" data-label={site.steer}>
-        {site.steer}
-      </p>
-      {holding ? <p className="begin-prompt">{site.begin}</p> : null}
+      <div className="intro" aria-hidden={holding ? undefined : true}>
+        <div className="intro-story">
+          <p className="intro-title">{MILESTONES[0].label}</p>
+          <p className="intro-tag">{MILESTONES[0].tagline}</p>
+        </div>
+        <div className="intro-action">
+          <p className="intro-begin">{touch ? site.beginTouch : site.begin}</p>
+          <p className="intro-steer">{touch ? site.steerTouch : site.steer}</p>
+        </div>
+      </div>
     </section>
   );
 });

@@ -3,6 +3,8 @@ import type { LandingPulse } from "../game/physics/types";
 import { clamp } from "../utils/math";
 
 const LANDING_COOLDOWN_MS = 380;
+const SVG_NS = "http://www.w3.org/2000/svg";
+const MAX_CRACKS = 6;
 const LOOSE_WORDS = new Set(["rescued", "animals", "sanctuary"]);
 
 interface GhostSnapshot {
@@ -22,6 +24,7 @@ interface GhostSnapshot {
 export function createPageReactions(root: HTMLElement, reduced: boolean) {
   const tweens: gsap.core.Tween[] = [];
   const ghosts = new Set<HTMLElement>();
+  const cracks = new Set<Element>();
   let dead = false;
   let sealed = false;
   let lastLanding = 0;
@@ -71,6 +74,7 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
   const hanger = () =>
     dialogEl()?.querySelector<HTMLElement>("[data-hanger]") ??
     root.querySelector<HTMLElement>("[data-hanger]");
+  const windowEl = () => document.querySelector<HTMLElement>(".story-window");
   const photo = () => root.querySelector<HTMLElement>("[data-strain='photo']");
   const frame = () =>
     root.querySelector<HTMLElement>("[data-strain='frame']") ??
@@ -104,6 +108,8 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
       ghost.remove();
     }
     ghosts.clear();
+    for (const crack of cracks) crack.remove();
+    cracks.clear();
   };
 
   const restoreLetters = () => {
@@ -128,6 +134,11 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
     }
     const stage = frame();
     if (stage) gsap.set(stage, { clearProps: "borderRadius" });
+    const box = windowEl();
+    if (box) {
+      gsap.killTweensOf(box);
+      gsap.set(box, { clearProps: "transform" });
+    }
     restoreLetters();
     delete root.dataset.strainTier;
   };
@@ -138,17 +149,17 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
       (node) => inView(node) && (node.closest(".story-dialog") !== null || !coveredByWindow(node)),
     );
     if (titles.length === 0) return;
-    const base = tier === "cramped" || tier === "breakthrough" ? 2.4 : 1.8;
-    const amp = Math.min(7, base + power * 4.5);
+    const base = tier === "cramped" || tier === "breakthrough" ? 5 : 3;
+    const amp = Math.min(16, base + power * 10);
     for (const title of titles) {
       gsap.killTweensOf(title);
       track(
         gsap.to(title, {
           keyframes: [
-            { x: amp, duration: 0.05 },
-            { x: -amp * 0.55, duration: 0.08 },
-            { x: amp * 0.22, duration: 0.08 },
-            { x: 0, duration: 0.14 },
+            { x: amp, y: amp * 0.3, rotation: amp * 0.25, duration: 0.05 },
+            { x: -amp * 0.7, y: -amp * 0.15, rotation: -amp * 0.18, duration: 0.07 },
+            { x: amp * 0.35, y: 0, rotation: amp * 0.08, duration: 0.08 },
+            { x: 0, rotation: 0, duration: 0.16 },
           ],
           ease: "power2.out",
         }),
@@ -160,12 +171,12 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
     const picture = photo();
     if (!picture || reduced) return;
     tiltSign *= -1;
-    const angle = tiltSign * Math.min(3.4, 1 + impact * 2.4);
+    const angle = tiltSign * Math.min(6, 1.6 + impact * 4.4);
     gsap.killTweensOf(picture);
     track(
       gsap.to(picture, {
         rotation: angle,
-        scale: 1.05,
+        scale: 1.08,
         duration: 0.42,
         ease: "power3.out",
         transformOrigin: "50% 42%",
@@ -177,7 +188,7 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
     const stage = frame();
     if (!stage || reduced) return;
     const token = ++frameToken;
-    const bulge = 4 + impact * 14;
+    const bulge = 10 + impact * 30;
     track(
       gsap.fromTo(
         stage,
@@ -189,9 +200,9 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
         },
         {
           borderTopLeftRadius: bulge,
-          borderTopRightRadius: 2 + impact * 8,
-          borderBottomRightRadius: 3 + impact * 12,
-          borderBottomLeftRadius: 2 + impact * 9,
+          borderTopRightRadius: 6 + impact * 18,
+          borderBottomRightRadius: 8 + impact * 26,
+          borderBottomLeftRadius: 6 + impact * 20,
           duration: 0.16,
           yoyo: true,
           repeat: 1,
@@ -201,6 +212,66 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
             gsap.set(stage, { clearProps: "borderRadius" });
           },
         },
+      ),
+    );
+  };
+
+  const shakeWindow = (power: number) => {
+    const box = windowEl();
+    if (!box || reduced) return;
+    const amp = 2 + power * 9;
+    gsap.killTweensOf(box);
+    track(
+      gsap.to(box, {
+        keyframes: [
+          { x: -amp, y: amp * 0.6, rotation: -amp * 0.12, duration: 0.05 },
+          { x: amp * 0.8, y: -amp * 0.4, rotation: amp * 0.1, duration: 0.06 },
+          { x: -amp * 0.45, y: amp * 0.2, rotation: -amp * 0.05, duration: 0.07 },
+          { x: amp * 0.2, y: 0, rotation: 0, duration: 0.08 },
+          { x: 0, y: 0, rotation: 0, duration: 0.12 },
+        ],
+        ease: "power2.out",
+      }),
+    );
+  };
+
+  /** A jagged line that grows out from an edge of the game frame. */
+  const crack = (impact: number) => {
+    const stage = frame();
+    if (!stage || cracks.size >= MAX_CRACKS) return;
+    const width = stage.clientWidth;
+    const height = stage.clientHeight;
+    if (width < 1 || height < 1) return;
+    const edge = cracks.size % 4;
+    const along = 0.15 + Math.random() * 0.7;
+    let x = edge === 1 ? width : edge === 3 ? 0 : width * along;
+    let y = edge === 0 ? 0 : edge === 2 ? height : height * along;
+    const inward = { x: edge === 1 ? -1 : edge === 3 ? 1 : 0, y: edge === 0 ? 1 : edge === 2 ? -1 : 0 };
+    const reach = Math.min(width, height) * (0.22 + impact * 0.3);
+    const steps = 6;
+    const points = [`${x},${y}`];
+    for (let step = 0; step < steps; step += 1) {
+      const jag = (Math.random() - 0.5) * reach * 0.35;
+      x += inward.x * (reach / steps) + (inward.x === 0 ? jag : 0);
+      y += inward.y * (reach / steps) + (inward.y === 0 ? jag : 0);
+      points.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+    }
+    const svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("class", "strain-crack");
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    const line = document.createElementNS(SVG_NS, "polyline");
+    line.setAttribute("points", points.join(" "));
+    svg.appendChild(line);
+    stage.appendChild(svg);
+    cracks.add(svg);
+    if (reduced) return;
+    const length = reach * 1.6;
+    track(
+      gsap.fromTo(
+        line,
+        { strokeDasharray: length, strokeDashoffset: length },
+        { strokeDashoffset: 0, duration: 0.22, ease: "power3.out" },
       ),
     );
   };
@@ -219,8 +290,8 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
     gsap.killTweensOf(letter);
     track(
       gsap.to(letter, {
-        rotation: direction * (6 + impact * 7),
-        y: 1 + impact * 2,
+        rotation: direction * (10 + impact * 14),
+        y: 2 + impact * 5,
         duration: 0.28,
         ease: "power2.out",
       }),
@@ -300,6 +371,8 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
   const strainCramped = (impact: number) => {
     tiltPhoto(impact);
     deformFrame(impact);
+    shakeWindow(0.45 + impact * 0.55);
+    crack(impact);
     crampedHits += 1;
     const hung = hanger();
     if (hung && !hung.classList.contains("is-gone")) {
@@ -315,8 +388,8 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
     const looseCount = allLetters().filter(
       (letter) => letter.classList.contains("is-loose") || letter.classList.contains("is-gone"),
     ).length;
-    const next = loosePool()[0];
-    if (next && looseCount < 4) loosen(next, impact);
+    const pool = loosePool();
+    for (const next of pool.slice(0, Math.max(0, Math.min(2, 10 - looseCount)))) loosen(next, impact);
   };
 
   const cascade = (originX: number) => {
@@ -327,7 +400,7 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
         (letter.classList.contains("is-loose") || letter.classList.contains("is-hung") || letter.dataset.hanger === "1"),
     );
     const extra = loosePool().filter((letter) => !loose.includes(letter));
-    const chosen = [...loose, ...extra].slice(0, 7);
+    const chosen = [...loose, ...extra].slice(0, 16);
     chosen.forEach((letter, index) => {
       const snapshot = snapshotLetter(letter);
       letter.style.visibility = "hidden";
@@ -356,6 +429,10 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
       if (now - lastLanding < LANDING_COOLDOWN_MS && pulse.outcome !== "break") return;
       lastLanding = now;
       joltHeading(pulse.impact, pulse.tier);
+      if (pulse.tier === "tremble") {
+        shakeWindow(0.15 + pulse.impact * 0.3);
+        deformFrame(pulse.impact * 0.5);
+      }
       if (pulse.tier === "cramped") strainCramped(pulse.impact);
     },
     breakthrough(origin: { x: number; y: number }) {
@@ -365,6 +442,9 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
       cascade(origin.x);
       joltHeading(1, "breakthrough");
       deformFrame(1);
+      shakeWindow(1.4);
+      crack(1);
+      crack(1);
     },
     settle() {
       if (dead) return;

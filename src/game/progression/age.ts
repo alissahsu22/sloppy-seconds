@@ -103,6 +103,25 @@ export function lifeStageAt(progress: number): (typeof LIFE_STAGES)[number] {
   return LIFE_STAGES[0];
 }
 
+/**
+ * Ages the game's Wilbur shows, one per milestone. Illustrative only: the real
+ * Wilbur's age at each size isn't on record, and the sprite's growth isn't a
+ * real growth curve. Edit freely; nothing in the physics reads these.
+ */
+export const GAME_AGES: Readonly<Record<string, { count: number; unit: "month" | "year" }>> = {
+  piglet: { count: 3, unit: "month" },
+  months: { count: 6, unit: "month" },
+  growing: { count: 1, unit: "year" },
+  "not-teacup": { count: 2, unit: "year" },
+  wilbur: { count: 3, unit: "year" },
+};
+
+export function gameAgeLabel(milestone: AgeMilestone): string {
+  const age = GAME_AGES[milestone.id];
+  if (!age) return "";
+  return `${age.count} ${age.unit}${age.count === 1 ? "" : "s"} old`;
+}
+
 export function strainTierAt(progress: number): StrainTier {
   const p = clamp01(progress);
   if (p >= FINALE_AT) return "breakthrough";

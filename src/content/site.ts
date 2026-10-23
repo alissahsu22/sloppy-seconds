@@ -1,26 +1,28 @@
-
 export const site = {
-  kicker: "Sloppy Seconds presents",
+  kicker: "Sloppy Seconds presents:",
   title: "The Not-So-Teacup Pig",
-  // lede: "You got a teacup pig. Or so you thought.",
-  //   controls: "He jumps. You steer. ← → or A / D.",
   begin: "Press any key to start",
+  beginTouch: "Tap to start",
   skip: "Skip to the ending",
   hopWith: "Hop with",
-  hopAgain: "Hop again with",
   played: "Played",
-  backToStory: "Back to the story",
 
   endingTitle: "Still think he's a teacup?",
   replay: "Try again",
 
-  sanctuaryLabel: "Meet the real animals",
-  sanctuaryUrl: "https://www.sloppysecondsinc.org/animals",
+  helpLabel: "Help pigs like Wilbur",
+  helpHref: "https://www.sloppysecondsinc.org/ways-to-help",
+  sanctuaryLabel: "Meet the other animals",
 
-  reduced: "Reduced motion is on.",
+  heroPlay: "Start exploring",
+  heroReplay: "Play again",
+  heroPlayNote: "Begin with a short game, then meet the animals who call the sanctuary home.",
+
+  reduced: "Animations are simplified to match your system settings.",
   ageLabel: "Wilbur's age",
   ageKicker: "Age",
-  steer: " ← → or A / D.",
+  steer: "Use arrow keys or A and D to steer.",
+  steerTouch: "Hold the left or right side to steer.",
   gameLabel:
     "Wilbur jumps automatically. Use arrow keys or A and D to steer. On touchscreens, hold either side.",
 } as const;

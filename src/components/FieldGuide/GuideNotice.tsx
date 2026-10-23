@@ -34,10 +34,10 @@ export function GuideNotice({
         <WilburSprite pose="idle" playing={false} reduced={reduced} />
       </span>
       <p>Wilbur added to your Field Guide</p>
-      <button type="button" className="guide-notice-view" onClick={onView}>
+      <button type="button" className="btn btn-secondary guide-notice-view" onClick={onView}>
         View entry
       </button>
-      <button type="button" className="guide-notice-dismiss" aria-label="Dismiss notification" onClick={onDismiss}>
+      <button type="button" className="icon-button guide-notice-dismiss" aria-label="Dismiss notification" onClick={onDismiss}>
         ×
       </button>
     </div>

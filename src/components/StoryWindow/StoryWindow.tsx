@@ -141,7 +141,7 @@ export function StoryWindow({
               )}
             </h2>
           </div>
-          <button type="button" className="story-close" aria-label="Close" onClick={onClose}>
+          <button type="button" className="icon-button story-close" aria-label="Close" onClick={onClose}>
             ×
           </button>
         </header>
