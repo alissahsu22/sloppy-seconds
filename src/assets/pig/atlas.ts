@@ -78,6 +78,11 @@ export function frameRect(name: FrameName): { x: number; y: number; w: number; h
   return atlas.frames[name].frame;
 }
 
+/** Opaque pixels only, so the element does not include the sheet's empty margin. */
+export function frameTrim(name: FrameName): { x: number; y: number; w: number; h: number } {
+  return atlas.frames[name].trim;
+}
+
 export const PIG_POSES: readonly PigPose[] = [
   "idle",
   "walk",

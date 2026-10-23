@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { mulberry32 } from "../../utils/math";
 import { BASE_HALF_WIDTH, FINALE_SECONDS, MAX_GAP, PLANK_REACH } from "./constants";
+import { strainTierAt } from "../progression/age";
 import { degradeStage, evaluateLanding, stageFromIntegrity } from "./platforms";
 import { createWorld, stepWorld } from "./step";
 import type { Platform, World } from "./types";
@@ -31,9 +32,39 @@ describe("platform behavior", () => {
     world.pig.y = 186;
     world.pig.vy = -400;
     world.pig.mass = 0.22;
-    stepWorld(world, 0.05);
+    const events = stepWorld(world, 0.05);
     expect(world.pig.vy).toBeGreaterThan(0);
     expect(world.pig.y).toBeCloseTo(180);
+    expect(events.landed?.outcome).toBe("bounce");
+    expect(events.landed?.tier).toBe("still");
+    expect(events.landed?.tier).toBe(strainTierAt(world.progress));
+  });
+
+  it("reports a grown landing on the same tier as the age model", () => {
+    const world = createWorld({ width: 480, height: 520, bare: true, rng: () => 0.5 });
+    world.platforms.push(pad(180));
+    world.pig.x = 200;
+    world.pig.y = 186;
+    world.pig.vy = -400;
+    world.elapsed = 27;
+    world.maxHeight = 1800;
+    const events = stepWorld(world, 0.05);
+    expect(events.finale).toBe(false);
+    expect(events.landed?.tier).toBe("cramped");
+    expect(events.landed?.tier).toBe(strainTierAt(world.progress));
+  });
+
+  it("keeps the breakthrough landing out of the ordinary landing pulse", () => {
+    const world = createWorld({ width: 480, height: 520, bare: true, rng: () => 0.5 });
+    world.platforms.push(pad(180));
+    world.pig.x = 200;
+    world.pig.y = 186;
+    world.pig.vy = -400;
+    world.elapsed = 36;
+    world.maxHeight = 2300;
+    const events = stepWorld(world, 0.05);
+    expect(events.finale).toBe(true);
+    expect(events.landed).toBeNull();
   });
 
   it("falls through a plank that cannot hold the pig", () => {

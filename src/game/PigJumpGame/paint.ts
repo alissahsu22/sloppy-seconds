@@ -1,6 +1,6 @@
 import { PIG_DRAW } from "../../assets/pig/metrics";
 import type { PigPose } from "../../model/types";
-import { milestoneAt } from "../progression/age";
+import { LIFE_STAGES, MILESTONES, lifeStageAt, milestoneAt, type LifeStageId } from "../progression/age";
 import { BOUNCE_VY, MAX_VX } from "../physics/constants";
 import type { World } from "../physics/types";
 import { clamp } from "../../utils/math";
@@ -47,14 +47,39 @@ export function paintWorld(
   pigSlot.style.transform = `translate3d(${world.pig.x - PIG_DRAW.width / 2}px, ${footY - PIG_DRAW.height}px, 0) rotate(${tilt}deg) scale(${world.pig.facing * world.pig.scale}, ${world.pig.scale})`;
 }
 
-export function writeAge(world: World, badge: HTMLElement | null, tag: HTMLElement | null): void {
+/** Size comparison inside the age card. The cap keeps the adult mark inside the indicator. */
+const AGE_COMPARE_CAP = 3.4;
+
+export function paintAgeCue(world: World, card: HTMLElement | null): void {
+  if (!card) return;
+  const ratio = clamp(world.pig.scale / MILESTONES[0].scale, 1, AGE_COMPARE_CAP);
+  card.style.setProperty("--growth", ratio.toFixed(3));
+}
+
+export function writeAge(world: World, card: HTMLElement | null): void {
+  if (!card) return;
   const milestone = milestoneAt(world.progress);
-  if (badge) {
-    badge.textContent = milestone.label;
-    const chip = badge.closest<HTMLElement>("[data-debris]");
-    if (chip) chip.dataset.label = `${milestone.label}. ${milestone.tagline}`;
-  }
+  const stage = lifeStageAt(world.progress);
+  const previous = card.dataset.stage;
+  card.dataset.stage = stage.id;
+  card.dataset.label = `${stage.label}. ${milestone.tagline}`;
+  const live = card.querySelector<HTMLElement>("[data-age-live]");
+  if (live) live.textContent = `Age: ${stage.label}. ${milestone.tagline}`;
+  const tag = card.querySelector<HTMLElement>(".age-tag");
   if (tag) tag.textContent = milestone.tagline;
+  const order = LIFE_STAGES.map((item) => item.id);
+  const currentIndex = order.indexOf(stage.id);
+  card.querySelectorAll<HTMLElement>("[data-life]").forEach((node) => {
+    const id = (node.dataset.life ?? "") as LifeStageId;
+    const index = order.indexOf(id);
+    node.classList.toggle("is-current", id === stage.id);
+    node.classList.toggle("is-past", index > -1 && index < currentIndex);
+    node.classList.remove("is-arrived");
+  });
+  if (previous && previous !== stage.id) {
+    card.querySelector<HTMLElement>(`[data-life="${stage.id}"]`)?.classList.add("is-arrived");
+  }
+  paintAgeCue(world, card);
 }
 
 export function measureEscape(

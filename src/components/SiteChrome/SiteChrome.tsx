@@ -12,7 +12,9 @@ export function EndedCard({
 }) {
   return (
     <section className="ended" hidden={hidden} aria-hidden={hidden} {...(inert ? { inert: true } : {})}>
-      <h2>{site.endingTitle}</h2>
+      <h2 id="ending-title" tabIndex={-1} {...(hidden ? {} : { "data-autofocus": "" })}>
+        {site.endingTitle}
+      </h2>
       <p className="ended-lead">{wilbur.endingLead}</p>
       <div className="ended-actions">
         <a className="ended-primary" href={site.sanctuaryUrl} target="_blank" rel="noreferrer">

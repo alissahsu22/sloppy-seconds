@@ -72,6 +72,58 @@ export function milestoneAt(progress: number): AgeMilestone {
   return current;
 }
 
+export const LIFE_STAGES = [
+  { id: "piglet", label: "Piglet" },
+  { id: "growing", label: "Growing up" },
+  { id: "adult", label: "Adult" },
+] as const;
+
+export type LifeStageId = (typeof LIFE_STAGES)[number]["id"];
+
+/**
+ * How hard a landing is allowed to bother the page around the game.
+ * Thresholds are the existing milestones, so age, mass, and page strain move together.
+ * Adult begins at "not-teacup" so the stage is readable before the breakthrough.
+ */
+export type StrainTier = "still" | "tremble" | "cramped" | "breakthrough";
+
+function milestoneProgress(id: string): number {
+  const milestone = MILESTONES.find((item) => item.id === id);
+  return milestone ? milestone.at : 0;
+}
+
+const GROWING_AT = milestoneProgress("growing");
+const ADULT_AT = milestoneProgress("not-teacup");
+const FINALE_AT = milestoneProgress("wilbur");
+
+export function lifeStageAt(progress: number): (typeof LIFE_STAGES)[number] {
+  const p = clamp01(progress);
+  if (p >= ADULT_AT) return LIFE_STAGES[2];
+  if (p >= GROWING_AT) return LIFE_STAGES[1];
+  return LIFE_STAGES[0];
+}
+
+export function strainTierAt(progress: number): StrainTier {
+  const p = clamp01(progress);
+  if (p >= FINALE_AT) return "breakthrough";
+  if (p >= ADULT_AT) return "cramped";
+  if (p >= GROWING_AT) return "tremble";
+  return "still";
+}
+
+/** 0 is a piglet landing. 1 is a plank that cannot hold him. */
+export function impactForLanding(
+  mass: number,
+  integrity: number,
+  outcome: "bounce" | "wobble" | "break",
+): number {
+  const strain = mass / Math.max(0.15, integrity);
+  let impact = clamp01((strain - 0.35) / 1.2);
+  if (outcome === "wobble") impact = clamp01(impact + 0.18);
+  if (outcome === "break") impact = 1;
+  return impact;
+}
+
 export function growthAt(progress: number): { scale: number; mass: number } {
   const p = clamp01(progress);
   let lower: AgeMilestone = MILESTONES[0];

@@ -33,6 +33,7 @@ export function Pasture({
   visible,
   reduced,
   holdState,
+  suspended = false,
   onFind,
 }: {
   animal: AnimalDefinition;
@@ -42,6 +43,8 @@ export function Pasture({
   visible: boolean;
   reduced: boolean;
   holdState: NpcStateId | null;
+  /** Freezes the walk and pose loop while the Field Guide replaces the ending. */
+  suspended?: boolean;
   onFind: (found: FoundDiscovery) => void;
 }) {
   const anchorRef = useRef<HTMLDivElement>(null);
@@ -57,6 +60,7 @@ export function Pasture({
   const onFindRef = useRef(onFind);
   const visibleRef = useRef(visible);
   const holdRef = useRef(holdState);
+  const suspendedRef = useRef(suspended);
   const pointerRef = useRef<{ x: number; y: number } | null>(null);
   const [view, setView] = useState<View>({
     pose: "idle",
@@ -71,6 +75,7 @@ export function Pasture({
   onFindRef.current = onFind;
   visibleRef.current = visible;
   holdRef.current = holdState;
+  suspendedRef.current = suspended;
 
   const apply = () => {
     const anchor = anchorRef.current;
@@ -104,7 +109,7 @@ export function Pasture({
       discoveriesLeft: animal.discoveries.filter(
         (item) => !foundRef.current.some((foundItem) => foundItem.id === item.id),
       ).length,
-      paused: !visibleRef.current || document.hidden,
+      paused: !visibleRef.current || document.hidden || suspendedRef.current,
       holdState: holdRef.current,
     };
   };
@@ -112,7 +117,7 @@ export function Pasture({
   useGSAP(
     () => {
     const memory = memoryRef.current;
-    if (memory.state !== "walking" || memory.walkTarget == null) {
+    if (suspended || memory.state !== "walking" || memory.walkTarget == null) {
         apply();
         return;
       }
@@ -129,7 +134,7 @@ export function Pasture({
       });
       return () => tween.kill();
     },
-    { dependencies: [view.token, view.facing, reduced], scope: anchorRef },
+    { dependencies: [view.token, view.facing, reduced, suspended], scope: anchorRef },
   );
 
   useEffect(() => {
@@ -211,7 +216,7 @@ export function Pasture({
           onClick={onPig}
           aria-label={`${animal.displayName}. Activate for a reaction. He may be busy.`}
         >
-          <PigCharacter pose={view.pose} ambient={visible} reduced={reduced} />
+          <PigCharacter pose={view.pose} ambient={visible && !suspended} reduced={reduced} />
         </button>
         {view.bubble ? (
           <span className="bubble" role="status">

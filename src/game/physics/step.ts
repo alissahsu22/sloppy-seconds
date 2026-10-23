@@ -1,4 +1,4 @@
-import { growthAt, milestoneAt, runProgress } from "../progression/age";
+import { growthAt, impactForLanding, milestoneAt, runProgress, strainTierAt } from "../progression/age";
 import { clamp, clamp01 } from "../../utils/math";
 import {
   BASE_HALF_WIDTH,
@@ -18,6 +18,7 @@ const emptyEvents = (): StepEvents => ({
   finale: false,
   respawned: false,
   milestoneChanged: false,
+  landed: null,
 });
 
 /** Share of the playfield kept below the pig's feet. The course stays above him. */
@@ -98,6 +99,13 @@ export function stepWorld(world: World, dtSeconds: number): StepEvents {
     }
     if (hit) {
       const landing = evaluateLanding(hit, pig.mass);
+      events.landed = {
+        outcome: landing.outcome,
+        mass: pig.mass,
+        progress,
+        impact: impactForLanding(pig.mass, hit.integrity, landing.outcome),
+        tier: strainTierAt(progress),
+      };
       if (landing.outcome === "break") {
         hit.broken = true;
         hit.stage = "broken";

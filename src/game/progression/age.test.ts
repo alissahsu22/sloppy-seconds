@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { NPC_SCALE } from "../../assets/pig/metrics";
 import { MAX_GAP, WOBBLE_BOUNCE_SCALE, jumpApex } from "../physics/constants";
-import { MILESTONES, growthAt, milestoneAt, runProgress } from "./age";
+import { MILESTONES, growthAt, impactForLanding, lifeStageAt, milestoneAt, runProgress, strainTierAt } from "./age";
 
 describe("age and growth", () => {
   it("starts as a piglet and ends at the sanctuary weight milestone", () => {
@@ -28,6 +28,24 @@ describe("age and growth", () => {
     expect(runProgress(0, 36)).toBe(1);
     expect(runProgress(2300, 1)).toBe(1);
     expect(runProgress(1150, 0)).toBeCloseTo(0.5);
+  });
+
+  it("maps milestones onto piglet, growing up, and adult together", () => {
+    expect(lifeStageAt(0).label).toBe("Piglet");
+    expect(lifeStageAt(0.24).id).toBe("piglet");
+    expect(lifeStageAt(0.5).label).toBe("Growing up");
+    expect(lifeStageAt(0.74).label).toBe("Adult");
+    expect(lifeStageAt(1).id).toBe("adult");
+    expect(strainTierAt(0)).toBe("still");
+    expect(strainTierAt(0.5)).toBe("tremble");
+    expect(strainTierAt(0.74)).toBe("cramped");
+    expect(strainTierAt(1)).toBe("breakthrough");
+  });
+
+  it("hits harder as the landing gets heavier", () => {
+    expect(impactForLanding(0.22, 1, "bounce")).toBe(0);
+    expect(impactForLanding(0.84, 0.7, "wobble")).toBeGreaterThan(impactForLanding(0.62, 1, "bounce"));
+    expect(impactForLanding(1, 0.66, "break")).toBe(1);
   });
 
   it("keeps every platform gap inside the weaker bounce", () => {

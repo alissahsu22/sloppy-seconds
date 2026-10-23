@@ -4,6 +4,8 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { App } from "./App";
 import "./styles/global.css";
+import "./styles/sanctuary.css";
+import "./styles/story.css";
 
 gsap.registerPlugin(useGSAP);
 

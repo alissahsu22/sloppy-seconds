@@ -1,4 +1,5 @@
 import type { CrackStage, Facing } from "../../model/types";
+import type { StrainTier } from "../progression/age";
 
 export interface PigBody {
   x: number;
@@ -54,8 +55,18 @@ export interface World {
   time: number;
 }
 
+/** A footfall. The page reacts to this; it is not a per-frame physics sample. */
+export interface LandingPulse {
+  outcome: "bounce" | "wobble" | "break";
+  mass: number;
+  progress: number;
+  impact: number;
+  tier: StrainTier;
+}
+
 export interface StepEvents {
   finale: boolean;
   respawned: boolean;
   milestoneChanged: boolean;
+  landed: LandingPulse | null;
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { PigPose } from "../../model/types";
-import { ATLAS_URL, CELL, FOOT, clipForPose, frameFacesLeft, frameRect, isPigPose } from "./atlas";
+import { ATLAS_URL, FOOT, clipForPose, frameFacesLeft, frameRect, frameTrim, isPigPose } from "./atlas";
 
 /**
  * Plays one atlas clip for the pose it is given.
@@ -32,6 +32,9 @@ export function WilburSprite({
   const index = clip.loop && playing && !reduced ? frame % clip.frames.length : 0;
   const name = clip.frames[index] ?? clip.frames[0];
   const rect = frameRect(name);
+  const trim = frameTrim(name);
+  const footX = FOOT.x - trim.x;
+  const footY = FOOT.y - trim.y;
 
   useEffect(() => {
     if (!node) return;
@@ -60,13 +63,13 @@ export function WilburSprite({
       data-mirror={frameFacesLeft(name) ? "1" : "0"}
       role="presentation"
       style={{
-        width: CELL.width,
-        height: CELL.height,
-        marginLeft: -FOOT.x,
-        bottom: FOOT.y - CELL.height,
-        transformOrigin: `${FOOT.x}px ${FOOT.y}px`,
+        width: trim.w,
+        height: trim.h,
+        marginLeft: -footX,
+        bottom: footY - trim.h,
+        transformOrigin: `${footX}px ${footY}px`,
         backgroundImage: `url("${ATLAS_URL}")`,
-        backgroundPosition: `-${rect.x}px -${rect.y}px`,
+        backgroundPosition: `-${rect.x + trim.x}px -${rect.y + trim.y}px`,
       }}
     />
   );

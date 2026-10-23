@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import {
+  awardGuideEntry,
   emptyProgress,
   readProgress,
   writeProgress,
@@ -16,13 +17,16 @@ export function usePersistentProgress() {
   }, [progress]);
 
   const unlock = useCallback((id: string, pigX: number, facing: Facing) => {
-    setProgress((current) => ({
-      ...current,
-      seenEnding: true,
-      pigX,
-      facing,
-      unlockedIds: current.unlockedIds.includes(id) ? current.unlockedIds : [...current.unlockedIds, id],
-    }));
+    setProgress((current) => {
+      const next = awardGuideEntry(current, id);
+      return {
+        ...next,
+        seenEnding: true,
+        pigX,
+        facing,
+        unlockedIds: next.unlockedIds.includes(id) ? next.unlockedIds : [...next.unlockedIds, id],
+      };
+    });
   }, []);
 
   const rememberFind = useCallback((found: FoundDiscovery) => {

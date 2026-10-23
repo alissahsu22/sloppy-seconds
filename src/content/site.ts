@@ -5,7 +5,11 @@ export const site = {
   // lede: "You got a teacup pig. Or so you thought.",
   //   controls: "He jumps. You steer. ← → or A / D.",
   begin: "Press any key to start",
-  skip: "Skip to Wilbur",
+  skip: "Skip to the ending",
+  hopWith: "Hop with",
+  hopAgain: "Hop again with",
+  played: "Played",
+  backToStory: "Back to the story",
 
   endingTitle: "Still think he's a teacup?",
   replay: "Try again",
