@@ -1,9 +1,8 @@
 import { growthAt, impactForLanding, milestoneAt, runProgress, strainTierAt } from "../progression/age";
-import { clamp, clamp01 } from "../../utils/math";
+import { clamp } from "../../utils/math";
 import {
   BASE_HALF_WIDTH,
   FINALE_HEIGHT,
-  FINALE_SECONDS,
   FRICTION,
   GRAVITY,
   MAX_DT,
@@ -208,21 +207,4 @@ export function createWorld(options: {
   };
   if (!options.bare) layCourse(world, FINALE_HEIGHT);
   return world;
-}
-
-/** Debug helper: snap age without skipping the collapse unless progress is already 1 and they land. */
-export function jumpProgress(world: World, progress: number): void {
-  const next = clamp01(progress);
-  world.elapsed = next * FINALE_SECONDS;
-  world.maxHeight = Math.max(world.maxHeight, next * FINALE_HEIGHT);
-  world.progress = runProgress(world.maxHeight, world.elapsed);
-  const growth = growthAt(world.progress);
-  world.pig.mass = growth.mass;
-  world.pig.scale = growth.scale;
-  world.milestoneId = milestoneAt(world.progress).id;
-  if (next > 0.05) {
-    world.pig.y = Math.max(world.pig.y, next * FINALE_HEIGHT * 0.9);
-    world.pig.vy = 700;
-    world.cameraBottom = world.pig.y - world.height * CAMERA_ANCHOR;
-  }
 }

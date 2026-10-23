@@ -73,16 +73,9 @@ function line(lines: string[], rng: () => number, fallback: string): string {
   return lines[index] ?? fallback;
 }
 
-export function pickWalkTarget(
-  ctx: Pick<NpcContext, "x" | "width" | "enrichmentX">,
-  rng: () => number,
-  interest: number,
-): number {
+export function pickWalkTarget(ctx: Pick<NpcContext, "x" | "width">, rng: () => number): number {
   const min = 78;
   const max = Math.max(min + 48, ctx.width - 150);
-  if (ctx.enrichmentX != null && rng() < interest) {
-    return clamp(ctx.enrichmentX, min, max);
-  }
   const direction = rng() < 0.5 ? -1 : 1;
   const distance = 90 + rng() * 200;
   return clamp(ctx.x + direction * distance, min, max);
@@ -102,12 +95,10 @@ function enter(
   let walkTarget: number | null = null;
   let facing = memory.facing;
   if (next === "walking") {
-    walkTarget = pickWalkTarget(ctx, rng, profile.enrichmentInterest);
+    walkTarget = pickWalkTarget(ctx, rng);
     facing = walkTarget >= ctx.x ? 1 : -1;
   } else if (next === "curious" && ctx.pointerX != null) {
     facing = ctx.pointerX >= ctx.x ? 1 : -1;
-  } else if (next === "rooting" && ctx.enrichmentX != null) {
-    facing = ctx.enrichmentX >= ctx.x ? 1 : -1;
   }
   return {
     state: next,
@@ -135,17 +126,6 @@ export function stepNpc(
   now: number,
   rng: () => number,
 ): NpcStep {
-  if (ctx.holdState) {
-    if (memory.state !== ctx.holdState) {
-      return {
-        memory: enter(memory, ctx.holdState, now, profile, ctx, rng, null),
-        changed: true,
-        unearthed: false,
-      };
-    }
-    return { memory: { ...memory, x: ctx.x }, changed: false, unearthed: false };
-  }
-
   const bubble = memory.bubbleUntil > now ? memory.bubble : null;
   const cleared = bubble === memory.bubble ? memory : { ...memory, bubble, x: ctx.x };
   if (ctx.paused || now < memory.until) {
@@ -180,7 +160,6 @@ export function applyClick(
   now: number,
   rng: () => number,
 ): NpcMemory {
-  if (ctx.holdState) return memory;
   const spec = profile.states[memory.state];
   if (!canInterrupt(memory, spec, now) || rng() > spec.obedience) {
     return withBubble(memory, line(profile.lines.refuse, rng, "mmm"), now);
@@ -196,46 +175,11 @@ export function applyHover(
   now: number,
   rng: () => number,
 ): NpcMemory {
-  if (ctx.holdState || ctx.paused || !ctx.pointerNear) return memory;
+  if (ctx.paused || !ctx.pointerNear) return memory;
   if (memory.state !== "idle" && memory.state !== "walking") return memory;
   const spec = profile.states[memory.state];
   if (!canInterrupt(memory, spec, now)) return memory;
   if (rng() > profile.hoverCuriosityChance) return memory;
   const curious = enter(memory, "curious", now, profile, ctx, rng, memory.state);
   return withBubble(curious, line(profile.lines.curious, rng, "huh"), now);
-}
-
-/**
- * Dirt on the grass is a suggestion. Sleeping and committed rooting ignore it.
- * Otherwise he might walk over, or he might not.
- */
-export function considerEnrichment(
-  memory: NpcMemory,
-  profile: BehaviorProfile,
-  ctx: NpcContext,
-  now: number,
-  rng: () => number,
-): NpcMemory {
-  if (ctx.holdState || ctx.paused || ctx.enrichmentX == null) return memory;
-  if (memory.state === "sleeping" || memory.state === "rooting" || memory.state === "reacting") {
-    return memory;
-  }
-  const spec = profile.states[memory.state];
-  if (!canInterrupt(memory, spec, now)) return memory;
-  const distance = Math.abs(ctx.enrichmentX - ctx.x);
-  if (distance < 42) {
-    if (rng() > profile.enrichmentInterest) return memory;
-    return enter(memory, "rooting", now, profile, ctx, rng, memory.state);
-  }
-  if (memory.state === "walking" && memory.walkTarget != null) return memory;
-  if (rng() > profile.enrichmentInterest) return memory;
-  const walking = enter(memory, "walking", now, profile, ctx, rng, null);
-  const min = 78;
-  const max = Math.max(min + 48, ctx.width - 150);
-  const walkTarget = clamp(ctx.enrichmentX, min, max);
-  return {
-    ...walking,
-    walkTarget,
-    facing: walkTarget >= ctx.x ? 1 : -1,
-  };
 }

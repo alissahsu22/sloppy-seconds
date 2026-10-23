@@ -12,7 +12,7 @@ import { wilbur } from "./content/animals/wilbur";
 import { collectedFieldGuide } from "./content/fieldGuide";
 import { site } from "./content/site";
 import { PigJumpGame } from "./game/PigJumpGame/PigJumpGame";
-import type { EscapePayload, GameHandle } from "./game/PigJumpGame/types";
+import type { EscapePayload } from "./game/PigJumpGame/types";
 import { usePersistentProgress } from "./hooks/usePersistentProgress";
 import { usePrefersReducedMotion } from "./hooks/usePrefersReducedMotion";
 import { Pasture } from "./npc/Pasture";
@@ -36,7 +36,6 @@ export function App() {
   const [returnToEnding, setReturnToEnding] = useState(false);
   const [notice, setNotice] = useState(false);
   const groundRef = useRef<HTMLElement>(null);
-  const gameRef = useRef<GameHandle>(null);
   const reactionsRef = useRef<PageReactions | null>(null);
   const collectedRef = useRef(progress.collectedIds);
   const openerRef = useRef<HTMLElement | null>(null);
@@ -208,9 +207,7 @@ export function App() {
               found={progress.found}
               startX={progress.pigX ?? clamp(window.innerWidth * 0.46, 96, window.innerWidth - 96)}
               startFacing={progress.facing}
-              visible
               reduced={reduced}
-              holdState={null}
               suspended={dialog === "guide" && activeId !== null}
               onFind={rememberFind}
             />
@@ -254,7 +251,6 @@ export function App() {
                 {phase !== "ended" ? (
                   <PigJumpGame
                     key={runId}
-                    ref={gameRef}
                     active={(phase === "playing" || phase === "collapsing") && dialog === "game"}
                     reduced={reduced}
                     onStart={() => setPhase("playing")}

@@ -43,9 +43,7 @@ export function Pasture({
   found,
   startX,
   startFacing,
-  visible,
   reduced,
-  holdState,
   suspended = false,
   onFind,
 }: {
@@ -53,9 +51,7 @@ export function Pasture({
   found: FoundDiscovery[];
   startX: number;
   startFacing: Facing;
-  visible: boolean;
   reduced: boolean;
-  holdState: NpcStateId | null;
   /** Freezes the walk and pose loop while the Field Guide replaces the ending. */
   suspended?: boolean;
   onFind: (found: FoundDiscovery) => void;
@@ -71,8 +67,6 @@ export function Pasture({
   const motionRef = useRef({ x: startX });
   const foundRef = useRef(found);
   const onFindRef = useRef(onFind);
-  const visibleRef = useRef(visible);
-  const holdRef = useRef(holdState);
   const suspendedRef = useRef(suspended);
   const pointerRef = useRef<{ x: number; y: number } | null>(null);
   const [dropped, setDropped] = useState<Dropped[]>([]);
@@ -89,8 +83,6 @@ export function Pasture({
 
   foundRef.current = found;
   onFindRef.current = onFind;
-  visibleRef.current = visible;
-  holdRef.current = holdState;
   suspendedRef.current = suspended;
 
   const apply = () => {
@@ -126,10 +118,8 @@ export function Pasture({
       width: window.innerWidth,
       pointerX: pointer?.x ?? null,
       pointerNear: pointer ? pointerIsNearPig(pointer.x, pointer.y, motionRef.current.x) : false,
-      enrichmentX: null,
       discoveriesLeft: animal.discoveries.filter((item) => !isTaken(item.id)).length,
-      paused: !visibleRef.current || document.hidden || suspendedRef.current,
-      holdState: holdRef.current,
+      paused: document.hidden || suspendedRef.current,
     };
   };
 
@@ -212,7 +202,7 @@ export function Pasture({
     const onMove = (event: PointerEvent) => {
       pointerRef.current = { x: event.clientX, y: event.clientY };
       const now = performance.now();
-      if (now - last < 1500 || !visibleRef.current || document.hidden) return;
+      if (now - last < 1500 || document.hidden) return;
       if (!pointerIsNearPig(event.clientX, event.clientY, motionRef.current.x)) return;
       last = now;
       const next = applyHover(memoryRef.current, animal.behavior, makeCtx(), now, Math.random);
@@ -273,7 +263,7 @@ export function Pasture({
       ))}
       <div
         ref={anchorRef}
-        className={`pig-anchor${visible ? "" : " is-hidden"}`}
+        className="pig-anchor"
         data-pose={view.pose}
         data-state={view.state}
         data-facing={view.facing}
@@ -285,7 +275,7 @@ export function Pasture({
           onClick={onPig}
           aria-label={`${animal.displayName}. Activate for a reaction. He may be busy.`}
         >
-          <PigCharacter pose={view.pose} ambient={visible && !suspended} reduced={reduced} />
+          <PigCharacter pose={view.pose} ambient={!suspended} reduced={reduced} />
         </button>
         {view.bubble ? (
           <span className="bubble" role="status">

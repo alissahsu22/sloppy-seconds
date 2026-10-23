@@ -20,7 +20,6 @@ export const wilbur: AnimalDefinition = {
     tickMs: 480,
     hoverCuriosityChance: 0.42,
     discoveryChance: 0.8,
-    enrichmentInterest: 0.62,
     states: {
       idle: { minMs: 1600, maxMs: 3400, lockMs: 0, interruptible: true, obedience: 0.86 },
       walking: { minMs: 1800, maxMs: 4200, lockMs: 500, interruptible: true, obedience: 0.55 },

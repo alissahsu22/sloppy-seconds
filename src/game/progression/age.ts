@@ -72,14 +72,6 @@ export function milestoneAt(progress: number): AgeMilestone {
   return current;
 }
 
-export const LIFE_STAGES = [
-  { id: "piglet", label: "Piglet" },
-  { id: "growing", label: "Growing up" },
-  { id: "adult", label: "Adult" },
-] as const;
-
-export type LifeStageId = (typeof LIFE_STAGES)[number]["id"];
-
 /**
  * How hard a landing is allowed to bother the page around the game.
  * Thresholds are the existing milestones, so age, mass, and page strain move together.
@@ -95,13 +87,6 @@ function milestoneProgress(id: string): number {
 const GROWING_AT = milestoneProgress("growing");
 const ADULT_AT = milestoneProgress("not-teacup");
 const FINALE_AT = milestoneProgress("wilbur");
-
-export function lifeStageAt(progress: number): (typeof LIFE_STAGES)[number] {
-  const p = clamp01(progress);
-  if (p >= ADULT_AT) return LIFE_STAGES[2];
-  if (p >= GROWING_AT) return LIFE_STAGES[1];
-  return LIFE_STAGES[0];
-}
 
 /**
  * Ages the game's Wilbur shows, one per milestone. Illustrative only: the real

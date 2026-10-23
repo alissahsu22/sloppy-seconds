@@ -251,7 +251,8 @@
   margin-bottom: var(--space-4);
   overflow: hidden;
   aspect-ratio: 1;
-  background: var(--color-ink);
+  /* Paper while the photo loads, so a slow image reads as a quiet frame, not a black hole. */
+  background: var(--color-paper);
 }
 
 .profile-crop {

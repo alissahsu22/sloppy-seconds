@@ -17,10 +17,8 @@ function ctx(overrides: Partial<NpcContext> = {}): NpcContext {
     width: 900,
     pointerX: null,
     pointerNear: false,
-    enrichmentX: null,
     discoveriesLeft: 0,
     paused: false,
-    holdState: null,
     ...overrides,
   };
 }

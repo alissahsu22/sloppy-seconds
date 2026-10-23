@@ -1,12 +1,28 @@
 import { useEffect, useState } from "react";
 import { WilburSprite } from "../../assets/pig/WilburSprite";
-import { crew, crewHeading, crewHeroCaption, crewHeroImage, crewRows } from "../../content/crew";
+import {
+  cdnSrcSet,
+  crew,
+  crewHeading,
+  crewHeroCaption,
+  crewHeroImage,
+  crewRows,
+} from "../../content/crew";
 import { fieldGuideButtonLabel } from "../../content/fieldGuide";
 import { site } from "../../content/site";
 import type { Phase } from "../../App";
 
 /** The crew heading. The ending's "meet the other animals" scrolls here. */
 export const CREW_ANCHOR = "animals";
+
+/**
+ * Drawn widths for the card photos, by row length. The crop scales each photo 1.2×,
+ * so these run a fifth wider than the card itself.
+ */
+const PHOTO_SIZES: Record<number, string> = {
+  3: "(max-width: 600px) 120vw, (max-width: 960px) 60vw, 384px",
+  2: "(max-width: 600px) 120vw, (max-width: 1084px) 60vw, 600px",
+};
 
 /** The one card with a game. The hero teaser opens the same story. */
 const GAME_ID = crew.find((animal) => animal.game)?.id;
@@ -239,6 +255,8 @@ function Profiles({ reduced, activeId, phase, playedIds, onPlay }: PlayProps) {
                   >
                     <img
                       src={animal.image}
+                      srcSet={cdnSrcSet(animal.image, animal.imageWidth)}
+                      sizes={PHOTO_SIZES[row.length] ?? PHOTO_SIZES[2]}
                       alt={animal.alt}
                       loading="lazy"
                       decoding="async"

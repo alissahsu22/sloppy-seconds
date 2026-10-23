@@ -592,6 +592,11 @@ h1 { margin: 0; }
   overflow: auto;
 }
 
+/* Short windows: less air above the question, so the main action stays in view. The rest scrolls. */
+@media (max-height: 720px) {
+  .ended { padding-block: var(--space-5); }
+}
+
 .ended h2 {
   margin: 0;
   max-width: 18ch;
@@ -674,16 +679,20 @@ h1 { margin: 0; }
   pointer-events: auto;
 }
 
-.pig-anchor.is-hidden { visibility: hidden; }
-
 .ground-shadow { display: none; }
 
 .pig-anchor[data-pose="sleep"] .ground-shadow { width: 108px; height: 12px; }
 
+/*
+ * Hugs the tallest pasture drawing (97px of the cell at --wilbur-fit) rather than the
+ * whole draw box, so the empty top of the box never reaches into the window above his lane.
+ */
 .pig-hit {
-  position: relative;
+  position: absolute;
+  left: 0;
+  bottom: 0;
   width: 100%;
-  height: 100%;
+  height: 84px;
   padding: 0;
   border: 0;
   background: transparent;

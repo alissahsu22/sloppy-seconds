@@ -21,8 +21,3 @@ export interface EscapePayload {
   pieces: EscapePiece[];
   frame: HTMLElement;
 }
-
-export interface GameHandle {
-  setProgress: (progress: number) => void;
-  collapseNow: () => void;
-}

@@ -3,6 +3,7 @@ export const site = {
   title: "The Not-So-Teacup Pig",
   begin: "Press any key to start",
   beginTouch: "Tap to start",
+  beginBoth: "Press any key or tap to start",
   skip: "Skip to the ending",
   hopWith: "Hop with",
   played: "Played",
@@ -18,13 +19,14 @@ export const site = {
 
   heroPlay: "Start exploring",
   heroReplay: "Play again",
-  heroPlayNote: "Play a game to learn more about each of the animals who call the sanctuary home.",
+  heroPlayNote: "Play a game to learn more about Wilbur, one of the animals who call the sanctuary home.",
 
   reduced: "Animations are simplified to match your system settings.",
   ageLabel: "Wilbur's age",
   ageKicker: "Age",
   steer: "Use arrow keys or A and D to steer.",
   steerTouch: "Hold the left or right side to steer.",
+  steerBoth: "Use arrow keys or A and D, or hold the left or right side, to steer.",
   gameLabel:
     "Wilbur jumps automatically. Use arrow keys or A and D to steer. On touchscreens, hold either side.",
 } as const;

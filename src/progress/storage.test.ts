@@ -47,6 +47,28 @@ describe("field guide progress", () => {
     expect(readProgress().unlockedIds).toEqual([]);
   });
 
+  it("keeps a visit saved before seenEnding was dropped", () => {
+    installMemoryStorage();
+    localStorage.setItem(
+      PROGRESS_KEY,
+      JSON.stringify({
+        unlockedIds: ["wilbur"],
+        collectedIds: ["wilbur"],
+        found: [{ id: "teacup", x: 320 }],
+        seenEnding: true,
+        pigX: 412,
+        facing: -1,
+      }),
+    );
+    expect(readProgress()).toEqual({
+      unlockedIds: ["wilbur"],
+      collectedIds: ["wilbur"],
+      found: [{ id: "teacup", x: 320 }],
+      pigX: 412,
+      facing: -1,
+    });
+  });
+
   it("stays usable when storage is blocked", () => {
     Object.defineProperty(globalThis, "localStorage", {
       configurable: true,

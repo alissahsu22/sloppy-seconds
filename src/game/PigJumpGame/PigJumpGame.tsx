@@ -1,11 +1,4 @@
-import {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { PlatformArt } from "../../assets/environment/scenery";
 import { site } from "../../content/site";
 import { MILESTONES, gameAgeLabel, milestoneAt, type AgeMilestone } from "../progression/age";
@@ -14,12 +7,12 @@ import { PIG_DRAW } from "../../assets/pig/metrics";
 import type { PigPose } from "../../model/types";
 import { platformSignature, resizeWorld } from "../physics/platforms";
 import { BOUNCE_VY } from "../physics/constants";
-import { createWorld, jumpProgress, stepWorld } from "../physics/step";
+import { createWorld, stepWorld } from "../physics/step";
 import type { World } from "../physics/types";
 import { flipReadout, settleReadout } from "./readout";
 import { measureEscape, paintEcho, paintWorld, poseForBody, writeCaption, type GrowthEcho } from "./paint";
 import { clamp01, lerp } from "../../utils/math";
-import type { EscapePayload, GameHandle } from "./types";
+import type { EscapePayload } from "./types";
 import type { LandingPulse } from "../physics/types";
 
 interface PigJumpGameProps {
@@ -38,20 +31,26 @@ const GROW_SECONDS = 0.35;
 const AGE_DELAY = 0.45;
 const START_AGE = gameAgeLabel(MILESTONES[0]);
 
-/** Phones and tablets get tap wording. A laptop with a touchscreen still has a fine pointer, so it keeps the keys. */
-const coarsePointer = () =>
-  typeof window !== "undefined" && typeof window.matchMedia === "function"
-    ? window.matchMedia("(pointer: coarse)").matches
-    : false;
+type InputHints = "keys" | "touch" | "both";
+
+/**
+ * Phones and tablets get tap wording. A laptop with a touchscreen still has a fine
+ * pointer, so it keeps the keys and adds the tap and hold wording.
+ */
+const inputHints = (): InputHints => {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") return "keys";
+  if (window.matchMedia("(pointer: coarse)").matches) return "touch";
+  return window.matchMedia("(any-pointer: coarse)").matches ? "both" : "keys";
+};
+
+const BEGIN: Record<InputHints, string> = { keys: site.begin, touch: site.beginTouch, both: site.beginBoth };
+const STEER: Record<InputHints, string> = { keys: site.steer, touch: site.steerTouch, both: site.steerBoth };
 
 /**
  * Rendering is a copy of the physics world onto transforms.
  * React state changes only when a plank's crack state changes. The age readout, its note, and the growth echo are written directly.
  */
-export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function PigJumpGame(
-  { active, reduced, onCollapse, onLanding, onStart, onRetry },
-  ref,
-) {
+export function PigJumpGame({ active, reduced, onCollapse, onLanding, onStart, onRetry }: PigJumpGameProps) {
   const frameRef = useRef<HTMLElement>(null);
   const worldElRef = useRef<HTMLDivElement>(null);
   const pigRef = useRef<HTMLDivElement>(null);
@@ -77,7 +76,7 @@ export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function Pig
   const poseRef = useRef<PigPose>("idle");
   const holdingRef = useRef(true);
   const onStartRef = useRef(onStart);
-  const [touch] = useState(coarsePointer);
+  const [hints] = useState(inputHints);
   const [holding, setHolding] = useState(true);
   const [ready, setReady] = useState(false);
   const [pose, setPose] = useState<PigPose>("idle");
@@ -197,25 +196,6 @@ export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function Pig
     setHolding(false);
     onStartRef.current?.();
   };
-
-  useImperativeHandle(ref, () => ({
-    setProgress(progress: number) {
-      const world = worldRef.current;
-      if (!world || world.over) return;
-      release();
-      jumpProgress(world, progress);
-      const milestone = milestoneAt(world.progress);
-      if (milestone.scale !== growRef.current.to) grow(world, milestone);
-      paint(world);
-      syncPlatforms(world);
-    },
-    collapseNow() {
-      const world = worldRef.current;
-      if (!world || world.over) return;
-      release();
-      world.finaleRequested = true;
-    },
-  }));
 
   useEffect(() => {
     if (!ready) return;
@@ -460,8 +440,8 @@ export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function Pig
           <p className="intro-tag">{MILESTONES[0].tagline}</p>
         </div>
         <div className="intro-action">
-          <p className="intro-begin">{touch ? site.beginTouch : site.begin}</p>
-          <p className="intro-steer">{touch ? site.steerTouch : site.steer}</p>
+          <p className="intro-begin">{BEGIN[hints]}</p>
+          <p className="intro-steer">{STEER[hints]}</p>
         </div>
       </div>
       {fell ? (
@@ -479,4 +459,4 @@ export const PigJumpGame = forwardRef<GameHandle, PigJumpGameProps>(function Pig
       ) : null}
     </section>
   );
-});
+}

@@ -116,11 +116,21 @@
   gap: var(--space-2);
 }
 
-.story-played { color: var(--color-on-ink); }
+/* An opaque chip, so the status reads over light and dark photographs alike. */
+.story-played {
+  display: inline-flex;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  background: var(--color-ink);
+  color: var(--color-on-ink);
+}
 
-.story-played::before { content: "✓ "; }
+.story-played::before { content: "✓"; }
 
 .story-dialog {
+  /* Height the ending and the Field Guide notice need without scrolling. */
+  --window-fit: 680px;
+  --dialog-bottom: var(--space-6);
   position: fixed;
   inset: 0;
   width: 100%;
@@ -128,12 +138,24 @@
   max-width: none;
   max-height: none;
   margin: 0;
-  /* The top clears the fixed site header. */
-  padding: calc(var(--space-8) + var(--space-5)) var(--space-7) var(--space-6);
+  /* The top clears the fixed site header when there is room. Short windows give that space back to the window. */
+  padding:
+    clamp(var(--space-4), calc(100dvh - var(--window-fit) - var(--dialog-bottom)), calc(var(--space-8) + var(--space-5)))
+    var(--space-7)
+    var(--dialog-bottom);
   border: 0;
   background: transparent;
   overflow: visible;
   color: var(--color-ink);
+  transition: padding 0.3s ease;
+}
+
+/*
+ * Once Wilbur has landed, the window sits above his lane so he never stands on its text
+ * or controls. Not during the breakthrough: its debris is pinned to where the window was.
+ */
+.page[data-phase="roaming"] .story-dialog {
+  --dialog-bottom: var(--strip);
 }
 
 .page:has(.story-dialog[open]) .site-header {
@@ -435,7 +457,7 @@
   width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
-  background: var(--color-ink);
+  background: var(--color-paper);
 }
 
 /* Overlaps the photo's lower right, over his front leg rather than his face. */
@@ -498,7 +520,8 @@
 
 @media (max-width: 720px) {
   .story-dialog {
-    padding: var(--space-2);
+    --dialog-bottom: var(--space-2);
+    padding: var(--space-2) var(--space-2) var(--dialog-bottom);
   }
 
   .story-window {
@@ -524,9 +547,11 @@
 
 @media (prefers-reduced-motion: reduce) {
   .story-launch-hop[data-hop] { animation: none; }
+  .story-dialog { transition: none; }
 }
 
 .page[data-motion="reduce"] .story-launch-hop[data-hop] { animation: none; }
+.page[data-motion="reduce"] .story-dialog { transition: none; }
 
 /* Pasture finds: found ones read in full, the rest wait as locked slots. */
 .guide-finds ul {

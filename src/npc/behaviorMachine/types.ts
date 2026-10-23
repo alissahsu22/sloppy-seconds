@@ -17,8 +17,6 @@ export interface BehaviorProfile {
   hoverCuriosityChance: number;
   /** Rolled once, when a rooting bout ends. */
   discoveryChance: number;
-  /** Chance an enrichment object is interesting enough to walk toward. */
-  enrichmentInterest: number;
   states: Record<NpcStateId, StateSpec>;
   transitions: Record<NpcStateId, { to: NpcStateId; weight: number }[]>;
   lines: {
@@ -48,11 +46,8 @@ export interface NpcContext {
   width: number;
   pointerX: number | null;
   pointerNear: boolean;
-  enrichmentX: number | null;
   discoveriesLeft: number;
   paused: boolean;
-  /** Developer override. Autonomy resumes when this is null. */
-  holdState: NpcStateId | null;
 }
 
 export interface NpcStep {

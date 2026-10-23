@@ -8,7 +8,6 @@ export interface Progress {
   /** Field Guide entries already awarded. Reaching the story adds an id once. */
   collectedIds: string[];
   found: FoundDiscovery[];
-  seenEnding: boolean;
   pigX: number | null;
   facing: 1 | -1;
 }
@@ -19,7 +18,6 @@ export const emptyProgress = (): Progress => ({
   unlockedIds: [],
   collectedIds: [],
   found: [],
-  seenEnding: false,
   pigX: null,
   facing: 1,
 });
@@ -53,7 +51,6 @@ export function readProgress(): Progress {
               !!item && typeof item.id === "string" && typeof item.x === "number",
           )
         : [],
-      seenEnding: parsed.seenEnding === true,
       pigX: typeof parsed.pigX === "number" ? parsed.pigX : null,
       facing: parsed.facing === -1 ? -1 : 1,
     };
