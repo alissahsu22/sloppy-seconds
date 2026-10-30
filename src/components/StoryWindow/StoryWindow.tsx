@@ -1,43 +1,5 @@
 import { useLayoutEffect, useRef, type ReactNode } from "react";
-
-function SplitText({ text }: { text: string }) {
-  const words = text.split(" ");
-  let letterIndex = 0;
-  let lastLetter = -1;
-  words.forEach((word) => {
-    Array.from(word).forEach((character, index) => {
-      if (/[A-Za-z]/.test(character)) lastLetter = letterIndex + index;
-    });
-    letterIndex += Array.from(word).length;
-  });
-  letterIndex = 0;
-  return (
-    <span aria-hidden="true" className="crew-title-art">
-      {words.map((word, wordIndex) => (
-        <span key={`${word}-${wordIndex}`}>
-          {wordIndex > 0 ? " " : null}
-          <span className="crew-word">
-            {Array.from(word).map((character) => {
-              const index = letterIndex;
-              letterIndex += 1;
-              return (
-                <span
-                  key={index}
-                  className="crew-letter"
-                  data-letter={index}
-                  data-word={word.toLowerCase()}
-                  {...(index === lastLetter ? { "data-hanger": "1" } : {})}
-                >
-                  {character}
-                </span>
-              );
-            })}
-          </span>
-        </span>
-      ))}
-    </span>
-  );
-}
+import { SplitText } from "../SplitText/SplitText";
 
 /**
  * One modal window for Wilbur's game and the Field Guide.
@@ -134,7 +96,7 @@ export function StoryWindow({
               {kicker ? (
                 <>
                   <span className="sr-only">{title}</span>
-                  <SplitText text={title} />
+                  <SplitText text={title} hanger="last-letter" />
                 </>
               ) : (
                 title

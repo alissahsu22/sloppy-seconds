@@ -101,13 +101,11 @@ export function Pasture({
   };
 
   // A new line has a new width, and a turn puts it on his other side.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useLayoutEffect(apply, [view.bubble, view.facing]);
 
   useEffect(() => {
     window.addEventListener("resize", apply);
     return () => window.removeEventListener("resize", apply);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const publish = (memory: NpcMemory) => {
@@ -231,6 +229,8 @@ export function Pasture({
     };
     window.addEventListener("pointermove", onMove);
     return () => window.removeEventListener("pointermove", onMove);
+    // makeCtx reads live values through refs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [animal]);
 
   const onPig = () => {

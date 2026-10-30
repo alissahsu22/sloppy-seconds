@@ -208,6 +208,8 @@ export function PigJumpGame({ active, reduced, onCollapse, onLanding, onStart, o
     const world = worldRef.current;
     if (!world || !ready) return;
     paint(world);
+    // paint, grow, showAge and release read only refs, so any render's copy is current.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [platforms, ready]);
 
   const release = () => {
@@ -269,6 +271,7 @@ export function PigJumpGame({ active, reduced, onCollapse, onLanding, onStart, o
     };
     frameId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frameId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
 
   useEffect(() => {
@@ -286,6 +289,7 @@ export function PigJumpGame({ active, reduced, onCollapse, onLanding, onStart, o
     });
     observer.observe(frame);
     return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
 
   useEffect(() => {
@@ -313,6 +317,7 @@ export function PigJumpGame({ active, reduced, onCollapse, onLanding, onStart, o
       window.removeEventListener("keydown", onKey);
       frame.removeEventListener("pointerdown", onPointer);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, holding]);
 
   useEffect(() => {

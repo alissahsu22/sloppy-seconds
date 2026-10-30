@@ -10,6 +10,7 @@ import {
 } from "../../content/crew";
 import { fieldGuideButtonLabel } from "../../content/fieldGuide";
 import { site } from "../../content/site";
+import { SplitText } from "../SplitText/SplitText";
 import type { Phase } from "../../App";
 
 /** The crew heading. The ending's "meet the other animals" scrolls here. */
@@ -134,54 +135,11 @@ function GuideButton({
   );
 }
 
-function SplitText({
-  text,
-  hangLast = false,
-  hangerWord,
-}: {
-  text: string;
-  hangLast?: boolean;
-  hangerWord?: { word: string; character: string };
-}) {
-  const words = text.split(" ");
-  const last = Array.from(text.replace(/ /g, "")).length - 1;
-  let letterIndex = 0;
-  return (
-    <span aria-hidden="true" className="crew-title-art">
-      {words.map((word, wordIndex) => (
-        <span key={`${word}-${wordIndex}`}>
-          {wordIndex > 0 ? " " : null}
-          <span className="crew-word">
-            {Array.from(word).map((character) => {
-              const index = letterIndex;
-              letterIndex += 1;
-              const hang = hangLast
-                ? index === last
-                : hangerWord?.word === word && hangerWord.character === character;
-              return (
-                <span
-                  key={index}
-                  className="crew-letter"
-                  data-letter={index}
-                  data-word={word.toLowerCase()}
-                  {...(hang ? { "data-hanger": "1" } : {})}
-                >
-                  {character}
-                </span>
-              );
-            })}
-          </span>
-        </span>
-      ))}
-    </span>
-  );
-}
-
 function CrewTitle() {
   return (
     <h1 className="crew-title" id={CREW_ANCHOR} data-strain="heading">
       <span className="sr-only">{crewHeading}</span>
-      <SplitText text={crewHeading} hangerWord={{ word: "sanctuary", character: "y" }} />
+      <SplitText text={crewHeading} hanger={{ word: "sanctuary", character: "y" }} />
     </h1>
   );
 }
