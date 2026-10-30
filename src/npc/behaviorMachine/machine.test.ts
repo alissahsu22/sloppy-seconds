@@ -4,7 +4,9 @@ import {
   applyClick,
   canInterrupt,
   createNpcMemory,
+  pickWalkTarget,
   stepNpc,
+  walkBounds,
   weightedPick,
 } from "./machine";
 import type { NpcContext } from "./types";
@@ -93,5 +95,21 @@ describe("npc state transitions", () => {
     const stepped = stepNpc(memory, ctx({ discoveriesLeft: 2 }), profile, 50, () => 0);
     expect(stepped.unearthed).toBe(true);
     expect(stepped.memory.state).not.toBe("rooting");
+  });
+});
+
+describe("walk lane", () => {
+  it("keeps every walk target inside the bounds for that width", () => {
+    for (const width of [320, 900, 1600]) {
+      const { min, max } = walkBounds(width);
+      expect(min).toBeLessThan(max);
+      for (const x of [0, min, max, width * 2]) {
+        for (const roll of [0, 0.49, 0.5, 0.99]) {
+          const target = pickWalkTarget({ x, width }, () => roll);
+          expect(target).toBeGreaterThanOrEqual(min);
+          expect(target).toBeLessThanOrEqual(max);
+        }
+      }
+    }
   });
 });

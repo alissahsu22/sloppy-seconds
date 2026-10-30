@@ -16,6 +16,7 @@ import type { EscapePayload } from "./game/PigJumpGame/types";
 import { usePersistentProgress } from "./hooks/usePersistentProgress";
 import { usePrefersReducedMotion } from "./hooks/usePrefersReducedMotion";
 import { Pasture } from "./npc/Pasture";
+import { walkBounds } from "./npc/behaviorMachine/machine";
 import { createPageReactions, type PageReactions } from "./page/reactions";
 import { clamp } from "./utils/math";
 
@@ -24,12 +25,22 @@ export type Phase = "begin" | "playing" | "collapsing" | "ended";
 
 type DialogView = "game" | "guide";
 
+const centerX = () => clamp(window.innerWidth * 0.46, 96, window.innerWidth - 96);
+
+/** A saved spot may come from a wider window. Pull it back inside today's walk lane. */
+function restoredX(saved: number | null): number {
+  const { min, max } = walkBounds(window.innerWidth);
+  return clamp(saved ?? centerX(), min, max);
+}
+
 export function App() {
   const reduced = usePrefersReducedMotion();
   const { progress, unlock, rememberFind } = usePersistentProgress();
+  // Finishing or skipping the story is what unlocks him, so a returning visitor finds him roaming.
+  const unlocked = progress.unlockedIds.includes(wilbur.id);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [phase, setPhase] = useState<Phase>("begin");
-  const [roaming, setRoaming] = useState(false);
+  const [roaming, setRoaming] = useState(unlocked);
   const [escape, setEscape] = useState<EscapePayload | null>(null);
   const [runId, setRunId] = useState(0);
   const [dialog, setDialog] = useState<DialogView | null>(null);
@@ -42,6 +53,8 @@ export function App() {
   const scrollRef = useRef(0);
   const restoreArmed = useRef(false);
   const revealRef = useRef<string | null>(null);
+  /** True when he is out because he just landed, so he starts exactly where he fell. */
+  const landedRef = useRef(false);
   collectedRef.current = progress.collectedIds;
 
   useEffect(() => {
@@ -104,6 +117,7 @@ export function App() {
   };
 
   const play = (id: string) => {
+    landedRef.current = false;
     setEscape(null);
     setRoaming(false);
     setRunId((value) => value + 1);
@@ -112,6 +126,7 @@ export function App() {
   };
 
   const replay = () => {
+    landedRef.current = false;
     reactionsRef.current?.reset();
     setEscape(null);
     setNotice(false);
@@ -127,6 +142,8 @@ export function App() {
     setReturnToEnding(false);
     setDialog(null);
     setActiveId(null);
+    // Leaving a replay early puts him back out to roam. A first run left early unlocks nothing.
+    if (unlocked) setRoaming(true);
   };
 
   /** Closes the window and scrolls to the target, e.g. the top of the crew list. */
@@ -140,6 +157,7 @@ export function App() {
     const added = !collectedRef.current.includes(id);
     if (added) collectedRef.current = [...collectedRef.current, id];
     unlock(id, x, facing);
+    landedRef.current = true;
     if (added) setNotice(true);
     setEscape(null);
     setPhase("ended");
@@ -148,7 +166,7 @@ export function App() {
 
   const skip = (id: string) => {
     reactionsRef.current?.reset();
-    finish(id, clamp(window.innerWidth * 0.46, 96, window.innerWidth - 96));
+    finish(id, centerX());
   };
 
   const openGame = (id: string, opener: HTMLButtonElement) => {
@@ -205,7 +223,7 @@ export function App() {
             <Pasture
               animal={wilbur}
               found={progress.found}
-              startX={progress.pigX ?? clamp(window.innerWidth * 0.46, 96, window.innerWidth - 96)}
+              startX={landedRef.current ? progress.pigX ?? centerX() : restoredX(progress.pigX)}
               startFacing={progress.facing}
               reduced={reduced}
               suspended={dialog === "guide" && activeId !== null}

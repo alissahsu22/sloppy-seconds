@@ -73,9 +73,14 @@ function line(lines: string[], rng: () => number, fallback: string): string {
   return lines[index] ?? fallback;
 }
 
-export function pickWalkTarget(ctx: Pick<NpcContext, "x" | "width">, rng: () => number): number {
+/** The stretch of lane the pig walks within at a given viewport width. */
+export function walkBounds(width: number): { min: number; max: number } {
   const min = 78;
-  const max = Math.max(min + 48, ctx.width - 150);
+  return { min, max: Math.max(min + 48, width - 150) };
+}
+
+export function pickWalkTarget(ctx: Pick<NpcContext, "x" | "width">, rng: () => number): number {
+  const { min, max } = walkBounds(ctx.width);
   const direction = rng() < 0.5 ? -1 : 1;
   const distance = 90 + rng() * 200;
   return clamp(ctx.x + direction * distance, min, max);

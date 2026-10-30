@@ -69,6 +69,16 @@ describe("field guide progress", () => {
     });
   });
 
+  it("drops a saved spot that is not a usable number", () => {
+    installMemoryStorage();
+    localStorage.setItem(PROGRESS_KEY, '{"unlockedIds":["wilbur"],"pigX":1e999}');
+    expect(readProgress().pigX).toBeNull();
+    localStorage.setItem(PROGRESS_KEY, '{"unlockedIds":["wilbur"],"pigX":"412"}');
+    expect(readProgress()).toMatchObject({ unlockedIds: ["wilbur"], pigX: null });
+    localStorage.setItem(PROGRESS_KEY, "{not json");
+    expect(readProgress()).toEqual(emptyProgress());
+  });
+
   it("stays usable when storage is blocked", () => {
     Object.defineProperty(globalThis, "localStorage", {
       configurable: true,

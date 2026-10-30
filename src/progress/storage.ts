@@ -51,7 +51,7 @@ export function readProgress(): Progress {
               !!item && typeof item.id === "string" && typeof item.x === "number",
           )
         : [],
-      pigX: typeof parsed.pigX === "number" ? parsed.pigX : null,
+      pigX: typeof parsed.pigX === "number" && Number.isFinite(parsed.pigX) ? parsed.pigX : null,
       facing: parsed.facing === -1 ? -1 : 1,
     };
   } catch {
