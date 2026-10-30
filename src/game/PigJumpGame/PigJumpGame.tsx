@@ -56,9 +56,7 @@ const fitWorld = (frame: HTMLElement, worldEl: HTMLElement) => {
   const stageWidth = frame.clientWidth;
   const stageHeight = frame.clientHeight;
   const view =
-    stageWidth > 0 && stageHeight > 0
-      ? Math.min(1, stageWidth / MIN_WORLD_WIDTH, stageHeight / MIN_WORLD_HEIGHT)
-      : 1;
+    stageWidth > 0 && stageHeight > 0 ? Math.min(1, stageWidth / MIN_WORLD_WIDTH, stageHeight / MIN_WORLD_HEIGHT) : 1;
   const width = Math.max(MIN_WORLD_WIDTH, stageWidth / view);
   const height = Math.max(MIN_WORLD_HEIGHT, stageHeight / view);
   const scaled = view < 1;
@@ -106,7 +104,9 @@ export function PigJumpGame({ active, reduced, onCollapse, onLanding, onStart, o
   const [ready, setReady] = useState(false);
   const [pose, setPose] = useState<PigPose>("idle");
   const [fell, setFell] = useState(false);
-  const [platforms, setPlatforms] = useState<{ id: string; stage: World["platforms"][number]["stage"]; falling: boolean; wobble: boolean }[]>([]);
+  const [platforms, setPlatforms] = useState<
+    { id: string; stage: World["platforms"][number]["stage"]; falling: boolean; wobble: boolean }[]
+  >([]);
 
   onCollapseRef.current = onCollapse;
   onLandingRef.current = onLanding;
@@ -420,7 +420,9 @@ export function PigJumpGame({ active, reduced, onCollapse, onLanding, onStart, o
           <span className="age-readout-label">{site.ageLabel}</span>
           <span className="age-readout-page">
             {MILESTONES.map((milestone) => (
-              <span className="age-readout-sizer" key={milestone.id}>{gameAgeLabel(milestone)}</span>
+              <span className="age-readout-sizer" key={milestone.id}>
+                {gameAgeLabel(milestone)}
+              </span>
             ))}
             <span className="age-readout-value">{START_AGE}</span>
           </span>
@@ -447,11 +449,7 @@ export function PigJumpGame({ active, reduced, onCollapse, onLanding, onStart, o
             </div>
           </div>
         ))}
-        <div
-          className="pig-slot"
-          ref={pigRef}
-          style={{ width: PIG_DRAW.width, height: PIG_DRAW.height }}
-        >
+        <div className="pig-slot" ref={pigRef} style={{ width: PIG_DRAW.width, height: PIG_DRAW.height }}>
           <WilburSprite pose={pose} reduced={reduced} />
         </div>
         <div
@@ -476,7 +474,9 @@ export function PigJumpGame({ active, reduced, onCollapse, onLanding, onStart, o
       {fell ? (
         <div className="intro game-over" role="group" aria-labelledby="game-over-title">
           <div className="intro-story">
-            <p className="intro-title" id="game-over-title">{site.fellTitle}</p>
+            <p className="intro-title" id="game-over-title">
+              {site.fellTitle}
+            </p>
             <p className="intro-tag">{site.fellNote}</p>
           </div>
           <div className="intro-action">

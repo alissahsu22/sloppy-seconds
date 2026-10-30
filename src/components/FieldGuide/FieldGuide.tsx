@@ -44,9 +44,7 @@ function Finds({
         ))}
       </ul>
       {left > 0 ? (
-        <p className="guide-finds-hint">
-          {`${left} more to collect. Learn about ${name} by finding stickers.`}
-        </p>
+        <p className="guide-finds-hint">{`${left} more to collect. Learn about ${name} by finding stickers.`}</p>
       ) : null}
     </section>
   );

@@ -8,12 +8,7 @@ import type { AnimalDefinition, Discovery } from "../content/animals/types";
 import type { Facing, NpcStateId, PigPose } from "../model/types";
 import type { FoundDiscovery } from "../progress/storage";
 import { clamp } from "../utils/math";
-import {
-  applyClick,
-  applyHover,
-  createNpcMemory,
-  stepNpc,
-} from "./behaviorMachine/machine";
+import { applyClick, applyHover, createNpcMemory, stepNpc } from "./behaviorMachine/machine";
 import type { NpcContext, NpcMemory } from "./behaviorMachine/types";
 import { bubbleLeft } from "./interactions/bubble";
 import { pointerIsNearPig } from "./interactions/proximity";
@@ -116,16 +111,13 @@ export function Pasture({
       bubble: memory.bubble,
       walkTarget: memory.walkTarget,
       token:
-        current.state !== memory.state || current.walkTarget !== memory.walkTarget
-          ? current.token + 1
-          : current.token,
+        current.state !== memory.state || current.walkTarget !== memory.walkTarget ? current.token + 1 : current.token,
     }));
   };
 
   // Found, or already lying on the grass. Either way he should not dig it up again.
   const isTaken = (id: string) =>
-    foundRef.current.some((item) => item.id === id) ||
-    droppedRef.current.some((item) => item.discovery.id === id);
+    foundRef.current.some((item) => item.id === id) || droppedRef.current.some((item) => item.discovery.id === id);
 
   const makeCtx = (): NpcContext => {
     const pointer = pointerRef.current;
@@ -141,8 +133,8 @@ export function Pasture({
 
   useGSAP(
     () => {
-    const memory = memoryRef.current;
-    if (suspended || memory.state !== "walking" || memory.walkTarget == null) {
+      const memory = memoryRef.current;
+      if (suspended || memory.state !== "walking" || memory.walkTarget == null) {
         apply();
         return;
       }
@@ -242,9 +234,7 @@ export function Pasture({
   const collect = (sticker: Dropped) => {
     if (sticker.collected) return;
     onFindRef.current({ id: sticker.discovery.id, x: sticker.x });
-    setDropped((current) =>
-      current.map((item) => (item === sticker ? { ...item, collected: true } : item)),
-    );
+    setDropped((current) => current.map((item) => (item === sticker ? { ...item, collected: true } : item)));
     window.setTimeout(
       () => setDropped((current) => current.filter((item) => item.discovery.id !== sticker.discovery.id)),
       reduced ? 1400 : COLLECT_MS,

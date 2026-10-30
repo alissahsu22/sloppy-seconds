@@ -59,9 +59,7 @@ export function StoryWindow({
     const dialog = dialogRef.current;
     if (!dialog?.open) return;
     const target =
-      dialog.querySelector<HTMLElement>("[data-autofocus]") ??
-      dialog.querySelector<HTMLElement>("button") ??
-      dialog;
+      dialog.querySelector<HTMLElement>("[data-autofocus]") ?? dialog.querySelector<HTMLElement>("button") ?? dialog;
     target.focus({ preventScroll: true });
   }, [focusKey]);
 

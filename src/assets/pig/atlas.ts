@@ -26,14 +26,7 @@ export interface SpriteClip {
  * These drawings face left on the sheet. Idle, walk, and jump face right.
  * The sprite flips just these frames so the pig's snout follows `facing`.
  */
-const LEFT_FACING: ReadonlySet<FrameName> = new Set([
-  "curious",
-  "sniff",
-  "root_1",
-  "root_2",
-  "eat",
-  "sleep_2",
-]);
+const LEFT_FACING: ReadonlySet<FrameName> = new Set(["curious", "sniff", "root_1", "root_2", "eat", "sleep_2"]);
 
 export function frameFacesLeft(name: string): boolean {
   return LEFT_FACING.has(name as FrameName);

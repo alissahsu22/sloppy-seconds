@@ -37,7 +37,12 @@ export function GuideNotice({
       <button type="button" className="btn btn-secondary guide-notice-view" onClick={onView}>
         View entry
       </button>
-      <button type="button" className="icon-button guide-notice-dismiss" aria-label="Dismiss notification" onClick={onDismiss}>
+      <button
+        type="button"
+        className="icon-button guide-notice-dismiss"
+        aria-label="Dismiss notification"
+        onClick={onDismiss}
+      >
         ×
       </button>
     </div>

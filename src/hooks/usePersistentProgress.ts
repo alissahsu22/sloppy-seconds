@@ -1,11 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import {
-  awardGuideEntry,
-  readProgress,
-  writeProgress,
-  type FoundDiscovery,
-  type Progress,
-} from "../progress/storage";
+import { awardGuideEntry, readProgress, writeProgress, type FoundDiscovery, type Progress } from "../progress/storage";
 import type { Facing } from "../model/types";
 
 export function usePersistentProgress() {

@@ -9,11 +9,7 @@ export function settleReadout(readout: HTMLElement | null): void {
  * Called when the time label changes. Writes the new label underneath, then
  * flips one page carrying the old label off the top, like the calendar did.
  */
-export function flipReadout(
-  readout: HTMLElement,
-  text: string,
-  reduced: boolean,
-): gsap.core.Timeline | null {
+export function flipReadout(readout: HTMLElement, text: string, reduced: boolean): gsap.core.Timeline | null {
   const page = readout.querySelector<HTMLElement>(".age-readout-page");
   const value = readout.querySelector<HTMLElement>(".age-readout-value");
   if (!page || !value || value.textContent === text) return null;

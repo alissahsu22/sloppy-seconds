@@ -58,7 +58,6 @@ export const MILESTONES: readonly AgeMilestone[] = [
   },
 ];
 
-
 export function runProgress(maxHeight: number, elapsed: number): number {
   return clamp01(Math.max(maxHeight / FINALE_HEIGHT, elapsed / FINALE_SECONDS));
 }
@@ -116,11 +115,7 @@ export function strainTierAt(progress: number): StrainTier {
 }
 
 /** 0 is a piglet landing. 1 is a plank that cannot hold him. */
-export function impactForLanding(
-  mass: number,
-  integrity: number,
-  outcome: "bounce" | "wobble" | "break",
-): number {
+export function impactForLanding(mass: number, integrity: number, outcome: "bounce" | "wobble" | "break"): number {
   const strain = mass / Math.max(0.15, integrity);
   let impact = clamp01((strain - 0.35) / 1.2);
   if (outcome === "wobble") impact = clamp01(impact + 0.18);

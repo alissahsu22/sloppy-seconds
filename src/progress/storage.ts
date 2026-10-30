@@ -47,8 +47,7 @@ export function readProgress(): Progress {
       collectedIds: stringList(parsed.collectedIds),
       found: Array.isArray(parsed.found)
         ? parsed.found.filter(
-            (item): item is FoundDiscovery =>
-              !!item && typeof item.id === "string" && typeof item.x === "number",
+            (item): item is FoundDiscovery => !!item && typeof item.id === "string" && typeof item.x === "number",
           )
         : [],
       pigX: typeof parsed.pigX === "number" && Number.isFinite(parsed.pigX) ? parsed.pigX : null,

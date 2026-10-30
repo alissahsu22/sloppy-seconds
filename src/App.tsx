@@ -199,12 +199,7 @@ export function App() {
   const guideCount = collectedFieldGuide(progress.collectedIds).length;
 
   return (
-    <div
-      className="page sanctuary"
-      id="top"
-      data-motion={reduced ? "reduce" : "full"}
-      data-phase={pagePhase}
-    >
+    <div className="page sanctuary" id="top" data-motion={reduced ? "reduce" : "full"} data-phase={pagePhase}>
       <div {...(dialog ? { inert: true } : {})}>
         <AnimalsPage
           reduced={reduced}
@@ -215,15 +210,12 @@ export function App() {
           onPlay={openGame}
           onOpenGuide={openGuide}
         />
-        <GroundStrip
-          ref={groundRef}
-          name={roaming ? wilbur.displayName : undefined}
-        >
+        <GroundStrip ref={groundRef} name={roaming ? wilbur.displayName : undefined}>
           {roaming ? (
             <Pasture
               animal={wilbur}
               found={progress.found}
-              startX={landedRef.current ? progress.pigX ?? centerX() : restoredX(progress.pigX)}
+              startX={landedRef.current ? (progress.pigX ?? centerX()) : restoredX(progress.pigX)}
               startFacing={progress.facing}
               reduced={reduced}
               suspended={dialog === "guide" && activeId !== null}
@@ -263,7 +255,10 @@ export function App() {
             <>
               {reduced ? <p className="story-reduced">{site.reduced}</p> : null}
               <div className="stage-slot story-stage">
-                <EndedCard hidden={phase !== "ended"} inert={phase !== "ended"} onReplay={replay}
+                <EndedCard
+                  hidden={phase !== "ended"}
+                  inert={phase !== "ended"}
+                  onReplay={replay}
                   onMeet={() => meetAnimal(CREW_ANCHOR)}
                 />
                 {phase !== "ended" ? (

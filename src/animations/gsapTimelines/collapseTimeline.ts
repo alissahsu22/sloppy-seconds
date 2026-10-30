@@ -109,21 +109,17 @@ export function createCollapseTimeline(options: {
     },
     "fall",
   );
-  timeline.call(() => {
-    art?.setAttribute("data-pose", "land");
-    if (line) line.textContent = "oof";
-  }, [], "land");
-  timeline.to(
-    motion,
-    { scale: landing.scale, duration: 0.55, ease: "power2.out", onUpdate: apply },
+  timeline.call(
+    () => {
+      art?.setAttribute("data-pose", "land");
+      if (line) line.textContent = "oof";
+    },
+    [],
     "land",
   );
+  timeline.to(motion, { scale: landing.scale, duration: 0.55, ease: "power2.out", onUpdate: apply }, "land");
   timeline.to(motion, { rotation: 0, duration: 0.16, ease: "power2.out", onUpdate: apply }, "land");
-  timeline.to(
-    motion,
-    { squashX: 1.18, squashY: 0.74, duration: 0.08, onUpdate: apply },
-    "land+=0.05",
-  );
+  timeline.to(motion, { squashX: 1.18, squashY: 0.74, duration: 0.08, onUpdate: apply }, "land+=0.05");
   timeline.to(
     motion,
     { squashX: 1, squashY: 1, duration: 0.42, ease: "elastic.out(1, 0.55)", onUpdate: apply },

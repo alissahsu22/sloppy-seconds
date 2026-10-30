@@ -96,9 +96,7 @@ function overlap(a: [number, number], b: [number, number]): [number, number] | n
 export function placePlatformX(world: World, previous: Platform, width: number): number {
   const maxX = Math.max(EDGE, world.width - width - EDGE);
   const anchors =
-    previous.id === "floor"
-      ? [previous.x + previous.width / 2]
-      : [previous.x, previous.x + previous.width];
+    previous.id === "floor" ? [previous.x + previous.width / 2] : [previous.x, previous.x + previous.width];
   let band: [number, number] | null = null;
   for (const anchor of anchors) {
     const next = xBand(anchor, width, PLANK_REACH);

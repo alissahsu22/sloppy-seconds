@@ -1,13 +1,6 @@
 import { useEffect, useState } from "react";
 import { WilburSprite } from "../../assets/pig/WilburSprite";
-import {
-  cdnSrcSet,
-  crew,
-  crewHeading,
-  crewHeroCaption,
-  crewHeroImage,
-  crewRows,
-} from "../../content/crew";
+import { cdnSrcSet, crew, crewHeading, crewHeroCaption, crewHeroImage, crewRows } from "../../content/crew";
 import { fieldGuideButtonLabel } from "../../content/fieldGuide";
 import { site } from "../../content/site";
 import { SplitText } from "../SplitText/SplitText";
@@ -85,18 +78,18 @@ function SiteHeader() {
             <span className="nav-toggle-bars" aria-hidden="true" />
           </button>
           <nav id="site-nav" className="site-nav" aria-label="Primary">
-          {NAV.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              aria-current={"current" in item && item.current ? "page" : undefined}
-              onClick={() => setOpen(false)}
-              {...(item.href.startsWith("http") ? { rel: "noreferrer" } : {})}
-            >
-              {item.label}
-            </a>
-          ))}
-        </nav>
+            {NAV.map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                aria-current={"current" in item && item.current ? "page" : undefined}
+                onClick={() => setOpen(false)}
+                {...(item.href.startsWith("http") ? { rel: "noreferrer" } : {})}
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
         </div>
       </div>
     </header>
@@ -104,13 +97,7 @@ function SiteHeader() {
 }
 
 /** Floats in the bottom right corner so the guide stays one tap away while scrolling. */
-function GuideButton({
-  count,
-  onOpenGuide,
-}: {
-  count: number;
-  onOpenGuide: (opener: HTMLButtonElement) => void;
-}) {
+function GuideButton({ count, onOpenGuide }: { count: number; onOpenGuide: (opener: HTMLButtonElement) => void }) {
   const label = fieldGuideButtonLabel(count);
   return (
     <button

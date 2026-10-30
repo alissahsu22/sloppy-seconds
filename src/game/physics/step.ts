@@ -1,14 +1,6 @@
 import { growthAt, impactForLanding, milestoneAt, runProgress, strainTierAt } from "../progression/age";
 import { clamp } from "../../utils/math";
-import {
-  BASE_HALF_WIDTH,
-  FINALE_HEIGHT,
-  FRICTION,
-  GRAVITY,
-  MAX_DT,
-  MAX_VX,
-  MOVE_ACCEL,
-} from "./constants";
+import { BASE_HALF_WIDTH, FINALE_HEIGHT, FRICTION, GRAVITY, MAX_DT, MAX_VX, MOVE_ACCEL } from "./constants";
 import { evaluateLanding, layCourse } from "./platforms";
 import type { Platform, StepEvents, World } from "./types";
 
@@ -169,12 +161,7 @@ function cullPlatforms(world: World): void {
   });
 }
 
-export function createWorld(options: {
-  width: number;
-  height: number;
-  rng?: () => number;
-  bare?: boolean;
-}): World {
+export function createWorld(options: { width: number; height: number; rng?: () => number; bare?: boolean }): World {
   const growth = growthAt(0);
   const world: World = {
     width: options.width,

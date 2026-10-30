@@ -1,12 +1,6 @@
 import type { NpcStateId, PigPose } from "../../model/types";
 import { clamp, lerp } from "../../utils/math";
-import type {
-  BehaviorProfile,
-  NpcContext,
-  NpcMemory,
-  NpcStep,
-  StateSpec,
-} from "./types";
+import type { BehaviorProfile, NpcContext, NpcMemory, NpcStep, StateSpec } from "./types";
 
 /**
  * Discrete behavior choices, not a per-frame coin flip.
@@ -48,10 +42,7 @@ export function createNpcMemory(now: number, x: number): NpcMemory {
   };
 }
 
-export function weightedPick<T extends string>(
-  options: readonly { to: T; weight: number }[],
-  rng: () => number,
-): T {
+export function weightedPick<T extends string>(options: readonly { to: T; weight: number }[], rng: () => number): T {
   const total = options.reduce((sum, option) => sum + Math.max(0, option.weight), 0);
   if (total <= 0) return options[options.length - 1].to;
   let roll = rng() * total;
@@ -138,11 +129,7 @@ export function stepNpc(
   }
 
   let unearthed = false;
-  if (
-    memory.state === "rooting" &&
-    ctx.discoveriesLeft > 0 &&
-    rng() < profile.discoveryChance
-  ) {
+  if (memory.state === "rooting" && ctx.discoveriesLeft > 0 && rng() < profile.discoveryChance) {
     unearthed = true;
   }
 
