@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { NPC_SCALE, PIG_DRAW } from "../assets/pig/metrics";
@@ -15,6 +15,7 @@ import {
   stepNpc,
 } from "./behaviorMachine/machine";
 import type { NpcContext, NpcMemory } from "./behaviorMachine/types";
+import { bubbleLeft } from "./interactions/bubble";
 import { pointerIsNearPig } from "./interactions/proximity";
 
 interface View {
@@ -57,6 +58,7 @@ export function Pasture({
   onFind: (found: FoundDiscovery) => void;
 }) {
   const anchorRef = useRef<HTMLDivElement>(null);
+  const bubbleRef = useRef<HTMLSpanElement>(null);
   const memoryRef = useRef<NpcMemory>(
     (() => {
       const initial = createNpcMemory(performance.now(), startX);
@@ -90,7 +92,23 @@ export function Pasture({
     if (!anchor) return;
     const facing = memoryRef.current.facing;
     anchor.style.transform = `translate(${motionRef.current.x - PIG_DRAW.width / 2}px, 0) scale(${facing * NPC_SCALE}, ${NPC_SCALE})`;
+    // The bubble rides beside him in page pixels, so it can turn to whichever side has room.
+    const bubble = bubbleRef.current;
+    if (bubble) {
+      const lane = bubble.offsetParent instanceof HTMLElement ? bubble.offsetParent.clientWidth : window.innerWidth;
+      bubble.style.left = `${bubbleLeft(motionRef.current.x, facing, bubble.offsetWidth, lane)}px`;
+    }
   };
+
+  // A new line has a new width, and a turn puts it on his other side.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useLayoutEffect(apply, [view.bubble, view.facing]);
+
+  useEffect(() => {
+    window.addEventListener("resize", apply);
+    return () => window.removeEventListener("resize", apply);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const publish = (memory: NpcMemory) => {
     setView((current) => ({
@@ -277,12 +295,12 @@ export function Pasture({
         >
           <PigCharacter pose={view.pose} ambient={!suspended} reduced={reduced} />
         </button>
-        {view.bubble ? (
-          <span className="bubble" role="status">
-            {view.bubble}
-          </span>
-        ) : null}
       </div>
+      {view.bubble ? (
+        <span className="bubble" ref={bubbleRef} role="status">
+          {view.bubble}
+        </span>
+      ) : null}
     </>
   );
 }
