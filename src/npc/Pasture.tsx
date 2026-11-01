@@ -1,7 +1,7 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { NPC_SCALE, PIG_DRAW } from "../assets/pig/metrics";
+import { PASTURE_SCALE, PIG_DRAW } from "../assets/pig/metrics";
 import { PigCharacter } from "../components/PigCharacter/PigCharacter";
 import { StickerIcon } from "../components/Sticker/Sticker";
 import type { AnimalDefinition, Discovery } from "../content/animals/types";
@@ -10,7 +10,7 @@ import type { FoundDiscovery } from "../progress/storage";
 import { clamp } from "../utils/math";
 import { applyClick, applyHover, createNpcMemory, stepNpc } from "./behaviorMachine/machine";
 import type { NpcContext, NpcMemory } from "./behaviorMachine/types";
-import { bubbleLeft } from "./interactions/bubble";
+import { BUBBLE_REACH, bubbleLeft, TOODLES_BUBBLE_REACH } from "./interactions/bubble";
 import { pointerIsNearPig } from "./interactions/proximity";
 
 interface View {
@@ -82,26 +82,30 @@ export function Pasture({
   onFindRef.current = onFind;
   suspendedRef.current = suspended;
 
-  const apply = () => {
+  const apply = useCallback(() => {
     const anchor = anchorRef.current;
     if (!anchor) return;
     const facing = memoryRef.current.facing;
-    anchor.style.transform = `translate(${motionRef.current.x - PIG_DRAW.width / 2}px, 0) scale(${facing * NPC_SCALE}, ${NPC_SCALE})`;
+    const scale = PASTURE_SCALE[animal.portrait];
+    anchor.style.transform = `translate(${motionRef.current.x - PIG_DRAW.width / 2}px, 0) scale(${facing * scale}, ${scale})`;
     // The bubble rides beside him in page pixels, so it can turn to whichever side has room.
     const bubble = bubbleRef.current;
     if (bubble) {
       const lane = bubble.offsetParent instanceof HTMLElement ? bubble.offsetParent.clientWidth : window.innerWidth;
-      bubble.style.left = `${bubbleLeft(motionRef.current.x, facing, bubble.offsetWidth, lane)}px`;
+      const reach = animal.portrait === "toodles" ? TOODLES_BUBBLE_REACH : BUBBLE_REACH;
+      bubble.style.left = `${bubbleLeft(motionRef.current.x, facing, bubble.offsetWidth, lane, reach)}px`;
     }
-  };
+  }, [animal.portrait]);
 
   // A new line has a new width, and a turn puts it on his other side.
-  useLayoutEffect(apply, [view.bubble, view.facing]);
+  useLayoutEffect(() => {
+    apply();
+  }, [apply, view.bubble, view.facing]);
 
   useEffect(() => {
     window.addEventListener("resize", apply);
     return () => window.removeEventListener("resize", apply);
-  }, []);
+  }, [apply]);
 
   const publish = (memory: NpcMemory) => {
     setView((current) => ({
@@ -275,6 +279,7 @@ export function Pasture({
         data-pose={view.pose}
         data-state={view.state}
         data-facing={view.facing}
+        data-animal={animal.id}
       >
         <span className="ground-shadow" />
         <button
@@ -283,11 +288,11 @@ export function Pasture({
           onClick={onPig}
           aria-label={`${animal.displayName}. Activate for a reaction. He may be busy.`}
         >
-          <PigCharacter pose={view.pose} ambient={!suspended} reduced={reduced} />
+          <PigCharacter pose={view.pose} sprite={animal.portrait} ambient={!suspended} reduced={reduced} />
         </button>
       </div>
       {view.bubble ? (
-        <span className="bubble" ref={bubbleRef} role="status">
+        <span className="bubble" ref={bubbleRef} data-animal={animal.id} role="status">
           {view.bubble}
         </span>
       ) : null}

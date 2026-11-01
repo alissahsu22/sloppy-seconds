@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import { awardGuideEntry, readProgress, writeProgress, type FoundDiscovery, type Progress } from "../progress/storage";
+import {
+  awardGuideEntry,
+  readProgress,
+  rememberResident,
+  writeProgress,
+  type FoundDiscovery,
+  type Progress,
+} from "../progress/storage";
 import type { Facing } from "../model/types";
 
 export function usePersistentProgress() {
@@ -16,6 +23,7 @@ export function usePersistentProgress() {
         ...next,
         pigX,
         facing,
+        spots: { ...next.spots, [id]: { x: pigX, facing } },
         unlockedIds: next.unlockedIds.includes(id) ? next.unlockedIds : [...next.unlockedIds, id],
       };
     });
@@ -28,5 +36,12 @@ export function usePersistentProgress() {
     });
   }, []);
 
-  return { progress, unlock, rememberFind };
+  const placeResident = useCallback((id: string, x: number, facing: Facing, award = false) => {
+    setProgress((current) => {
+      const parked = rememberResident(current, id, x, facing);
+      return award ? awardGuideEntry(parked, id) : parked;
+    });
+  }, []);
+
+  return { progress, unlock, rememberFind, placeResident };
 }

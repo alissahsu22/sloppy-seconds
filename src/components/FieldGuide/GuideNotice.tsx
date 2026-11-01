@@ -1,13 +1,19 @@
 import { useEffect, useState } from "react";
+import { ToodlesSprite } from "../../assets/pig/ToodlesSprite";
 import { WilburSprite } from "../../assets/pig/WilburSprite";
+import type { SpriteId } from "../../game/variants/types";
 
 const DISMISS_MS = 8000;
 
 export function GuideNotice({
+  name,
+  sprite,
   reduced,
   onView,
   onDismiss,
 }: {
+  name: string;
+  sprite: SpriteId;
   reduced: boolean;
   onView: () => void;
   onDismiss: () => void;
@@ -31,9 +37,13 @@ export function GuideNotice({
       onBlur={() => setPaused(false)}
     >
       <span className="guide-notice-pig" aria-hidden="true">
-        <WilburSprite pose="idle" playing={false} reduced={reduced} />
+        {sprite === "toodles" ? (
+          <ToodlesSprite pose="idle" playing={false} reduced={reduced} />
+        ) : (
+          <WilburSprite pose="idle" playing={false} reduced={reduced} />
+        )}
       </span>
-      <p>Wilbur added to your Field Guide</p>
+      <p>{`${name} added to your Field Guide`}</p>
       <button type="button" className="btn btn-secondary guide-notice-view" onClick={onView}>
         View entry
       </button>

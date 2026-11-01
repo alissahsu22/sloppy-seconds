@@ -1,5 +1,25 @@
 import type { CrackStage, Facing } from "../../model/types";
-import type { StrainTier } from "../progression/age";
+import type { AgeMilestone, StrainTier } from "../progression/age";
+import type { VariantId } from "../variants/types";
+
+export type PlatformSkin = "plank" | "bench" | "tube" | "tube-moss" | "overgrown" | "meadow";
+
+/** What a landing does. Wilbur's planks use strain. Toodles' course uses the rest. */
+export type PlatformTemper = "strain" | "anchor" | "brittle" | "soft" | "living";
+
+export interface WorldEffect {
+  id: string;
+  kind: "spill" | "scorch" | "bloom" | "chip" | "sprout" | "moss" | "grass";
+  /** Left edge. `y` is the top. World Y grows upward, and the art hangs below `y`. */
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  startedAt: number;
+  duration: number;
+  /** A fresh glass splash. Falling into it ends the run. Stylized, not a lab procedure. */
+  hazard: boolean;
+}
 
 export interface PigBody {
   x: number;
@@ -22,6 +42,14 @@ export interface Platform {
   /** How much mass the plank can take before it complains. */
   integrity: number;
   stage: CrackStage;
+  /** Drawing. Omitted pieces fall back to Wilbur's bench. */
+  skin?: PlatformSkin;
+  /** Wilbur furniture name, or a Toodles sprite name. Does not change the collider. */
+  art?: string;
+  /** Landing rule. Omitted planks use Wilbur's strain. */
+  temper?: PlatformTemper;
+  /** Game time a brittle tube shatters. Unset until a landing schedules it. */
+  breakAt?: number;
   broken: boolean;
   wobbleUntil: number;
   falling: boolean;
@@ -38,8 +66,14 @@ export interface InputAxes {
 export interface World {
   width: number;
   height: number;
+  variant: VariantId;
+  /** Height that counts as the top of this run. Wilbur uses the shared finale. */
+  finaleHeight: number;
+  /** Growth and captions for this run. Wilbur's are the shared age milestones. */
+  milestones: readonly AgeMilestone[];
   pig: PigBody;
   platforms: Platform[];
+  effects: WorldEffect[];
   cameraBottom: number;
   maxHeight: number;
   elapsed: number;
@@ -50,6 +84,7 @@ export interface World {
   spawnCursor: number;
   spawnIndex: number;
   nextId: number;
+  nextEffectId: number;
   finaleRequested: boolean;
   over: boolean;
   time: number;

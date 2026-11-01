@@ -100,6 +100,7 @@ export const crew: readonly CrewAnimal[] = [
     id: "toodles",
     name: "Toodles",
     alt: "Toodles, a young grey Yucatan minipig, sprawled on the grass beside a green ball",
+    game: { kicker: site.kicker, title: "Not a number" },
     image:
       "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/5db72f77-db1c-4227-93e3-6fcc72c6ba99/Toodles.jpeg?format=900w",
     imageWidth: 1527,

@@ -1,5 +1,5 @@
 import type { PigPose } from "../../model/types";
-import atlasJson from "../../../public/assets/wilbur/wilbur_atlas.json";
+import atlasJson from "../wilbur/wilbur_atlas.json";
 
 export const ATLAS_URL = "/assets/wilbur/wilbur_atlas.png";
 
@@ -64,6 +64,9 @@ export function clipForPose(pose: PigPose): SpriteClip {
       return hold("jump_down");
     case "land":
       return hold("land");
+    case "dance":
+      // TODO(art): a dedicated victory loop. The idle clip keeps the pose wired until then.
+      return { ...loop("idle"), fps: 12 };
   }
 }
 
@@ -87,6 +90,7 @@ export const PIG_POSES: readonly PigPose[] = [
   "peak",
   "fall",
   "land",
+  "dance",
 ];
 
 export function isPigPose(value: string | undefined): value is PigPose {

@@ -48,6 +48,14 @@ export function paintWorld(
     node.style.transform = `translate3d(${platform.x}px, ${screenTop}px, 0)`;
   }
   pigSlot.style.transform = pigTransform(world, reduced, scale);
+  for (const effect of world.effects) {
+    const node = nodes.get(effect.id);
+    if (!node) continue;
+    const screenTop = height - (effect.y - camera);
+    node.style.width = `${effect.width}px`;
+    node.style.height = `${effect.height}px`;
+    node.style.transform = `translate3d(${effect.x}px, ${screenTop}px, 0)`;
+  }
 }
 
 /** Feet on the body's position, tilted with his run. Shared so the echo stays on him. */
@@ -80,9 +88,9 @@ export function paintEcho(world: World, echo: GrowthEcho | null, node: HTMLEleme
   node.style.transform = pigTransform(world, reduced, echo.scale);
 }
 
-/** Milestone copy for the note under the age. Wording comes straight from the milestone. */
-export function writeCaption(narrative: HTMLElement, milestone: AgeMilestone): void {
-  narrative.dataset.label = `${milestone.label} ${milestone.tagline}`;
+/** Milestone copy for the note under the readout. */
+export function writeCaption(narrative: HTMLElement, milestone: Pick<AgeMilestone, "label" | "tagline">): void {
+  narrative.dataset.label = `${milestone.label} ${milestone.tagline}`.trim();
   const headline = narrative.querySelector<HTMLElement>(".age-headline");
   if (headline) headline.textContent = milestone.label;
   const tag = narrative.querySelector<HTMLElement>(".age-tag");
@@ -116,6 +124,7 @@ export function measureEscape(
       width: rect.width,
       height: rect.height,
       stage: platform.stage,
+      art: platform.art,
     });
   }
 

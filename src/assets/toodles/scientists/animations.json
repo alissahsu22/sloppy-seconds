@@ -1,0 +1,22 @@
+{
+  "scientist1": {
+    "idle": ["scientist1_idle_01"],
+    "walk": ["scientist1_walk_01", "scientist1_walk_02", "scientist1_walk_03", "scientist1_walk_04"],
+    "fps": 7
+  },
+  "scientist2": {
+    "idle": ["scientist2_idle_01"],
+    "walk": ["scientist2_walk_01", "scientist2_walk_02", "scientist2_walk_03", "scientist2_walk_04"],
+    "fps": 7
+  },
+  "scientist3": {
+    "idle": ["scientist3_idle_01"],
+    "walk": ["scientist3_walk_01", "scientist3_walk_02", "scientist3_walk_03", "scientist3_walk_04"],
+    "fps": 7
+  },
+  "global": {
+    "renderSize": [128, 128],
+    "recommendedScale": 0.55,
+    "imageRendering": "pixelated"
+  }
+}

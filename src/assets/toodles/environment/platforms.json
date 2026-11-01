@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "canvas": {
+    "width": 115,
+    "height": 55
+  },
+  "art": "crisp monochrome pixel art, hard pixels only, thick black outlines, white fill, gray glass",
+  "progression": [
+    "tube_01_clean",
+    "tube_02_cracked",
+    "tube_03_leaking",
+    "tube_04_sprouting",
+    "tube_05_mossy",
+    "tube_06_grassy",
+    "grass_01_plain",
+    "grass_02_sprout",
+    "grass_03_grass",
+    "grass_04_flowers"
+  ],
+  "platforms": {
+    "tube_01_clean": {
+      "path": "environment/platforms_128/tube_01_clean.png",
+      "size": [115, 55],
+      "visualGroundY": 53,
+      "sourceCrop": [18, 193, 256, 284],
+      "category": "tube"
+    },
+    "tube_02_cracked": {
+      "path": "environment/platforms_128/tube_02_cracked.png",
+      "size": [115, 55],
+      "visualGroundY": 53,
+      "sourceCrop": [271, 193, 513, 284],
+      "category": "tube"
+    },
+    "tube_03_leaking": {
+      "path": "environment/platforms_128/tube_03_leaking.png",
+      "size": [115, 55],
+      "visualGroundY": 53,
+      "sourceCrop": [527, 184, 783, 309],
+      "category": "tube"
+    },
+    "tube_04_sprouting": {
+      "path": "environment/platforms_128/tube_04_sprouting.png",
+      "size": [115, 55],
+      "visualGroundY": 53,
+      "sourceCrop": [778, 175, 1031, 285],
+      "category": "tube"
+    },
+    "tube_05_mossy": {
+      "path": "environment/platforms_128/tube_05_mossy.png",
+      "size": [115, 55],
+      "visualGroundY": 53,
+      "sourceCrop": [1032, 181, 1279, 284],
+      "category": "tube"
+    },
+    "tube_06_grassy": {
+      "path": "environment/platforms_128/tube_06_grassy.png",
+      "size": [115, 55],
+      "visualGroundY": 53,
+      "sourceCrop": [1280, 174, 1533, 284],
+      "category": "tube"
+    },
+    "grass_01_plain": {
+      "path": "environment/platforms_128/grass_01_plain.png",
+      "size": [115, 55],
+      "visualGroundY": 53,
+      "sourceCrop": [50, 463, 228, 527],
+      "category": "grass"
+    },
+    "grass_02_sprout": {
+      "path": "environment/platforms_128/grass_02_sprout.png",
+      "size": [115, 55],
+      "visualGroundY": 53,
+      "sourceCrop": [269, 428, 470, 526],
+      "category": "grass"
+    },
+    "grass_03_grass": {
+      "path": "environment/platforms_128/grass_03_grass.png",
+      "size": [115, 55],
+      "visualGroundY": 53,
+      "sourceCrop": [502, 428, 687, 526],
+      "category": "grass"
+    },
+    "grass_04_flowers": {
+      "path": "environment/platforms_128/grass_04_flowers.png",
+      "size": [115, 55],
+      "visualGroundY": 53,
+      "sourceCrop": [714, 400, 907, 525],
+      "category": "grass"
+    },
+    "grass_small": {
+      "path": "environment/platforms_128/grass_small.png",
+      "size": [115, 55],
+      "visualGroundY": 53,
+      "sourceCrop": [989, 467, 1098, 524],
+      "category": "grass"
+    },
+    "grass_overgrown": {
+      "path": "environment/platforms_128/grass_overgrown.png",
+      "size": [115, 55],
+      "visualGroundY": 53,
+      "sourceCrop": [1105, 442, 1227, 524],
+      "category": "grass"
+    },
+    "grass_flowers_small": {
+      "path": "environment/platforms_128/grass_flowers_small.png",
+      "size": [115, 55],
+      "visualGroundY": 53,
+      "sourceCrop": [1231, 414, 1363, 525],
+      "category": "grass"
+    },
+    "grass_drips": {
+      "path": "environment/platforms_128/grass_drips.png",
+      "size": [115, 55],
+      "visualGroundY": 53,
+      "sourceCrop": [1384, 450, 1518, 542],
+      "category": "grass"
+    }
+  },
+  "backdrops": {
+    "lab_workbench": {
+      "path": "environment/backdrops/lab_workbench.png",
+      "size": [96, 58],
+      "role": "background decoration only"
+    },
+    "lab_light": {
+      "path": "environment/backdrops/lab_light.png",
+      "size": [28, 40],
+      "role": "background decoration only"
+    },
+    "lab_tube_rack": {
+      "path": "environment/backdrops/lab_tube_rack.png",
+      "size": [52, 46],
+      "role": "background decoration only"
+    },
+    "lab_tank": {
+      "path": "environment/backdrops/lab_tank.png",
+      "size": [78, 86],
+      "role": "background decoration only"
+    },
+    "transition_window": {
+      "path": "environment/backdrops/transition_window.png",
+      "size": [68, 60],
+      "role": "background decoration only"
+    },
+    "sanctuary_bushes": {
+      "path": "environment/backdrops/sanctuary_bushes.png",
+      "size": [132, 52],
+      "role": "background decoration only"
+    },
+    "sun": { "path": "environment/backdrops/sun.png", "size": [40, 40], "role": "background decoration only" },
+    "tuft": { "path": "environment/backdrops/tuft.png", "size": [12, 10], "role": "background decoration only" },
+    "flower": { "path": "environment/backdrops/flower.png", "size": [9, 12], "role": "background decoration only" },
+    "pebbles": { "path": "environment/backdrops/pebbles.png", "size": [22, 10], "role": "background decoration only" },
+    "bush": { "path": "environment/backdrops/bush.png", "size": [26, 18], "role": "background decoration only" },
+    "door": { "path": "environment/backdrops/door.png", "size": [28, 40], "role": "background decoration only" },
+    "cabinet": { "path": "environment/backdrops/cabinet.png", "size": [34, 36], "role": "background decoration only" },
+    "shelf": { "path": "environment/backdrops/shelf.png", "size": [48, 22], "role": "background decoration only" },
+    "pipe": { "path": "environment/backdrops/pipe.png", "size": [40, 12], "role": "background decoration only" },
+    "crate": { "path": "environment/backdrops/crate.png", "size": [18, 16], "role": "background decoration only" },
+    "note": { "path": "environment/backdrops/note.png", "size": [20, 24], "role": "background decoration only" },
+    "vine": { "path": "environment/backdrops/vine.png", "size": [14, 40], "role": "background decoration only" },
+    "hill": { "path": "environment/backdrops/hill.png", "size": [140, 40], "role": "background decoration only" }
+  },
+  "implementationNotes": [
+    "Do not use full sprite image as collider; retain the existing physics platform box.",
+    "Because grass grows taller, anchor the physics top to existing plank y and use a separately adjustable visualOffsetY.",
+    "Keep lab background faint; prefer existing CSS LabBackdrop and optionally layer these behind characters."
+  ]
+}

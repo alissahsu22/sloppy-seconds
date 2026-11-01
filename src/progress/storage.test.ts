@@ -1,5 +1,13 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { awardGuideEntry, emptyProgress, readProgress, writeProgress, PROGRESS_KEY, type Progress } from "./storage";
+import {
+  awardGuideEntry,
+  emptyProgress,
+  readProgress,
+  rememberResident,
+  writeProgress,
+  PROGRESS_KEY,
+  type Progress,
+} from "./storage";
 
 const original = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
 
@@ -66,6 +74,7 @@ describe("field guide progress", () => {
       found: [{ id: "teacup", x: 320 }],
       pigX: 412,
       facing: -1,
+      spots: {},
     });
   });
 
@@ -77,6 +86,20 @@ describe("field guide progress", () => {
     expect(readProgress()).toMatchObject({ unlockedIds: ["wilbur"], pigX: null });
     localStorage.setItem(PROGRESS_KEY, "{not json");
     expect(readProgress()).toEqual(emptyProgress());
+  });
+
+  it("lets Toodles take a spot without moving Wilbur or awarding a guide card", () => {
+    const parked = rememberResident(
+      { ...emptyProgress(), unlockedIds: ["wilbur"], pigX: 220, facing: -1 },
+      "toodles",
+      480,
+      1,
+    );
+    expect(parked.pigX).toBe(220);
+    expect(parked.facing).toBe(-1);
+    expect(parked.collectedIds).toEqual([]);
+    expect(parked.unlockedIds).toEqual(["wilbur", "toodles"]);
+    expect(parked.spots.toodles).toEqual({ x: 480, facing: 1 });
   });
 
   it("stays usable when storage is blocked", () => {

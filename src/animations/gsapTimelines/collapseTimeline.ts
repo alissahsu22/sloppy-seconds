@@ -15,7 +15,7 @@ export interface CollapseMotion {
 /**
  * Moves the same pig graphic from the game's foot-point to the pasture foot-point.
  * Viewport pixels, not physics. He stays at the jumper's size through the drop,
- * then shrinks to the pasture size on impact.
+ * then eases to the pasture size on impact.
  */
 export function applyPigFoot(pig: HTMLElement, motion: CollapseMotion): void {
   const width = PIG_DRAW.width;
@@ -33,10 +33,14 @@ export function createCollapseTimeline(options: {
   motion: CollapseMotion;
   landing: { x: number; y: number; scale: number };
   reduced: boolean;
+  /** Same landing as the breakthrough, without the shake, debris, or crash. */
+  gentle?: boolean;
   onComplete: () => void;
 }): gsap.core.Timeline {
-  const { pig, art, line, frame, debris, dust, motion, landing, reduced } = options;
-  options.frame.querySelectorAll<HTMLElement>(".world, .age-panel, .intro").forEach((element) => {
+  const { pig, art, line, frame, debris, dust, motion, landing, reduced, gentle = false } = options;
+  // A gentle drop keeps the sanctuary up and only hides the pig still standing on it.
+  const concealed = gentle ? ".pig-slot, .growth-echo" : ".world, .age-panel, .intro";
+  options.frame.querySelectorAll<HTMLElement>(concealed).forEach((element) => {
     element.style.visibility = "hidden";
   });
   applyPigFoot(pig, motion);
@@ -55,6 +59,41 @@ export function createCollapseTimeline(options: {
       onUpdate: apply,
     });
     timeline.to(frame, { opacity: 0, duration: 0.35 }, 0);
+    return timeline;
+  }
+
+  if (gentle) {
+    // He is already on all fours. Motion starts on that frame, so the settle does not cut to a fall pose.
+    timeline.addLabel("fall", 0);
+    timeline.addLabel("land", 0.92);
+    timeline.to(frame, { opacity: 0, duration: 0.6, ease: "power1.in" }, 0.35);
+    timeline.to(
+      motion,
+      {
+        x: landing.x,
+        y: landing.y,
+        rotation: motion.facing * 6,
+        duration: 0.92,
+        ease: "power3.in",
+        onUpdate: apply,
+      },
+      "fall",
+    );
+    timeline.call(() => art?.setAttribute("data-pose", "land"), [], "land");
+    timeline.to(motion, { scale: landing.scale, duration: 0.45, ease: "power2.out", onUpdate: apply }, "land");
+    timeline.to(motion, { rotation: 0, duration: 0.3, ease: "power2.out", onUpdate: apply }, "land");
+    timeline.to(motion, { squashX: 1.1, squashY: 0.88, duration: 0.08, onUpdate: apply }, "land");
+    timeline.to(motion, { squashX: 1, squashY: 1, duration: 0.38, ease: "power2.out", onUpdate: apply }, "land+=0.1");
+    dust.forEach((speck, index) => {
+      gsap.set(speck, {
+        left: landing.x + (index === 0 ? -18 : 12),
+        top: landing.y - 6,
+        opacity: 0,
+      });
+      timeline.to(speck, { opacity: 0.35, scale: 1.15, duration: 0.16 }, "land");
+      timeline.to(speck, { opacity: 0, y: -10, duration: 0.4 }, "land+=0.12");
+    });
+    timeline.call(() => art?.setAttribute("data-pose", "idle"), [], "land+=0.34");
     return timeline;
   }
 

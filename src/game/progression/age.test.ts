@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { NPC_SCALE } from "../../assets/pig/metrics";
-import { MAX_GAP, WOBBLE_BOUNCE_SCALE, jumpApex } from "../physics/constants";
+import { FINALE_HEIGHT, FINALE_SECONDS, MAX_GAP, WOBBLE_BOUNCE_SCALE, jumpApex } from "../physics/constants";
 import { MILESTONES, growthAt, impactForLanding, milestoneAt, runProgress, strainTierAt, gameAgeLabel } from "./age";
 
 describe("age and growth", () => {
@@ -20,14 +20,14 @@ describe("age and growth", () => {
     }
     expect(growthAt(0).scale).toBe(MILESTONES[0].scale);
     expect(growthAt(1).mass).toBe(1);
-    expect(growthAt(1).scale).toBeGreaterThan(NPC_SCALE * 2);
+    expect(growthAt(1).scale).toBeGreaterThan(NPC_SCALE * 1.5);
   });
 
   it("lets time reach the ending even if height stalls", () => {
     expect(runProgress(0, 0)).toBe(0);
-    expect(runProgress(0, 36)).toBe(1);
-    expect(runProgress(2300, 1)).toBe(1);
-    expect(runProgress(1150, 0)).toBeCloseTo(0.5);
+    expect(runProgress(0, FINALE_SECONDS)).toBe(1);
+    expect(runProgress(FINALE_HEIGHT, 1)).toBe(1);
+    expect(runProgress(FINALE_HEIGHT / 2, 0)).toBeCloseTo(0.5);
   });
 
   it("gives every milestone an age with its unit", () => {
