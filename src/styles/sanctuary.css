@@ -156,7 +156,7 @@
 
 .crew-hero-caption strong { font-weight: 300; }
 
-/* The game's pixel style crossing into the photo hero: same button as the card, Wilbur perched on top. */
+/* The game's pixel style crossing into the photo hero: same button as the card, the pig perched on top. */
 .hero-play {
   display: flex;
   flex-direction: column;
@@ -170,14 +170,52 @@
   margin-bottom: -2px;
 }
 
+/* Right arrow hops them forward, the way they face. Left arrow hops them backward. */
+.hero-play-swap {
+  position: absolute;
+  inset: 0;
+}
+
+.hero-play-swap[data-dir="1"][data-phase="out"] { --hero-x: 56px; }
+.hero-play-swap[data-dir="-1"][data-phase="out"] { --hero-x: -56px; }
+.hero-play-swap[data-dir="1"][data-phase="in"] { --hero-x: -56px; }
+.hero-play-swap[data-dir="-1"][data-phase="in"] { --hero-x: 56px; }
+
+.hero-play-swap[data-phase="out"] {
+  animation: hero-pig-out 0.24s ease-in forwards;
+}
+
+.hero-play-swap[data-phase="in"] {
+  animation: hero-pig-in 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) 0.18s both;
+}
+
+@keyframes hero-pig-out {
+  0% { transform: translate3d(0, 0, 0) scale(1, 1); opacity: 1; }
+  28% { transform: translate3d(calc(var(--hero-x) * 0.2), -12px, 0) scale(0.95, 1.08); opacity: 1; }
+  100% { transform: translate3d(var(--hero-x), -4px, 0) scale(1, 1); opacity: 0; }
+}
+
+@keyframes hero-pig-in {
+  0% { transform: translate3d(var(--hero-x), -20px, 0) scale(0.96, 1.06); opacity: 0; }
+  42% { transform: translate3d(0, -14px, 0) scale(0.97, 1.06); opacity: 1; }
+  70% { transform: translate3d(0, 0, 0) scale(1.1, 0.86); opacity: 1; }
+  100% { transform: translate3d(0, 0, 0) scale(1, 1); opacity: 1; }
+}
+
 .hero-play-pig .wilbur-sprite {
   --wilbur-fit: 0.46;
+}
+
+.hero-play-pig .toodles-sprite,
+.hero-play-pig .toodles-frame {
+  --toodles-fit: 0.44651;
 }
 
 .hero-play-button { padding: var(--space-3) var(--space-5); }
 
 .hero-play-note {
   margin: var(--space-3) 0 0;
+  max-width: 28em;
   color: var(--color-on-ink-muted);
   font-size: var(--text-md);
   font-weight: 400;
@@ -350,4 +388,7 @@
 @media (prefers-reduced-motion: reduce) {
   .site-header { transition: none; }
   html { scroll-behavior: auto; }
+  .hero-play-swap[data-phase] { animation: none; }
 }
+
+.page[data-motion="reduce"] .hero-play-swap[data-phase] { animation: none; }

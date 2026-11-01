@@ -1,0 +1,577 @@
+{
+  "idle_01": {
+    "category": "animations",
+    "path": "frames/trimmed/idle_01.png",
+    "width": 129,
+    "height": 99,
+    "original_rect": [
+      25,
+      88,
+      170,
+      195
+    ],
+    "aligned_path": "frames/aligned_192/idle_01.png",
+    "anchor": {
+      "x": 0.5,
+      "y": 0.8579545454545454
+    }
+  },
+  "idle_02": {
+    "category": "animations",
+    "path": "frames/trimmed/idle_02.png",
+    "width": 129,
+    "height": 96,
+    "original_rect": [
+      171,
+      88,
+      308,
+      195
+    ],
+    "aligned_path": "frames/aligned_192/idle_02.png",
+    "anchor": {
+      "x": 0.5,
+      "y": 0.8579545454545454
+    }
+  },
+  "walk_01": {
+    "category": "animations",
+    "path": "frames/trimmed/walk_01.png",
+    "width": 133,
+    "height": 101,
+    "original_rect": [
+      310,
+      86,
+      462,
+      196
+    ],
+    "aligned_path": "frames/aligned_192/walk_01.png",
+    "anchor": {
+      "x": 0.5,
+      "y": 0.8579545454545454
+    }
+  },
+  "walk_02": {
+    "category": "animations",
+    "path": "frames/trimmed/walk_02.png",
+    "width": 133,
+    "height": 96,
+    "original_rect": [
+      464,
+      86,
+      610,
+      197
+    ],
+    "aligned_path": "frames/aligned_192/walk_02.png",
+    "anchor": {
+      "x": 0.5,
+      "y": 0.8579545454545454
+    }
+  },
+  "walk_03": {
+    "category": "animations",
+    "path": "frames/trimmed/walk_03.png",
+    "width": 135,
+    "height": 96,
+    "original_rect": [
+      611,
+      88,
+      757,
+      196
+    ],
+    "aligned_path": "frames/aligned_192/walk_03.png",
+    "anchor": {
+      "x": 0.5,
+      "y": 0.8579545454545454
+    }
+  },
+  "walk_04": {
+    "category": "animations",
+    "path": "frames/trimmed/walk_04.png",
+    "width": 132,
+    "height": 98,
+    "original_rect": [
+      758,
+      87,
+      897,
+      198
+    ],
+    "aligned_path": "frames/aligned_192/walk_04.png",
+    "anchor": {
+      "x": 0.5,
+      "y": 0.8579545454545454
+    }
+  },
+  "jump_up": {
+    "category": "animations",
+    "path": "frames/trimmed/jump_up.png",
+    "width": 119,
+    "height": 107,
+    "original_rect": [
+      895,
+      56,
+      1024,
+      172
+    ],
+    "aligned_path": "frames/aligned_192/jump_up.png",
+    "anchor": {
+      "x": 0.5,
+      "y": 0.8579545454545454
+    }
+  },
+  "jump_peak": {
+    "category": "animations",
+    "path": "frames/trimmed/jump_peak.png",
+    "width": 116,
+    "height": 107,
+    "original_rect": [
+      1030,
+      15,
+      1163,
+      136
+    ],
+    "aligned_path": "frames/aligned_192/jump_peak.png",
+    "anchor": {
+      "x": 0.5,
+      "y": 0.8579545454545454
+    }
+  },
+  "jump_down": {
+    "category": "animations",
+    "path": "frames/trimmed/jump_down.png",
+    "width": 135,
+    "height": 103,
+    "original_rect": [
+      1174,
+      85,
+      1330,
+      196
+    ],
+    "aligned_path": "frames/aligned_192/jump_down.png",
+    "anchor": {
+      "x": 0.5,
+      "y": 0.8579545454545454
+    }
+  },
+  "land": {
+    "category": "animations",
+    "path": "frames/trimmed/land.png",
+    "width": 141,
+    "height": 93,
+    "original_rect": [
+      1346,
+      88,
+      1508,
+      200
+    ],
+    "aligned_path": "frames/aligned_192/land.png",
+    "anchor": {
+      "x": 0.5,
+      "y": 0.8579545454545454
+    }
+  },
+  "blink": {
+    "category": "animations",
+    "path": "frames/trimmed/blink.png",
+    "width": 131,
+    "height": 97,
+    "original_rect": [
+      24,
+      332,
+      172,
+      436
+    ],
+    "aligned_path": "frames/aligned_192/blink.png",
+    "anchor": {
+      "x": 0.5,
+      "y": 0.8579545454545454
+    }
+  },
+  "happy": {
+    "category": "animations",
+    "path": "frames/trimmed/happy.png",
+    "width": 130,
+    "height": 97,
+    "original_rect": [
+      173,
+      335,
+      310,
+      435
+    ],
+    "aligned_path": "frames/aligned_192/happy.png",
+    "anchor": {
+      "x": 0.5,
+      "y": 0.8579545454545454
+    }
+  },
+  "curious": {
+    "category": "animations",
+    "path": "frames/trimmed/curious.png",
+    "width": 128,
+    "height": 97,
+    "original_rect": [
+      315,
+      334,
+      460,
+      439
+    ],
+    "aligned_path": "frames/aligned_192/curious.png",
+    "anchor": {
+      "x": 0.5,
+      "y": 0.8579545454545454
+    }
+  },
+  "sniff": {
+    "category": "animations",
+    "path": "frames/trimmed/sniff.png",
+    "width": 135,
+    "height": 92,
+    "original_rect": [
+      461,
+      338,
+      628,
+      436
+    ],
+    "aligned_path": "frames/aligned_192/sniff.png",
+    "anchor": {
+      "x": 0.5,
+      "y": 0.8579545454545454
+    }
+  },
+  "root_01": {
+    "category": "animations",
+    "path": "frames/trimmed/root_01.png",
+    "width": 156,
+    "height": 93,
+    "original_rect": [
+      624,
+      336,
+      785,
+      439
+    ],
+    "aligned_path": "frames/aligned_192/root_01.png",
+    "anchor": {
+      "x": 0.5,
+      "y": 0.8579545454545454
+    }
+  },
+  "root_02": {
+    "category": "animations",
+    "path": "frames/trimmed/root_02.png",
+    "width": 170,
+    "height": 92,
+    "original_rect": [
+      792,
+      339,
+      972,
+      438
+    ],
+    "aligned_path": "frames/aligned_192/root_02.png",
+    "anchor": {
+      "x": 0.5,
+      "y": 0.8579545454545454
+    }
+  },
+  "eat": {
+    "category": "animations",
+    "path": "frames/trimmed/eat.png",
+    "width": 145,
+    "height": 96,
+    "original_rect": [
+      978,
+      337,
+      1128,
+      437
+    ],
+    "aligned_path": "frames/aligned_192/eat.png",
+    "anchor": {
+      "x": 0.5,
+      "y": 0.8579545454545454
+    }
+  },
+  "sleep_01": {
+    "category": "animations",
+    "path": "frames/trimmed/sleep_01.png",
+    "width": 153,
+    "height": 74,
+    "original_rect": [
+      1150,
+      353,
+      1310,
+      435
+    ],
+    "aligned_path": "frames/aligned_192/sleep_01.png",
+    "anchor": {
+      "x": 0.5,
+      "y": 0.8579545454545454
+    }
+  },
+  "sleep_02": {
+    "category": "animations",
+    "path": "frames/trimmed/sleep_02.png",
+    "width": 155,
+    "height": 80,
+    "original_rect": [
+      1346,
+      352,
+      1521,
+      437
+    ],
+    "aligned_path": "frames/aligned_192/sleep_02.png",
+    "anchor": {
+      "x": 0.5,
+      "y": 0.8579545454545454
+    }
+  },
+  "piglet": {
+    "category": "growth",
+    "path": "growth/piglet.png",
+    "width": 106,
+    "height": 72,
+    "original_rect": [
+      24,
+      596,
+      142,
+      678
+    ]
+  },
+  "young": {
+    "category": "growth",
+    "path": "growth/young.png",
+    "width": 138,
+    "height": 93,
+    "original_rect": [
+      174,
+      577,
+      319,
+      680
+    ]
+  },
+  "adolescent": {
+    "category": "growth",
+    "path": "growth/adolescent.png",
+    "width": 157,
+    "height": 106,
+    "original_rect": [
+      354,
+      563,
+      517,
+      679
+    ]
+  },
+  "teen": {
+    "category": "growth",
+    "path": "growth/teen.png",
+    "width": 173,
+    "height": 124,
+    "original_rect": [
+      541,
+      550,
+      731,
+      678
+    ]
+  },
+  "subadult": {
+    "category": "growth",
+    "path": "growth/subadult.png",
+    "width": 192,
+    "height": 138,
+    "original_rect": [
+      762,
+      532,
+      974,
+      679
+    ]
+  },
+  "adult": {
+    "category": "growth",
+    "path": "growth/adult.png",
+    "width": 217,
+    "height": 156,
+    "original_rect": [
+      984,
+      516,
+      1214,
+      679
+    ]
+  },
+  "full_size": {
+    "category": "growth",
+    "path": "growth/full_size.png",
+    "width": 263,
+    "height": 173,
+    "original_rect": [
+      1224,
+      497,
+      1501,
+      681
+    ]
+  },
+  "body": {
+    "category": "parts",
+    "path": "body_parts/body.png",
+    "width": 126,
+    "height": 76,
+    "original_rect": [
+      47,
+      802,
+      179,
+      889
+    ]
+  },
+  "head": {
+    "category": "parts",
+    "path": "body_parts/head.png",
+    "width": 93,
+    "height": 79,
+    "original_rect": [
+      198,
+      802,
+      302,
+      882
+    ]
+  },
+  "snout": {
+    "category": "parts",
+    "path": "body_parts/snout.png",
+    "width": 48,
+    "height": 34,
+    "original_rect": [
+      323,
+      821,
+      379,
+      868
+    ]
+  },
+  "ear_left": {
+    "category": "parts",
+    "path": "body_parts/ear_left.png",
+    "width": 46,
+    "height": 52,
+    "original_rect": [
+      398,
+      808,
+      459,
+      870
+    ]
+  },
+  "ear_right": {
+    "category": "parts",
+    "path": "body_parts/ear_right.png",
+    "width": 43,
+    "height": 52,
+    "original_rect": [
+      489,
+      808,
+      541,
+      873
+    ]
+  },
+  "eye": {
+    "category": "parts",
+    "path": "body_parts/eye.png",
+    "width": 13,
+    "height": 13,
+    "original_rect": [
+      583,
+      831,
+      603,
+      852
+    ]
+  },
+  "tail": {
+    "category": "parts",
+    "path": "body_parts/tail.png",
+    "width": 46,
+    "height": 53,
+    "original_rect": [
+      660,
+      804,
+      719,
+      877
+    ]
+  },
+  "front_leg_left": {
+    "category": "parts",
+    "path": "body_parts/front_leg_left.png",
+    "width": 36,
+    "height": 40,
+    "original_rect": [
+      209,
+      902,
+      255,
+      960
+    ]
+  },
+  "front_leg_right": {
+    "category": "parts",
+    "path": "body_parts/front_leg_right.png",
+    "width": 37,
+    "height": 40,
+    "original_rect": [
+      302,
+      899,
+      351,
+      958
+    ]
+  },
+  "back_leg_left": {
+    "category": "parts",
+    "path": "body_parts/back_leg_left.png",
+    "width": 28,
+    "height": 40,
+    "original_rect": [
+      413,
+      904,
+      456,
+      960
+    ]
+  },
+  "back_leg_right": {
+    "category": "parts",
+    "path": "body_parts/back_leg_right.png",
+    "width": 39,
+    "height": 40,
+    "original_rect": [
+      498,
+      905,
+      545,
+      961
+    ]
+  },
+  "front": {
+    "category": "angles",
+    "path": "angles/front.png",
+    "width": 103,
+    "height": 112,
+    "original_rect": [
+      809,
+      810,
+      931,
+      942
+    ]
+  },
+  "back": {
+    "category": "angles",
+    "path": "angles/back.png",
+    "width": 99,
+    "height": 108,
+    "original_rect": [
+      952,
+      809,
+      1077,
+      941
+    ]
+  },
+  "three_quarter": {
+    "category": "angles",
+    "path": "angles/three_quarter.png",
+    "width": 139,
+    "height": 116,
+    "original_rect": [
+      1091,
+      807,
+      1243,
+      939
+    ]
+  }
+}

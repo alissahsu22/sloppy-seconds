@@ -9,52 +9,27 @@
   "orientation": "pig mostly faces right in idle/walk/jump; sniff/root/eat generally face left",
   "animations": {
     "idle": {
-      "frames": [
-        "idle_1",
-        "idle_2"
-      ],
+      "frames": ["idle_1", "idle_2"],
       "fps": 2
     },
     "walk": {
-      "frames": [
-        "walk_1",
-        "walk_2",
-        "walk_3",
-        "walk_4"
-      ],
+      "frames": ["walk_1", "walk_2", "walk_3", "walk_4"],
       "fps": 7
     },
     "jump": {
-      "frames": [
-        "jump_up",
-        "jump_peak",
-        "jump_down",
-        "land"
-      ],
+      "frames": ["jump_up", "jump_peak", "jump_down", "land"],
       "fps": 5
     },
     "root": {
-      "frames": [
-        "root_1",
-        "root_2"
-      ],
+      "frames": ["root_1", "root_2"],
       "fps": 3
     },
     "sleep": {
-      "frames": [
-        "sleep_1",
-        "sleep_2"
-      ],
+      "frames": ["sleep_1", "sleep_2"],
       "fps": 1.5
     },
     "react": {
-      "frames": [
-        "blink",
-        "happy",
-        "curious",
-        "sniff",
-        "eat"
-      ],
+      "frames": ["blink", "happy", "curious", "sniff", "eat"],
       "fps": 4
     }
   },
@@ -67,12 +42,7 @@
         "x": 96,
         "y": 130
       },
-      "sourceCrop": [
-        25,
-        87,
-        167,
-        193
-      ],
+      "sourceCrop": [25, 87, 167, 193],
       "pixelScale": 1,
       "frame": {
         "x": 0,
@@ -95,12 +65,7 @@
         "x": 96,
         "y": 130
       },
-      "sourceCrop": [
-        167,
-        87,
-        314,
-        193
-      ],
+      "sourceCrop": [167, 87, 314, 193],
       "pixelScale": 1,
       "frame": {
         "x": 192,
@@ -123,12 +88,7 @@
         "x": 96,
         "y": 130
       },
-      "sourceCrop": [
-        312,
-        85,
-        457,
-        196
-      ],
+      "sourceCrop": [312, 85, 457, 196],
       "pixelScale": 1,
       "frame": {
         "x": 384,
@@ -151,12 +111,7 @@
         "x": 96,
         "y": 130
       },
-      "sourceCrop": [
-        457,
-        85,
-        602,
-        196
-      ],
+      "sourceCrop": [457, 85, 602, 196],
       "pixelScale": 1,
       "frame": {
         "x": 576,
@@ -179,12 +134,7 @@
         "x": 96,
         "y": 130
       },
-      "sourceCrop": [
-        595,
-        85,
-        745,
-        196
-      ],
+      "sourceCrop": [595, 85, 745, 196],
       "pixelScale": 1,
       "frame": {
         "x": 768,
@@ -207,12 +157,7 @@
         "x": 96,
         "y": 130
       },
-      "sourceCrop": [
-        746,
-        85,
-        895,
-        200
-      ],
+      "sourceCrop": [746, 85, 895, 200],
       "pixelScale": 1,
       "frame": {
         "x": 960,
@@ -235,12 +180,7 @@
         "x": 96,
         "y": 130
       },
-      "sourceCrop": [
-        896,
-        56,
-        1030,
-        182
-      ],
+      "sourceCrop": [896, 56, 1030, 182],
       "pixelScale": 1,
       "frame": {
         "x": 1152,
@@ -263,12 +203,7 @@
         "x": 96,
         "y": 130
       },
-      "sourceCrop": [
-        1033,
-        8,
-        1175,
-        154
-      ],
+      "sourceCrop": [1033, 8, 1175, 154],
       "pixelScale": 1,
       "frame": {
         "x": 0,
@@ -291,12 +226,7 @@
         "x": 96,
         "y": 130
       },
-      "sourceCrop": [
-        1171,
-        87,
-        1327,
-        198
-      ],
+      "sourceCrop": [1171, 87, 1327, 198],
       "pixelScale": 1,
       "frame": {
         "x": 192,
@@ -319,12 +249,7 @@
         "x": 96,
         "y": 130
       },
-      "sourceCrop": [
-        1331,
-        91,
-        1518,
-        202
-      ],
+      "sourceCrop": [1331, 91, 1518, 202],
       "pixelScale": 1,
       "frame": {
         "x": 384,
@@ -347,12 +272,7 @@
         "x": 96,
         "y": 130
       },
-      "sourceCrop": [
-        21,
-        330,
-        164,
-        431
-      ],
+      "sourceCrop": [21, 330, 164, 431],
       "pixelScale": 1,
       "frame": {
         "x": 576,
@@ -375,12 +295,7 @@
         "x": 96,
         "y": 130
       },
-      "sourceCrop": [
-        169,
-        331,
-        315,
-        434
-      ],
+      "sourceCrop": [169, 331, 315, 434],
       "pixelScale": 1,
       "frame": {
         "x": 768,
@@ -403,12 +318,7 @@
         "x": 96,
         "y": 130
       },
-      "sourceCrop": [
-        313,
-        331,
-        464,
-        435
-      ],
+      "sourceCrop": [313, 331, 464, 435],
       "pixelScale": 1,
       "frame": {
         "x": 960,
@@ -431,12 +341,7 @@
         "x": 96,
         "y": 130
       },
-      "sourceCrop": [
-        465,
-        326,
-        628,
-        437
-      ],
+      "sourceCrop": [465, 326, 628, 437],
       "pixelScale": 1,
       "frame": {
         "x": 1152,
@@ -459,12 +364,7 @@
         "x": 96,
         "y": 130
       },
-      "sourceCrop": [
-        621,
-        324,
-        789,
-        437
-      ],
+      "sourceCrop": [621, 324, 789, 437],
       "pixelScale": 1,
       "frame": {
         "x": 0,
@@ -487,12 +387,7 @@
         "x": 96,
         "y": 130
       },
-      "sourceCrop": [
-        790,
-        322,
-        974,
-        438
-      ],
+      "sourceCrop": [790, 322, 974, 438],
       "pixelScale": 1,
       "frame": {
         "x": 192,
@@ -515,12 +410,7 @@
         "x": 96,
         "y": 130
       },
-      "sourceCrop": [
-        974,
-        327,
-        1146,
-        440
-      ],
+      "sourceCrop": [974, 327, 1146, 440],
       "pixelScale": 1,
       "frame": {
         "x": 384,
@@ -543,12 +433,7 @@
         "x": 96,
         "y": 130
       },
-      "sourceCrop": [
-        1151,
-        333,
-        1345,
-        435
-      ],
+      "sourceCrop": [1151, 333, 1345, 435],
       "pixelScale": 1,
       "frame": {
         "x": 576,
@@ -571,12 +456,7 @@
         "x": 96,
         "y": 130
       },
-      "sourceCrop": [
-        1344,
-        330,
-        1517,
-        438
-      ],
+      "sourceCrop": [1344, 330, 1517, 438],
       "pixelScale": 1,
       "frame": {
         "x": 768,

@@ -13,6 +13,7 @@ export function StoryWindow({
   onClose,
   children,
   overlay,
+  strainTitle = true,
 }: {
   title: string;
   kicker?: string;
@@ -21,6 +22,8 @@ export function StoryWindow({
   onClose: () => void;
   children: ReactNode;
   overlay?: ReactNode;
+  /** Wilbur's title is split so landings can knock the letters loose. */
+  strainTitle?: boolean;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = "story-window-title";
@@ -90,8 +93,8 @@ export function StoryWindow({
         <header className="story-titlebar">
           <div className="story-title-copy">
             {kicker ? <p className="story-kicker">{kicker}</p> : null}
-            <h2 id={titleId} {...(kicker ? { "data-strain": "heading" } : {})}>
-              {kicker ? (
+            <h2 id={titleId} {...(kicker && strainTitle ? { "data-strain": "heading" } : {})}>
+              {kicker && strainTitle ? (
                 <>
                   <span className="sr-only">{title}</span>
                   <SplitText text={title} hanger="last-letter" />

@@ -1,0 +1,137 @@
+/*
+ * Name and arrows. On the hero the name sits above the pig, so the pig
+ * stays perched on Start exploring. In the game it is one quiet line
+ * above the playfield.
+ */
+.character-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.character-switch-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  margin: 0;
+  padding: 0;
+  border: var(--border-pixel);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-pixel-sm);
+}
+
+.character-switch-arrow:hover { background: var(--color-surface); }
+
+.character-switch-arrow:active {
+  transform: translate(1px, 1px);
+  box-shadow: none;
+}
+
+.character-switch-arrow:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.character-switch-name-slot {
+  position: relative;
+  display: grid;
+  min-width: 7.5em;
+  overflow: hidden;
+}
+
+.character-switch-name {
+  margin: 0;
+  grid-area: 1 / 1;
+  width: 100%;
+  font-family: var(--display);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  line-height: 1.2;
+  text-align: center;
+}
+
+/* The old name clears, then the new one settles. Letters never stack. */
+.character-switch-name[data-phase="out"] {
+  animation: character-name-out 0.14s ease-in forwards;
+}
+
+.character-switch-name[data-phase="in"] {
+  animation: character-name-in 0.2s ease-out 0.12s both;
+}
+
+@keyframes character-name-out {
+  to { opacity: 0; transform: translateY(-3px); }
+}
+
+@keyframes character-name-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+.character-switch[data-tone="hero"] {
+  gap: var(--space-1);
+  margin: 0 0 -24px;
+}
+
+.character-switch[data-tone="hero"] .character-switch-arrow {
+  width: 28px;
+  height: 28px;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-on-ink-line);
+}
+
+.character-switch[data-tone="hero"] .character-switch-arrow:hover {
+  background: transparent;
+  color: var(--color-on-ink);
+}
+
+.character-switch[data-tone="hero"] .character-switch-name {
+  color: var(--color-on-ink);
+}
+
+.character-switch[data-tone="game"] {
+  flex: none;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3) 0;
+}
+
+.character-switch[data-tone="game"] .character-switch-arrow {
+  width: 28px;
+  height: 28px;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-ink-muted);
+}
+
+.character-switch[data-tone="game"] .character-switch-arrow:hover {
+  background: var(--color-paper-raised);
+  color: var(--color-ink);
+}
+
+.character-switch[data-tone="game"] .character-switch-name-slot { min-width: 6.5em; }
+
+.character-switch[data-tone="game"] .character-switch-name {
+  color: var(--color-ink-muted);
+  font-size: var(--text-xs);
+}
+
+.story-body:has(.character-switch) .story-stage {
+  margin-top: var(--space-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .character-switch-arrow:active { transform: none; }
+  .character-switch-name[data-phase] { animation: none; }
+}
+
+.page[data-motion="reduce"] .character-switch-name[data-phase] { animation: none; }

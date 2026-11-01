@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
+import { ToodlesSprite } from "../../assets/pig/ToodlesSprite";
 import { WilburSprite } from "../../assets/pig/WilburSprite";
+import { CharacterSwitch } from "../CharacterSlider/CharacterSwitch";
+import { storyCharacters, type StoryCharacter } from "../../content/characters";
 import { cdnSrcSet, crew, crewHeading, crewHeroCaption, crewHeroImage, crewRows } from "../../content/crew";
 import { fieldGuideButtonLabel } from "../../content/fieldGuide";
 import { site } from "../../content/site";
+import { getPigVariant } from "../../game/variants";
 import { SplitText } from "../SplitText/SplitText";
 import type { Phase } from "../../App";
 
@@ -17,9 +21,6 @@ const PHOTO_SIZES: Record<number, string> = {
   3: "(max-width: 600px) 120vw, (max-width: 960px) 60vw, 384px",
   2: "(max-width: 600px) 120vw, (max-width: 1084px) 60vw, 600px",
 };
-
-/** The one card with a game. The hero teaser opens the same story. */
-const GAME_ID = crew.find((animal) => animal.game)?.id;
 
 const NAV = [
   { label: "About", href: "https://www.sloppysecondsinc.org/" },
@@ -136,18 +137,25 @@ interface PlayProps {
   activeId: string | null;
   phase: Phase;
   playedIds: readonly string[];
+  /** The animal the hero switcher is showing. The play button opens their story. */
+  selectedId: string;
   guideCount: number;
   onPlay: (id: string, opener: HTMLButtonElement) => void;
+  onStepStory: (delta: -1 | 1) => void;
   onOpenGuide: (opener: HTMLButtonElement) => void;
+  /** Wilbur's card strains while he climbs. Other pigs leave the page alone. */
+  pageStrain: boolean;
 }
 
 function StoryLaunch({
   name,
+  sprite,
   reduced,
   played,
   onPlay,
 }: {
   name: string;
+  sprite: "wilbur" | "toodles";
   reduced: boolean;
   played: boolean;
   onPlay: (opener: HTMLButtonElement) => void;
@@ -161,7 +169,11 @@ function StoryLaunch({
     <div className="story-launch" onMouseEnter={hop} onFocus={hop}>
       <span className="story-launch-pig" aria-hidden="true">
         <span className="story-launch-hop" key={hops} data-hop={hops > 0 ? "" : undefined}>
-          <WilburSprite pose="idle" playing={false} reduced={reduced} />
+          {sprite === "toodles" ? (
+            <ToodlesSprite pose="idle" playing={false} reduced={reduced} />
+          ) : (
+            <WilburSprite pose="idle" playing={false} reduced={reduced} />
+          )}
         </span>
       </span>
       <div className="story-launch-actions">
@@ -179,7 +191,7 @@ function StoryLaunch({
   );
 }
 
-function Profiles({ reduced, activeId, phase, playedIds, onPlay }: PlayProps) {
+function Profiles({ reduced, activeId, phase, playedIds, onPlay, pageStrain }: PlayProps) {
   const byId = new Map(crew.map((animal) => [animal.id, animal]));
   return (
     <div className="profiles">
@@ -189,7 +201,7 @@ function Profiles({ reduced, activeId, phase, playedIds, onPlay }: PlayProps) {
             const animal = byId.get(id);
             if (!animal) return null;
             const playing = activeId === animal.id;
-            const straining = playing && (phase === "playing" || phase === "collapsing");
+            const straining = pageStrain && playing && (phase === "playing" || phase === "collapsing");
             const played = playedIds.includes(animal.id);
             return (
               <article className="profile" key={animal.id} id={animal.id}>
@@ -211,6 +223,7 @@ function Profiles({ reduced, activeId, phase, playedIds, onPlay }: PlayProps) {
                   {animal.game ? (
                     <StoryLaunch
                       name={animal.name}
+                      sprite={getPigVariant(animal.id).sprite}
                       reduced={reduced}
                       played={played}
                       onPlay={(opener) => onPlay(animal.id, opener)}
@@ -239,28 +252,74 @@ function Profiles({ reduced, activeId, phase, playedIds, onPlay }: PlayProps) {
   );
 }
 
-/** Puts the game above the fold. Without it, the only way in is a card a screen below the hero. */
+function HeroSprite({ sprite, reduced }: { sprite: StoryCharacter["sprite"]; reduced: boolean }) {
+  if (sprite === "toodles") return <ToodlesSprite pose="idle" playing={!reduced} reduced={reduced} />;
+  return <WilburSprite pose="idle" playing={!reduced} reduced={reduced} />;
+}
+
+/** Puts a story above the fold. Arrows choose which animal the button opens. */
 function HeroPlay({
+  character,
   reduced,
   played,
+  canStep,
   onPlay,
+  onStep,
 }: {
+  character: StoryCharacter;
   reduced: boolean;
   played: boolean;
+  canStep: boolean;
   onPlay: (opener: HTMLButtonElement) => void;
+  onStep: (delta: -1 | 1) => void;
 }) {
+  const label = played ? site.heroReplay : site.heroPlay;
+  const [outgoing, setOutgoing] = useState<StoryCharacter | null>(null);
+  const [dir, setDir] = useState<-1 | 1>(1);
+  const [swap, setSwap] = useState(0);
+
+  useEffect(() => {
+    if (swap === 0) return;
+    const timer = window.setTimeout(() => setOutgoing(null), 620);
+    return () => window.clearTimeout(timer);
+  }, [swap]);
+
+  const step = (delta: -1 | 1) => {
+    if (!reduced) {
+      setOutgoing(character);
+      setDir(delta);
+      setSwap((count) => count + 1);
+    }
+    onStep(delta);
+  };
+
+  const departing = outgoing && outgoing.id !== character.id ? outgoing : null;
+
   return (
     <div className="hero-play">
+      <CharacterSwitch name={character.name} tone="hero" canStep={canStep} reduced={reduced} onStep={step} />
       <span className="hero-play-pig" aria-hidden="true">
-        <WilburSprite pose="idle" playing={!reduced} reduced={reduced} />
+        {departing ? (
+          <span className="hero-play-swap" data-phase="out" data-dir={dir}>
+            <HeroSprite sprite={departing.sprite} reduced={reduced} />
+          </span>
+        ) : null}
+        <span
+          className="hero-play-swap"
+          data-phase={departing ? "in" : undefined}
+          data-dir={departing ? dir : undefined}
+        >
+          <HeroSprite sprite={character.sprite} reduced={reduced} />
+        </span>
       </span>
       <button
         type="button"
         className="btn btn-secondary hero-play-button"
         aria-haspopup="dialog"
+        aria-label={`${label}, ${character.name}`}
         onClick={(event) => onPlay(event.currentTarget)}
       >
-        {played ? site.heroReplay : site.heroPlay}
+        {label}
       </button>
       <p className="hero-play-note">{site.heroPlayNote}</p>
     </div>
@@ -268,7 +327,8 @@ function HeroPlay({
 }
 
 export function AnimalsPage(props: PlayProps) {
-  const { reduced, guideCount, onOpenGuide, onPlay, playedIds } = props;
+  const { reduced, guideCount, onOpenGuide, onPlay, onStepStory, playedIds, selectedId } = props;
+  const selected = storyCharacters.find((character) => character.id === selectedId) ?? storyCharacters[0];
   return (
     <>
       <SiteHeader />
@@ -280,11 +340,14 @@ export function AnimalsPage(props: PlayProps) {
           <p className="crew-hero-caption">
             <strong>{crewHeroCaption}</strong>
           </p>
-          {GAME_ID ? (
+          {selected ? (
             <HeroPlay
+              character={selected}
               reduced={reduced}
-              played={playedIds.includes(GAME_ID)}
-              onPlay={(opener) => onPlay(GAME_ID, opener)}
+              played={playedIds.includes(selected.id)}
+              canStep={storyCharacters.length > 1}
+              onStep={onStepStory}
+              onPlay={(opener) => onPlay(selected.id, opener)}
             />
           ) : null}
         </div>

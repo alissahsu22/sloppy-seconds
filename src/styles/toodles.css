@@ -1,0 +1,494 @@
+/* Toodles' climb. Wilbur's stage is untouched: every rule is scoped to data-variant. */
+
+.stage[data-variant="toodles"] {
+  --climb: 0;
+  background: var(--color-surface);
+  /* The lab silhouettes stay. The room itself is white and gray, like Wilbur's stage. */
+  --color-lab-wall: #f3f3f3;
+  --color-lab-panel: #e4e4e4;
+  --color-lab-ink: #1c1c1c;
+  --color-lab-glow: #d5d5d5;
+  --color-lab-glow-deep: #8d8d8d;
+  --color-moss: #b5b5b5;
+  --color-moss-deep: #5c5c5c;
+  --color-sanctuary-sky: #f7f7f7;
+  --color-sanctuary-field: #efefef;
+  --color-sticker-pink: #cfcfcf;
+  --color-sticker-gold: #9a9a9a;
+}
+
+.stage[data-variant="toodles"][data-holding="1"] .world {
+  opacity: 0.72;
+}
+
+.stage[data-variant="toodles"] {
+  --scorch: 0;
+  box-shadow: inset 0 0 0 calc(var(--scorch) * 5px) var(--color-lab-glow);
+}
+
+.intro-tag:empty,
+.age-tag:empty {
+  display: none;
+}
+
+.biome {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.stage[data-variant="toodles"] .platform,
+.stage[data-variant="toodles"] .fx,
+.stage[data-variant="toodles"] .pig-slot {
+  z-index: 1;
+}
+
+/*
+ * The set. Every piece stands on the floor line and is sized in --px, one sprite
+ * pixel, so the props read as one room instead of stickers at different zooms.
+ * Layers crossfade on --climb. Windows match TOODLES.biome* in variants/toodles.ts.
+ */
+.biome {
+  --px: clamp(1.25px, 0.26cqi, 2.5px);
+  /* Top of the floor. Furniture, hills, and bushes all stand here. */
+  --floor: 78%;
+  --stand: calc(100% - var(--floor));
+  --crack-in: clamp(0, calc((var(--climb) - 0.2) / 0.08), 1);
+  --growth-in: clamp(0, calc((var(--climb) - 0.32) / 0.14), 1);
+  --lab-out: clamp(0, calc((var(--climb) - 0.46) / 0.12), 1);
+  --sun-up: clamp(0, calc((var(--climb) - 0.5) / 0.28), 1);
+  --sanctuary-in: clamp(0, calc((var(--climb) - 0.7) / 0.1), 1);
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+}
+
+/* One wash over the whole set, so the course in front always reads first. */
+.biome::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--color-surface);
+  opacity: 0.42;
+}
+
+.set-piece {
+  position: absolute;
+  height: auto;
+  image-rendering: pixelated;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Outside: always there underneath. The lab fades off it. */
+.scene-outside {
+  background: linear-gradient(to bottom, var(--color-sanctuary-sky), var(--color-surface) var(--floor));
+}
+
+.meadow-sun {
+  right: 14%;
+  width: calc(40 * var(--px));
+  /* Rises out of the field as he climbs. "Never felt sun" lands while it is coming up. */
+  top: calc(34% - var(--sun-up) * 26%);
+  opacity: var(--sun-up);
+}
+
+.set-hill {
+  bottom: calc(var(--stand) - 2px);
+}
+
+.set-hill-far {
+  left: -6%;
+  width: calc(140 * var(--px) * 1.6);
+  opacity: 0.3;
+}
+
+.set-hill-near {
+  right: -8%;
+  width: calc(140 * var(--px) * 1.25);
+  opacity: 0.45;
+}
+
+.field {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--stand);
+  background: var(--color-sanctuary-field);
+  border-top: var(--px) solid var(--color-moss);
+}
+
+.field::before {
+  /* Grass edge along the horizon. */
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: calc(10 * var(--px));
+  background: url("/assets/toodles/environment/backdrops/tuft.png") repeat-x left bottom / calc(24 * var(--px))
+    calc(10 * var(--px));
+  background-repeat: repeat-x;
+  image-rendering: pixelated;
+  opacity: 0.55;
+}
+
+.scene-sanctuary {
+  opacity: var(--sanctuary-in);
+}
+
+.set-bushes {
+  bottom: var(--stand);
+  width: calc(132 * var(--px));
+  opacity: 0.75;
+}
+
+.set-bushes-left { left: 2%; }
+.set-bushes-right { right: 2%; transform: scaleX(-1); }
+
+.set-bush {
+  left: 56%;
+  bottom: var(--stand);
+  width: calc(26 * var(--px));
+  opacity: 0.8;
+}
+
+.set-flower {
+  width: calc(9 * var(--px));
+}
+
+.set-flower-a { left: 30%; bottom: calc(var(--stand) - 6 * var(--px)); }
+.set-flower-b { left: 36%; bottom: calc(var(--stand) - 10 * var(--px)); }
+.set-flower-c { left: 61%; bottom: calc(var(--stand) - 4 * var(--px)); }
+.set-flower-d { left: 68%; bottom: calc(var(--stand) - 12 * var(--px)); }
+
+.set-pebbles {
+  width: calc(22 * var(--px));
+}
+
+.set-bush-field { left: 38%; opacity: 0.6; }
+.set-pebbles-path { left: 26%; bottom: calc(var(--stand) - 8 * var(--px)); opacity: 0.5; }
+.set-pebbles-field { left: 52%; bottom: calc(var(--stand) - 14 * var(--px)); opacity: 0.6; }
+
+/* The lab. */
+.scene-lab {
+  opacity: calc(1 - var(--lab-out));
+}
+
+.lab-wall {
+  position: absolute;
+  inset: 0 0 var(--stand);
+  background:
+    /* Wall panels and a baseboard, so the room has seams instead of a flat wash. */
+    linear-gradient(to top, var(--color-lab-panel) calc(6 * var(--px)), transparent 0),
+    repeating-linear-gradient(to right, transparent 0 calc(60 * var(--px) - 1px), var(--color-lab-panel) 0 calc(60 * var(--px))),
+    linear-gradient(to bottom, var(--color-lab-panel), var(--color-lab-wall) 40%);
+}
+
+.lab-floor {
+  position: absolute;
+  inset: var(--floor) 0 0;
+  background:
+    repeating-linear-gradient(to right, transparent 0 calc(32 * var(--px) - 1px), var(--color-lab-glow) 0 calc(32 * var(--px))),
+    var(--color-lab-panel);
+  border-top: var(--px) solid var(--color-lab-glow-deep);
+}
+
+.lab-pipe {
+  /* Ceiling run the lamps hang from. */
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(2 * var(--px));
+  height: calc(12 * var(--px));
+  background: url("/assets/toodles/environment/backdrops/pipe.png") repeat-x left top / calc(40 * var(--px))
+    calc(12 * var(--px));
+  image-rendering: pixelated;
+  opacity: 0.6;
+}
+
+.set-lamp {
+  top: calc(6 * var(--px));
+  width: calc(28 * var(--px));
+  transform: translateX(-50%);
+}
+
+.set-lamp-a { left: 30%; }
+.set-lamp-b { left: 66%; }
+
+.stage[data-biome="crack"] .set-lamp {
+  animation: lab-flicker 1.8s steps(2, end) infinite;
+}
+
+.set-lamp-b { animation-delay: 0.7s; }
+
+@keyframes lab-flicker {
+  0%, 100% { opacity: 1; }
+  45% { opacity: 0.25; }
+}
+
+.lab-band {
+  /* Observation window on the back wall. The staff walk the corridor behind it. */
+  position: absolute;
+  left: 14%;
+  right: 32%;
+  top: 20%;
+  height: 26%;
+  overflow: hidden;
+  background: linear-gradient(to bottom, var(--color-lab-glow), var(--color-lab-panel) 78%);
+  border: calc(2 * var(--px)) solid var(--color-lab-glow-deep);
+  box-shadow: inset 0 0 0 1px var(--color-lab-wall);
+}
+
+/* Matches the 78% floor line in LAB_AMBIENT. */
+.lab-corridor-floor {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  top: 78%;
+  bottom: 0;
+  background: var(--color-lab-glow);
+  border-top: 2px solid var(--color-lab-glow-deep);
+}
+
+/*
+ * Distant staff. Speed, opacity, count, and the fade window live in
+ * src/assets/environment/labScientists.ts (LAB_AMBIENT). The curve here matches
+ * labScientistOpacity: full until --scientist-hold, gone at --scientist-gone.
+ * The lab plate around them (.scene-lab) fades as well.
+ */
+.lab-scientists {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: clamp(
+    0,
+    calc((var(--scientist-gone) - var(--climb, 0)) / (var(--scientist-gone) - var(--scientist-hold))),
+    1
+  );
+}
+
+.lab-scientist-band {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.lab-scientist {
+  position: absolute;
+  left: 0;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  image-rendering: pixelated;
+  transform-origin: center bottom;
+  pointer-events: none;
+  /* Lighter than the ink on the tubes, so the staff stay in the back of the room. */
+  filter: brightness(1.18);
+}
+
+.lab-frost {
+  /* Glass between the room and the corridor: a sheen and a glare, not a fade, so feet stay visible. */
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  background:
+    linear-gradient(115deg, transparent 18%, rgb(255 255 255 / 0.45) 22%, transparent 30%),
+    rgb(255 255 255 / 0.18);
+  pointer-events: none;
+}
+
+.subject-stamp {
+  /* Stencilled on the wall beside the window, with his chart pinned next to it. */
+  position: absolute;
+  left: 74%;
+  top: 24%;
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(24px, 6cqi, 44px);
+  line-height: 1;
+  color: var(--color-lab-ink);
+  opacity: 0.16;
+}
+
+.set-note {
+  left: 76%;
+  top: calc(24% + clamp(24px, 6cqi, 44px) + 2 * var(--space-3));
+  width: calc(20 * var(--px));
+  opacity: 0.7;
+}
+
+/* Back wall lineup, left to right, all on the floor line. */
+.set-door { left: 3%; bottom: var(--stand); width: calc(28 * var(--px)); }
+.set-bench { left: 14%; bottom: var(--stand); width: calc(96 * var(--px)); }
+.set-cabinet { right: calc(4% + 82 * var(--px)); bottom: var(--stand); width: calc(34 * var(--px)); }
+.set-rack {
+  right: calc(4% + 82 * var(--px) - 9 * var(--px));
+  bottom: calc(var(--stand) + 36 * var(--px));
+  width: calc(52 * var(--px));
+}
+.set-tank { right: 3%; bottom: var(--stand); width: calc(78 * var(--px)); }
+
+/* A phone-width wall only fits the bench, door, and tank without them overlapping. */
+@container (max-width: 520px) {
+  .set-cabinet,
+  .set-rack {
+    display: none;
+  }
+}
+
+/* Crack: the same room, splitting. */
+.scene-crack {
+  opacity: var(--crack-in);
+}
+
+.lab-cracks {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.lab-cracks polyline {
+  fill: none;
+  stroke: var(--color-lab-ink);
+  stroke-width: 2;
+  stroke-linejoin: miter;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.5;
+}
+
+.set-pebbles-a { left: 40%; bottom: calc(var(--stand) - 6 * var(--px)); }
+.set-crate { left: calc(14% + 90 * var(--px)); bottom: var(--stand); width: calc(18 * var(--px)); transform: rotate(-8deg); }
+
+/* Growth: outside getting in before he gets out. */
+.scene-growth {
+  opacity: var(--growth-in);
+}
+
+.set-vine {
+  top: calc(10 * var(--px));
+  width: calc(14 * var(--px));
+}
+
+.set-vine-a { left: 9%; }
+.set-vine-b { left: 46%; }
+.set-vine-c { left: 70%; top: 46%; }
+.set-vine-d { left: 88%; }
+
+.lab-grass {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--stand);
+  height: calc(10 * var(--px));
+  background: url("/assets/toodles/environment/backdrops/tuft.png") repeat-x left bottom / calc(36 * var(--px))
+    calc(10 * var(--px));
+  image-rendering: pixelated;
+}
+
+.set-flower-lab { left: 38%; bottom: var(--stand); }
+
+/* Pixel platforms stay level. Wilbur's plank tilt does not apply to these skins. */
+.platform[data-skin="bench"] .platform-skin,
+.platform[data-skin="tube"] .platform-skin,
+.platform[data-skin="tube-moss"] .platform-skin,
+.platform[data-skin="overgrown"] .platform-skin,
+.platform[data-skin="meadow"] .platform-skin {
+  position: relative;
+  overflow: visible;
+  transform: none;
+}
+
+.platform-pixel,
+.platform-pixel-tile {
+  position: absolute;
+  left: 0;
+  pointer-events: none;
+  user-select: none;
+  image-rendering: pixelated;
+}
+
+.platform-pixel {
+  top: 0;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 115 / 55;
+}
+
+.platform-pixel-tile {
+  right: 0;
+  background-repeat: repeat-x;
+}
+
+.ending-replay { margin-left: var(--space-4); }
+
+.fx {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.fx-svg { display: block; width: 100%; height: 100%; }
+
+.fx-art {
+  width: 100%;
+  height: 100%;
+}
+
+/* Cropped frame is 172 wide. 150 / 172 fills the same draw box, so the pig reads larger. */
+.toodles-sprite {
+  --toodles-fit: 0.87209;
+  position: absolute;
+  left: 50%;
+  image-rendering: pixelated;
+  transform: scale(var(--toodles-fit));
+  pointer-events: none;
+}
+
+.toodles-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  image-rendering: pixelated;
+}
+
+/* Gameplay and dance sheets. Pose changes move one; they do not load a new URL. */
+.toodles-atlas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  max-width: none;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+/* Opacity, not visibility: the idle sheet stays painted, so it is decoded before it is shown. */
+.toodles-atlas[data-on="0"] {
+  opacity: 0;
+}
+
+.story-launch-pig .toodles-sprite {
+  --toodles-fit: 0.33488;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .set-lamp {
+    animation: none;
+  }
+}
+
+.page[data-motion="reduce"] .set-lamp {
+  animation: none;
+}

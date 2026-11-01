@@ -26,7 +26,7 @@ literally outgrows the website, so visitors *feel* why teacup pigs end up in san
 
 - Wilbur jumps automatically; you only steer. Age stands in for a score:
   piglet → a few months → still growing → not so teacup → 175 lbs later.
-- Progress is whichever comes first, height climbed or time spent (max 36 seconds), so a
+- Progress is whichever comes first, height climbed or time spent (max 16 seconds), so a
   clumsy player still reaches the ending. *Everyone gets the message.*
 - As he gets heavier, landings escalate in tiers: the frame trembles, then the heading
   jolts, photos tilt, cracks grow from the window edge, and letters of the page title

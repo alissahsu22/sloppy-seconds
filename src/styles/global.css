@@ -8,6 +8,13 @@
   --pink-300: #f2a7b8;
   --gold-300: #f5c842;
   --orange-400: #ef8a3c;
+  --wood-300: #f2b15a;
+  --wood-500: #e08a32;
+  --wood-700: #c46a22;
+  --sky-400: #8ec4ee;
+  --sky-600: #5aa6dc;
+  --rose-300: #f4a8b8;
+  --rose-500: #e57b94;
 
   /* Semantic colour. Components use these, never the palette. */
   --color-ink: var(--brown-900);
@@ -25,6 +32,39 @@
   --color-sticker-pink: var(--pink-300);
   --color-sticker-gold: var(--gold-300);
   --color-sticker-orange: var(--orange-400);
+  --color-wood: var(--wood-300);
+  --color-wood-mid: var(--wood-500);
+  --color-wood-deep: var(--wood-700);
+  --color-sofa: var(--sky-400);
+  --color-sofa-deep: var(--sky-600);
+  --color-chair: var(--rose-300);
+  --color-chair-deep: var(--rose-500);
+  --color-mattress: var(--sky-200);
+
+  /* Toodles' lab and sanctuary. Same pixel world, a cooler room that warms up. */
+  --lab-100: #e4eef3;
+  --lab-300: #c5d6e0;
+  --lab-700: #3e5563;
+  --glow-300: #d2f26a;
+  --glow-500: #6fa832;
+  --moss-400: #7da35a;
+  --moss-700: #3e5a32;
+  --sky-200: #d5eaf6;
+  --sky-050: #f3f7ea;
+  --hide-400: #8e8a85;
+  --hide-600: #5c5854;
+  --color-lab-wall: var(--lab-100);
+  --color-lab-panel: var(--lab-300);
+  --color-lab-ink: var(--lab-700);
+  --color-lab-glow: var(--glow-300);
+  --color-lab-glow-deep: var(--glow-500);
+  --color-moss: var(--moss-400);
+  --color-moss-deep: var(--moss-700);
+  --color-sanctuary-sky: var(--sky-200);
+  --color-sanctuary-field: var(--sky-050);
+  --color-toodles-hide: var(--hide-400);
+  --color-toodles-shade: var(--hide-600);
+  --color-toodles-snout: var(--pink-300);
 
   /* Pixel UI: hard edges and offset shadows, shared by the game and the page. */
   --border-width: 2px;
@@ -223,7 +263,7 @@ button {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .btn, .btn:hover, .btn:active, .icon-button:active { transition: none; transform: none; }
+  .btn, .btn:hover, .btn:active, .icon-button:active, .guide-pager-arrow:active { transition: none; transform: none; }
 }
 
 /* Headings and panels take focus from script so screen readers start in the right place. They are not controls, so no ring. */
@@ -445,6 +485,7 @@ h1 { margin: 0; }
   position: absolute;
   left: 0;
   top: 0;
+  z-index: 2;
   transform-origin: 50% 100%;
   pointer-events: none;
 }
@@ -571,6 +612,7 @@ h1 { margin: 0; }
   position: absolute;
   left: 0;
   top: 0;
+  z-index: 2;
   transform-origin: 50% 100%;
   pointer-events: none;
   /* Pale, so the smaller old shape shows against his dark coat. */
@@ -733,6 +775,11 @@ h1 { margin: 0; }
   pointer-events: none;
 }
 
+/* His head sits lower than Wilbur's, so the line stays beside his face. */
+.bubble[data-animal="toodles"] {
+  top: 32px;
+}
+
 /* Stickers Wilbur pops out. They arc from his back to the grass and wait to be clicked. */
 .sticker-drop {
   position: absolute;
@@ -836,7 +883,35 @@ h1 { margin: 0; }
 
 .escape-layer { position: fixed; inset: 0; z-index: 15; pointer-events: none; }
 .escape-layer .debris { position: fixed; margin: 0; }
-.plank-bit { overflow: hidden; }
+.plank-bit { overflow: visible; }
+
+/* Wilbur's pixel furniture. The seat row is the top of the box; backs rise above it. */
+.furniture-piece { position: relative; width: 100%; height: 100%; }
+.pixel-furniture {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  display: block;
+  overflow: visible;
+}
+.furniture-sofa {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  /* Keep cushion backs, clip extra bays past the ends. */
+  clip-path: inset(-48px 0 0 0);
+}
+.sofa-bay { position: relative; flex: 0 0 auto; height: 100%; }
+.furniture-arm { position: absolute; bottom: 0; z-index: 1; height: 100%; }
+.furniture-arm.left { left: 0; }
+.furniture-arm.right { right: 0; }
+.furniture-arm.right .pixel-furniture { left: auto; right: 0; }
+.pixel-furniture .strain rect { fill: var(--color-surface); opacity: 0; }
+.pixel-furniture[data-stage="hairline"] .strain .hair { opacity: 1; }
+.pixel-furniture[data-stage="major"] .strain .hair,
+.pixel-furniture[data-stage="major"] .strain .major { opacity: 1; }
+.pixel-furniture[data-stage="broken"] .strain rect { opacity: 1; }
 .chip-bit { display: flex; align-items: center; justify-content: center; text-align: center; font-size: var(--text-sm); }
 .fall-read {
   position: absolute;

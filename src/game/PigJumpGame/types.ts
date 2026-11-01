@@ -8,6 +8,8 @@ export interface EscapePiece {
   width: number;
   height: number;
   stage?: CrackStage;
+  /** Wilbur furniture name, so the collapse keeps the piece he was standing on. */
+  art?: string;
   label?: string;
   className?: string;
 }

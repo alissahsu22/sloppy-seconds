@@ -1,16 +1,21 @@
 import type { CrackStage } from "../../model/types";
 import { clamp, clamp01, lerp } from "../../utils/math";
+import { furniturePiece, furnitureThickness, wilburFurniture } from "../../assets/environment/wilburFurniture";
+import { growthAlong } from "../progression/age";
+import { toodlesPlatformSpec } from "../variants/toodles";
 import {
   BASE_HALF_WIDTH,
   BOUNCE_VY,
+  GRAVITY,
   MAX_GAP,
-  PLANK_REACH,
+  MAX_VX,
+  MOVE_ACCEL,
   STRAIN_BREAK,
   STRAIN_MARK,
   STRAIN_WOBBLE,
   WOBBLE_BOUNCE_SCALE,
 } from "./constants";
-import type { Platform, World } from "./types";
+import type { Platform, World, WorldEffect } from "./types";
 
 export interface LandingResult {
   outcome: "bounce" | "wobble" | "break";
@@ -69,60 +74,167 @@ export function platformSignature(platforms: Platform[], time: number): string {
   let signature = "";
   for (const platform of platforms) {
     const wobbling = time < platform.wobbleUntil ? "w" : "n";
-    signature += `${platform.id}:${platform.stage}:${platform.falling ? "f" : "s"}:${wobbling}|`;
+    signature += `${platform.id}:${platform.stage}:${platform.falling ? "f" : "s"}:${wobbling}${platform.art ? `:${platform.art}` : ""}|`;
   }
   return signature;
 }
 
-const EDGE = 16;
-const BODY_HALF = BASE_HALF_WIDTH * 0.55;
-
-/** x positions for a plank of `width` that a jump from `anchor` can still land on. */
-function xBand(anchor: number, width: number, reach: number): [number, number] {
-  return [anchor - reach - width - BODY_HALF, anchor + reach + BODY_HALF];
+export function effectSignature(effects: WorldEffect[]): string {
+  let signature = "";
+  for (const effect of effects) signature += `${effect.id}|`;
+  return signature;
 }
 
-function overlap(a: [number, number], b: [number, number]): [number, number] | null {
-  const min = Math.max(a[0], b[0]);
-  const max = Math.min(a[1], b[1]);
-  return min <= max ? [min, max] : null;
+const EDGE = 16;
+/** A pig who never steers should miss the next plank by at least this much. */
+const STILL_CLEAR = 10;
+/** Extra overlap so a landing is not perched on a single pixel. */
+const LAND_PAD = 10;
+const STEP = 1 / 60;
+
+interface Launch {
+  x: number;
+  vx: number;
+}
+
+function jumpHalf(world: World, y: number): number {
+  const progress = clamp01(y / Math.max(1, world.finaleHeight));
+  return BASE_HALF_WIDTH * Math.max(0.55, growthAlong(world.milestones, progress).scale);
 }
 
 /**
- * The next plank stays inside a casual jump from wherever you are standing.
- * The opening floor is full width, and the pig starts in the middle of it,
- * so that first gap is measured from the middle rather than both walls.
+ * Where a jump ends if one direction is held the whole way.
+ * Same step as the game: accelerate, then gravity, then move, and stop at the walls.
  */
-export function placePlatformX(world: World, previous: Platform, width: number): number {
-  const maxX = Math.max(EDGE, world.width - width - EDGE);
-  const anchors =
-    previous.id === "floor" ? [previous.x + previous.width / 2] : [previous.x, previous.x + previous.width];
-  let band: [number, number] | null = null;
-  for (const anchor of anchors) {
-    const next = xBand(anchor, width, PLANK_REACH);
-    band = band ? overlap(band, next) : next;
+function arc(launch: Launch, dir: -1 | 1, gap: number, vy0: number, worldWidth: number, half: number): Launch {
+  let x = launch.x;
+  let y = 0;
+  let vx = launch.vx;
+  let vy = vy0;
+  for (let frame = 0; frame < 240; frame += 1) {
+    vx = clamp(vx + dir * MOVE_ACCEL * STEP, -MAX_VX, MAX_VX);
+    const previousY = y;
+    vy -= GRAVITY * STEP;
+    x += vx * STEP;
+    y += vy * STEP;
+    if (x < half) {
+      x = half;
+      vx = 0;
+    } else if (x > worldWidth - half) {
+      x = worldWidth - half;
+      vx = 0;
+    }
+    if (vy <= 0 && previousY >= gap && y <= gap) return { x, vx };
   }
-  const fallback = clamp(previous.x + previous.width / 2 - width / 2, EDGE, maxX);
-  if (!band) return fallback;
-  const low = clamp(Math.min(band[0], band[1]), EDGE, maxX);
-  const high = clamp(Math.max(band[0], band[1]), EDGE, maxX);
-  // Stay near the plank you just left. The legal band is wider than a readable path.
-  const aim = previous.x + previous.width / 2 - width / 2;
-  const sway = 72;
-  return lerp(clamp(aim - sway, low, high), clamp(aim + sway, low, high), world.rng());
+  return { x: clamp(x, half, worldWidth - half), vx };
 }
 
-function makePlatform(world: World, y: number, t: number, previous: Platform): Platform {
-  const width = Math.min(lerp(186, 118, t), world.width - EDGE * 2);
+function bounceSpeeds(world: World): number[] {
+  // Wilbur's weak bounce still has to land. Toodles always gets the full hop.
+  return world.variant === "toodles" ? [BOUNCE_VY] : [BOUNCE_VY, BOUNCE_VY * WOBBLE_BOUNCE_SCALE];
+}
+
+function jumpsTo(world: World, launches: Launch[], dir: -1 | 1, gap: number, half: number): Launch[] {
+  const landed: Launch[] = [];
+  for (const launch of launches) {
+    for (const vy of bounceSpeeds(world)) landed.push(arc(launch, dir, gap, vy, world.width, half));
+  }
+  return landed;
+}
+
+function bodyOverlaps(x: number, half: number, box: { x: number; width: number }): boolean {
+  return x + half > box.x && x - half < box.x + box.width;
+}
+
+/**
+ * Sit the plank just clear of a pig who stays still, and long enough that holding
+ * toward it — even a jump that runs into the wall — still comes down on it.
+ */
+function cover(
+  world: World,
+  center: number,
+  half: number,
+  dir: -1 | 1,
+  landed: Launch[],
+  desired: number,
+): { x: number; width: number } {
+  let far = dir > 0 ? EDGE : world.width - EDGE;
+  for (const launch of landed) {
+    if (dir > 0) far = Math.max(far, launch.x);
+    else far = Math.min(far, launch.x);
+  }
+  if (dir > 0) {
+    const left = clamp(center + half + STILL_CLEAR, EDGE, world.width - EDGE - 64);
+    const right = clamp(Math.max(left + desired, far + half + LAND_PAD), left + 64, world.width - EDGE);
+    return { x: left, width: right - left };
+  }
+  const right = clamp(center - half - STILL_CLEAR, EDGE + 64, world.width - EDGE);
+  const left = clamp(Math.min(right - desired, far - half - LAND_PAD), EDGE, right - 64);
+  return { x: left, width: right - left };
+}
+
+/**
+ * Takeoffs on the plank you are leaving, including a full-speed slide off either lip.
+ * Fixed set, so each course stays the same size.
+ */
+function takeoffs(previous: Platform, center: number, half: number, worldWidth: number): Launch[] {
+  if (previous.id === "floor") {
+    return [
+      { x: center, vx: 0 },
+      { x: center, vx: MAX_VX },
+      { x: center, vx: -MAX_VX },
+    ];
+  }
+  const left = clamp(previous.x - half + 4, half, worldWidth - half);
+  const right = clamp(previous.x + previous.width + half - 4, half, worldWidth - half);
+  return [
+    { x: center, vx: 0 },
+    { x: left, vx: -MAX_VX },
+    { x: right, vx: MAX_VX },
+    { x: center, vx: MAX_VX },
+    { x: center, vx: -MAX_VX },
+  ];
+}
+
+function placeNext(world: World, previous: Platform, gap: number, desired: number): { x: number; width: number } {
+  const half = jumpHalf(world, previous.y + gap);
+  const center = previous.id === "floor" ? world.width / 2 : previous.x + previous.width / 2;
+  const launches = takeoffs(previous, center, half, world.width);
+  const roomRight = world.width - center;
+  const roomLeft = center;
+  const prefer: -1 | 1 = roomRight > roomLeft + 8 ? 1 : roomLeft > roomRight + 8 ? -1 : world.rng() < 0.5 ? -1 : 1;
+  const dirs: Array<-1 | 1> = [prefer, prefer === 1 ? -1 : 1];
+  let best: { x: number; width: number; rank: number } | null = null;
+  for (const dir of dirs) {
+    const landed = jumpsTo(world, launches, dir, gap, half);
+    const placed = cover(world, center, half, dir, landed, desired);
+    const catches = landed.every((launch) => bodyOverlaps(launch.x, half, placed));
+    const misses = !bodyOverlaps(center, half, placed);
+    const rank = (catches ? 2 : 0) + (misses ? 1 : 0);
+    if (!best || rank > best.rank) best = { ...placed, rank };
+    if (rank === 3) break;
+  }
+  return best ?? { x: EDGE, width: desired };
+}
+
+function makePlatform(world: World, y: number, t: number, placed: { x: number; width: number }): Platform {
+  const kind = wilburFurniture(world.spawnIndex);
+  const width = placed.width;
+  const piece = furniturePiece(kind);
+  const cols = piece.art[0].length;
+  const body = piece.art.length - piece.seat;
   const integrity = lerp(1, 0.66, t);
   return {
     id: `p${world.nextId++}`,
-    x: placePlatformX(world, previous, width),
+    x: placed.x,
     y,
     width,
-    thickness: 16,
+    thickness: Math.max(16, Math.round((width * body) / cols)),
     integrity,
     stage: stageFromIntegrity(integrity),
+    skin: "plank",
+    art: kind,
+    temper: "strain",
     broken: false,
     wobbleUntil: 0,
     falling: false,
@@ -130,30 +242,96 @@ function makePlatform(world: World, y: number, t: number, previous: Platform): P
   };
 }
 
-export function layCourse(world: World, finaleHeight: number): void {
-  world.platforms.push({
-    id: "floor",
-    x: 20,
-    y: START_Y,
-    width: Math.max(80, world.width - 40),
-    thickness: 18,
-    integrity: 4,
-    stage: "intact",
+function makeToodlesPlatform(world: World, y: number, t: number, placed: { x: number; width: number }): Platform {
+  const spec = toodlesPlatformSpec(t);
+  const width = placed.width;
+  return {
+    id: `p${world.nextId++}`,
+    x: placed.x,
+    y,
+    width,
+    thickness: spec.thickness,
+    integrity: 1,
+    stage: spec.stage,
+    skin: spec.skin,
+    art: spec.art,
+    temper: spec.temper,
     broken: false,
     wobbleUntil: 0,
     falling: false,
     fellAt: 0,
-  });
+  };
+}
+
+function wilburFloor(world: World): Platform {
+  return {
+    id: "floor",
+    x: 20,
+    y: START_Y,
+    width: Math.max(80, world.width - 40),
+    thickness: furnitureThickness("sectional"),
+    integrity: 4,
+    stage: "intact",
+    skin: "plank",
+    art: "sectional",
+    temper: "strain",
+    broken: false,
+    wobbleUntil: 0,
+    falling: false,
+    fellAt: 0,
+  };
+}
+
+function toodlesFloor(world: World): Platform {
+  return {
+    id: "floor",
+    x: 20,
+    y: START_Y,
+    width: Math.max(80, world.width - 40),
+    thickness: 20,
+    integrity: 4,
+    stage: "intact",
+    skin: "bench",
+    art: "tube_01_clean",
+    temper: "anchor",
+    broken: false,
+    wobbleUntil: 0,
+    falling: false,
+    fellAt: 0,
+  };
+}
+
+/** Shortest step that still reads as a jump. The last Toodles plank will not be squeezed under this. */
+const SUMMIT_GAP = 96;
+
+export function layCourse(world: World, finaleHeight: number): void {
+  const toodles = world.variant === "toodles";
+  world.platforms.push(toodles ? toodlesFloor(world) : wilburFloor(world));
   world.spawnCursor = START_Y;
   world.spawnIndex = 0;
-  while (world.spawnCursor < finaleHeight + 280) {
+  // Wilbur keeps planks past the breakthrough so the fall still has something under him.
+  // Toodles stops on one summit. Nothing is placed above it.
+  const ceiling = toodles ? finaleHeight : finaleHeight + 280;
+  while (world.spawnCursor < ceiling) {
     const t = clamp01(world.spawnCursor / finaleHeight);
-    const gap = clamp(lerp(96, MAX_GAP, t) + (world.rng() - 0.5) * 8, 92, MAX_GAP);
-    const y = world.spawnCursor + gap;
+    const gap = clamp(lerp(112, MAX_GAP, t) + (world.rng() - 0.5) * 8, 104, MAX_GAP);
+    let y = world.spawnCursor + gap;
+    if (toodles && y >= finaleHeight) {
+      const room = finaleHeight - world.spawnCursor;
+      if (room < SUMMIT_GAP) break;
+      y = finaleHeight;
+    }
     const previous = world.platforms[world.platforms.length - 1];
-    world.platforms.push(makePlatform(world, y, t, previous));
+    const desired = Math.min(toodles ? toodlesPlatformSpec(t).width : lerp(168, 136, t), world.width - EDGE * 2);
+    const placed = placeNext(world, previous, y - world.spawnCursor, desired);
+    world.platforms.push(toodles ? makeToodlesPlatform(world, y, t, placed) : makePlatform(world, y, t, placed));
     world.spawnCursor = y;
     world.spawnIndex += 1;
+    if (toodles && y >= finaleHeight) break;
+  }
+  if (toodles) {
+    const summit = world.platforms.reduce((highest, platform) => Math.max(highest, platform.y), 0);
+    world.finaleHeight = summit;
   }
 }
 
@@ -171,6 +349,21 @@ export function resizeWorld(world: World, width: number, height: number): void {
     platform.width = Math.min(platform.width, width - 32);
     const maxX = Math.max(12, width - platform.width - 12);
     platform.x = clamp(platform.x * scale, 12, maxX);
+  }
+  // Scaling the stage stretches sideways gaps. Pull a plank back when the
+  // stretch would put it past the jump that leaves the one below.
+  const reach = 110;
+  let previousCenter = width / 2;
+  for (const platform of [...world.platforms].sort((a, b) => a.y - b.y)) {
+    if (platform.id === "floor") {
+      previousCenter = width / 2;
+      continue;
+    }
+    const maxX = Math.max(EDGE, width - platform.width - EDGE);
+    const minLeft = previousCenter - reach - platform.width;
+    const maxLeft = previousCenter + reach;
+    platform.x = clamp(platform.x, Math.max(EDGE, minLeft), Math.min(maxX, maxLeft));
+    previousCenter = platform.x + platform.width / 2;
   }
   world.pig.x = clamp(world.pig.x * scale, 36, width - 36);
 }

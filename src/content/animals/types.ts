@@ -21,7 +21,7 @@ export interface AnimalDefinition {
   id: string;
   displayName: string;
   species: string;
-  portrait: "wilbur";
+  portrait: "wilbur" | "toodles";
   ground: {
     terrain: TerrainId;
     label: string;

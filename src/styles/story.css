@@ -288,11 +288,34 @@
   --wilbur-fit: 0.3;
 }
 
+.guide-notice-pig .toodles-sprite {
+  --toodles-fit: 0.22;
+}
+
 .guide-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--color-paper);
+}
+
+.guide-toolbar {
+  flex: none;
+  padding: var(--space-4) var(--space-6) 0;
+}
+
+.guide-back {
+  margin: 0;
+}
+
+/* One animal at a time. The pager underneath turns the page. */
+.guide-page {
   flex: 1;
   min-height: 0;
   overflow: auto;
-  padding: var(--space-5) var(--space-6) var(--space-7);
+  padding: var(--space-5) var(--space-6) var(--space-6);
   /* Faint dot grid, like a field notebook page. */
   background-color: var(--color-paper);
   background-image: radial-gradient(var(--color-ink-faint) 1px, transparent 1px);
@@ -300,8 +323,59 @@
   background-attachment: local;
 }
 
-.guide-back {
-  margin: 0 0 var(--space-4);
+.guide-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  flex: none;
+  padding: var(--space-3) var(--space-6);
+  border-top: var(--border-pixel);
+  background: var(--color-paper-raised);
+}
+
+.guide-pager-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  margin: 0;
+  padding: 0;
+  border: var(--border-pixel);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-pixel-sm);
+}
+
+.guide-pager-arrow:hover { background: var(--color-surface); }
+
+.guide-pager-arrow:active {
+  transform: translate(1px, 1px);
+  box-shadow: none;
+}
+
+.guide-pager-arrow:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.guide-pager-count {
+  margin: 0;
+  min-width: 5.5em;
+  color: var(--color-ink);
+  font-family: var(--display);
+  font-size: var(--text-sm);
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.guide-pager-of {
+  color: var(--color-ink-muted);
 }
 
 .guide-empty {
@@ -479,6 +553,10 @@
   --wilbur-fit: 0.34;
 }
 
+.guide-photo-pixel .toodles-sprite {
+  --toodles-fit: 0.32;
+}
+
 .guide-personality {
   padding: var(--space-4);
   border-top: var(--border-pixel);
@@ -531,9 +609,9 @@
     height: 100%;
   }
 
-  .guide-panel {
-    padding: var(--space-4) var(--space-4) var(--space-5);
-  }
+  .guide-toolbar { padding: var(--space-3) var(--space-4) 0; }
+  .guide-page { padding: var(--space-4) var(--space-4) var(--space-5); }
+  .guide-pager { padding: var(--space-3) var(--space-4); }
 
   .guide-notice {
     grid-template-columns: auto minmax(0, 1fr) auto;

@@ -43,7 +43,7 @@ export const MILESTONES: readonly AgeMilestone[] = [
   {
     id: "not-teacup",
     label: "Not so teacup anymore.",
-    tagline: "The platforms are struggling.",
+    tagline: "The furniture is struggling.",
     at: 0.74,
     scale: 1.55,
     mass: 0.84,
@@ -58,17 +58,21 @@ export const MILESTONES: readonly AgeMilestone[] = [
   },
 ];
 
-export function runProgress(maxHeight: number, elapsed: number): number {
-  return clamp01(Math.max(maxHeight / FINALE_HEIGHT, elapsed / FINALE_SECONDS));
+export function runProgress(maxHeight: number, elapsed: number, finaleHeight = FINALE_HEIGHT): number {
+  return clamp01(Math.max(maxHeight / finaleHeight, elapsed / FINALE_SECONDS));
 }
 
-export function milestoneAt(progress: number): AgeMilestone {
+export function milestoneAlong(milestones: readonly AgeMilestone[], progress: number): AgeMilestone {
   const p = clamp01(progress);
-  let current: AgeMilestone = MILESTONES[0];
-  for (const milestone of MILESTONES) {
+  let current: AgeMilestone = milestones[0];
+  for (const milestone of milestones) {
     if (p >= milestone.at) current = milestone;
   }
   return current;
+}
+
+export function milestoneAt(progress: number): AgeMilestone {
+  return milestoneAlong(MILESTONES, progress);
 }
 
 /**
@@ -123,13 +127,13 @@ export function impactForLanding(mass: number, integrity: number, outcome: "boun
   return impact;
 }
 
-export function growthAt(progress: number): { scale: number; mass: number } {
+export function growthAlong(milestones: readonly AgeMilestone[], progress: number): { scale: number; mass: number } {
   const p = clamp01(progress);
-  let lower: AgeMilestone = MILESTONES[0];
-  let upper: AgeMilestone = MILESTONES[MILESTONES.length - 1];
-  for (let index = 0; index < MILESTONES.length - 1; index += 1) {
-    const start = MILESTONES[index];
-    const end = MILESTONES[index + 1];
+  let lower: AgeMilestone = milestones[0];
+  let upper: AgeMilestone = milestones[milestones.length - 1];
+  for (let index = 0; index < milestones.length - 1; index += 1) {
+    const start = milestones[index];
+    const end = milestones[index + 1];
     if (p >= start.at && p <= end.at) {
       lower = start;
       upper = end;
@@ -142,4 +146,8 @@ export function growthAt(progress: number): { scale: number; mass: number } {
     scale: lerp(lower.scale, upper.scale, t),
     mass: lerp(lower.mass, upper.mass, t),
   };
+}
+
+export function growthAt(progress: number): { scale: number; mass: number } {
+  return growthAlong(MILESTONES, progress);
 }

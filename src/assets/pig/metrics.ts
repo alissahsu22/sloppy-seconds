@@ -8,4 +8,14 @@ export const PIG_DRAW = {
   height: 116,
 } as const;
 
-export const NPC_SCALE = 1.08;
+/**
+ * Pasture size, from the shared foot. Toodles is the young minipig, so he
+ * stays smaller than Wilbur. The jump game grows on its own scale.
+ */
+export const PASTURE_SCALE = {
+  wilbur: 1.4,
+  toodles: 0.8,
+} as const;
+
+/** Wilbur's size once he is walking the pasture. */
+export const NPC_SCALE = PASTURE_SCALE.wilbur;

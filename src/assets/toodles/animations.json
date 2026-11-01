@@ -1,0 +1,293 @@
+{
+  "name": "Toodles",
+  "version": "1.0.0",
+  "atlas": "atlases/toodles_atlas.png",
+  "frameSize": {
+    "width": 172,
+    "height": 109
+  },
+  "orientation": "right-facing side views (use scaleX(-1) to face left)",
+  "frameAlignment": "Feet at x=86, y=108 of the 172\u00d7109 frame; crop art intentionally not identical widths",
+  "frames": {
+    "idle_01": {
+      "x": 0,
+      "y": 0,
+      "w": 172,
+      "h": 109,
+      "anchor": {
+        "x": 0.5,
+        "y": 0.990899
+      }
+    },
+    "idle_02": {
+      "x": 172,
+      "y": 0,
+      "w": 172,
+      "h": 109,
+      "anchor": {
+        "x": 0.5,
+        "y": 0.990899
+      }
+    },
+    "walk_01": {
+      "x": 344,
+      "y": 0,
+      "w": 172,
+      "h": 109,
+      "anchor": {
+        "x": 0.5,
+        "y": 0.990899
+      }
+    },
+    "walk_02": {
+      "x": 516,
+      "y": 0,
+      "w": 172,
+      "h": 109,
+      "anchor": {
+        "x": 0.5,
+        "y": 0.990899
+      }
+    },
+    "walk_03": {
+      "x": 688,
+      "y": 0,
+      "w": 172,
+      "h": 109,
+      "anchor": {
+        "x": 0.5,
+        "y": 0.990899
+      }
+    },
+    "walk_04": {
+      "x": 0,
+      "y": 109,
+      "w": 172,
+      "h": 109,
+      "anchor": {
+        "x": 0.5,
+        "y": 0.990899
+      }
+    },
+    "jump_up": {
+      "x": 172,
+      "y": 109,
+      "w": 172,
+      "h": 109,
+      "anchor": {
+        "x": 0.5,
+        "y": 0.990899
+      }
+    },
+    "jump_peak": {
+      "x": 344,
+      "y": 109,
+      "w": 172,
+      "h": 109,
+      "anchor": {
+        "x": 0.5,
+        "y": 0.990899
+      }
+    },
+    "jump_down": {
+      "x": 516,
+      "y": 109,
+      "w": 172,
+      "h": 109,
+      "anchor": {
+        "x": 0.5,
+        "y": 0.990899
+      }
+    },
+    "land": {
+      "x": 688,
+      "y": 109,
+      "w": 172,
+      "h": 109,
+      "anchor": {
+        "x": 0.5,
+        "y": 0.990899
+      }
+    },
+    "blink": {
+      "x": 0,
+      "y": 218,
+      "w": 172,
+      "h": 109,
+      "anchor": {
+        "x": 0.5,
+        "y": 0.990899
+      }
+    },
+    "happy": {
+      "x": 172,
+      "y": 218,
+      "w": 172,
+      "h": 109,
+      "anchor": {
+        "x": 0.5,
+        "y": 0.990899
+      }
+    },
+    "curious": {
+      "x": 344,
+      "y": 218,
+      "w": 172,
+      "h": 109,
+      "anchor": {
+        "x": 0.5,
+        "y": 0.990899
+      }
+    },
+    "sniff": {
+      "x": 516,
+      "y": 218,
+      "w": 172,
+      "h": 109,
+      "anchor": {
+        "x": 0.5,
+        "y": 0.990899
+      }
+    },
+    "root_01": {
+      "x": 688,
+      "y": 218,
+      "w": 172,
+      "h": 109,
+      "anchor": {
+        "x": 0.5,
+        "y": 0.990899
+      }
+    },
+    "root_02": {
+      "x": 0,
+      "y": 327,
+      "w": 172,
+      "h": 109,
+      "anchor": {
+        "x": 0.5,
+        "y": 0.990899
+      }
+    },
+    "eat": {
+      "x": 172,
+      "y": 327,
+      "w": 172,
+      "h": 109,
+      "anchor": {
+        "x": 0.5,
+        "y": 0.990899
+      }
+    },
+    "sleep_01": {
+      "x": 344,
+      "y": 327,
+      "w": 172,
+      "h": 109,
+      "anchor": {
+        "x": 0.5,
+        "y": 0.990899
+      }
+    },
+    "sleep_02": {
+      "x": 516,
+      "y": 327,
+      "w": 172,
+      "h": 109,
+      "anchor": {
+        "x": 0.5,
+        "y": 0.990899
+      }
+    }
+  },
+  "animations": {
+    "idle": {
+      "frames": ["idle_01", "idle_02"],
+      "fps": 2,
+      "loop": true
+    },
+    "walk": {
+      "frames": ["walk_01", "walk_02", "walk_03", "walk_04"],
+      "fps": 7,
+      "loop": true
+    },
+    "jump": {
+      "frames": ["jump_up", "jump_peak", "jump_down"],
+      "fps": 6,
+      "loop": false
+    },
+    "land": {
+      "frames": ["land"],
+      "fps": 1,
+      "loop": false
+    },
+    "blink": {
+      "frames": ["blink", "idle_01"],
+      "fps": 3,
+      "loop": false
+    },
+    "happy": {
+      "frames": ["happy"],
+      "fps": 1,
+      "loop": false
+    },
+    "curious": {
+      "frames": ["curious"],
+      "fps": 1,
+      "loop": false
+    },
+    "sniff": {
+      "frames": ["sniff", "idle_01"],
+      "fps": 3,
+      "loop": false
+    },
+    "root": {
+      "frames": ["root_01", "root_02"],
+      "fps": 4,
+      "loop": true
+    },
+    "eat": {
+      "frames": ["eat"],
+      "fps": 1,
+      "loop": false
+    },
+    "sleep": {
+      "frames": ["sleep_01", "sleep_02"],
+      "fps": 1.6,
+      "loop": true
+    }
+  },
+  "growthFrames": {
+    "piglet": "growth/piglet.png",
+    "young": "growth/young.png",
+    "adolescent": "growth/adolescent.png",
+    "teen": "growth/teen.png",
+    "subadult": "growth/subadult.png",
+    "adult": "growth/adult.png",
+    "full_size": "growth/full_size.png"
+  },
+  "parts": {
+    "body": "body_parts/body.png",
+    "head": "body_parts/head.png",
+    "snout": "body_parts/snout.png",
+    "ear_left": "body_parts/ear_left.png",
+    "ear_right": "body_parts/ear_right.png",
+    "eye": "body_parts/eye.png",
+    "tail": "body_parts/tail.png",
+    "front_leg_left": "body_parts/front_leg_left.png",
+    "front_leg_right": "body_parts/front_leg_right.png",
+    "back_leg_left": "body_parts/back_leg_left.png",
+    "back_leg_right": "body_parts/back_leg_right.png"
+  },
+  "angles": {
+    "front": "angles/front.png",
+    "back": "angles/back.png",
+    "three_quarter": "angles/three_quarter.png"
+  },
+  "notes": [
+    "Pixel sprites extracted from AI-generated image; transparent but require manual QA before final shipping.",
+    "The frame atlas includes only character pose graphics (environmental effects are embedded where visible).",
+    "For lab-to-sanctuary story, do NOT imply Toodles was sold as a teacup pig; that is Wilbur story.",
+    "Some frames may differ subtly in shading and silhouette; evaluate in motion."
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "character": "toodles",
+  "frameSize": {
+    "width": 174,
+    "height": 200
+  },
+  "imageFormat": "transparent RGBA PNG",
+  "framePathTemplate": "dance/frames_192/{frame}.png",
+  "spriteAtlas": {
+    "image": "dance/toodles_dance_atlas.png",
+    "cols": 8,
+    "rows": 3,
+    "cellWidth": 174,
+    "cellHeight": 200,
+    "order": "row-major"
+  },
+  "animations": {
+    "rise": {
+      "frames": [
+        "toodles_dance_01",
+        "toodles_dance_02",
+        "toodles_dance_03",
+        "toodles_dance_04",
+        "toodles_dance_05",
+        "toodles_dance_06",
+        "toodles_dance_07"
+      ],
+      "fps": 8,
+      "loop": false,
+      "purpose": "all fours \u2192 getting upright"
+    },
+    "dance": {
+      "frames": [
+        "toodles_dance_08",
+        "toodles_dance_09",
+        "toodles_dance_10",
+        "toodles_dance_11",
+        "toodles_dance_12",
+        "toodles_dance_13",
+        "toodles_dance_14",
+        "toodles_dance_15",
+        "toodles_dance_16",
+        "toodles_dance_17",
+        "toodles_dance_18"
+      ],
+      "fps": 9,
+      "loop": true,
+      "purpose": "two-legged celebration"
+    },
+    "settle": {
+      "frames": [
+        "toodles_dance_19",
+        "toodles_dance_20",
+        "toodles_dance_21",
+        "toodles_dance_22",
+        "toodles_dance_23",
+        "toodles_dance_24"
+      ],
+      "fps": 8,
+      "loop": false,
+      "purpose": "dance \u2192 four legs"
+    },
+    "full_one_shot": {
+      "frames": [
+        "toodles_dance_01",
+        "toodles_dance_02",
+        "toodles_dance_03",
+        "toodles_dance_04",
+        "toodles_dance_05",
+        "toodles_dance_06",
+        "toodles_dance_07",
+        "toodles_dance_08",
+        "toodles_dance_09",
+        "toodles_dance_10",
+        "toodles_dance_11",
+        "toodles_dance_12",
+        "toodles_dance_13",
+        "toodles_dance_14",
+        "toodles_dance_15",
+        "toodles_dance_16",
+        "toodles_dance_17",
+        "toodles_dance_18",
+        "toodles_dance_19",
+        "toodles_dance_20",
+        "toodles_dance_21",
+        "toodles_dance_22",
+        "toodles_dance_23",
+        "toodles_dance_24"
+      ],
+      "fps": 8,
+      "loop": false,
+      "purpose": "reference preview only, for ending use rise then dance then settle"
+    }
+  },
+  "notes": [
+    "All poses are aligned to a 174x200 transparent canvas. Coordinate is bottom anchored; keep collision and NPC world coordinates separate.",
+    "Dance source is AI-generated reference artwork; review for a few morphing pixels/texture differences.",
+    "Do not call React setState once per frame in main game loop; use existing sprite playback infrastructure."
+  ]
+}

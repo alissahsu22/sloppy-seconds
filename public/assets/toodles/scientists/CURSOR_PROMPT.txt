@@ -1,0 +1,41 @@
+Integrate my new monochrome scientist background sprites into Toodles' lab sequence.
+
+ASSETS
+- Location: public/assets/toodles/scientists/
+- Read README.md and animations.json first.
+- Use the aligned sprites in frames/full_128/.
+
+GOAL
+Add subtle animated lab scientists walking around in the background during the early lab portion of Toodles' game. They should make the lab feel active without distracting from gameplay.
+
+REQUIREMENTS
+1. Use all 3 scientists as optional modular background actors.
+2. Each scientist has:
+   - 1 idle pose
+   - 4 walking frames
+3. Render them behind Toodles and behind the platforms.
+4. Keep them visually lighter/subtler than foreground gameplay elements.
+5. Animate with a slow 4-frame walk cycle.
+6. Move them horizontally across the lab background, at slightly different speeds and vertical positions.
+7. Occasionally pause on the idle pose.
+8. Optionally mirror a scientist when reversing direction.
+9. Do not let them interfere with gameplay physics or collision.
+10. They should appear only in the lab phase / early tube section, then gradually fade out as the sanctuary environment takes over.
+11. Respect reduced-motion preferences by either slowing or disabling background walkers.
+12. Keep Wilbur's game unchanged.
+
+IMPLEMENTATION NOTES
+- Reuse the existing Toodles game architecture.
+- Create a small background-actor system or lab-ambient layer rather than hardcoding the sprites directly into the backdrop.
+- Use requestAnimationFrame or your existing animation/render timing approach for frame cycling if that best fits the repo.
+- GSAP is fine for fade-in/fade-out and gentle movement, but do not overcomplicate it.
+- Make the scientists configurable via data (sprite set, speed, y position, delay, opacity).
+
+DESIRED EFFECT
+The scientists should feel like distant lab workers or silhouettes, not foreground characters. The player should notice them as atmosphere, not as the main focus.
+
+DELIVERABLES
+- Implement the animated background scientists.
+- Tell me what files changed.
+- Tell me where I can adjust opacity, speed, spawn count, and when they fade out.
+- Run the build/tests if available.

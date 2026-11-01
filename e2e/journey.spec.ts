@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-const launch = (page: Page) => page.locator(".story-launch-button");
+const launch = (page: Page) => page.locator("#wilbur .story-launch-button");
 const dialog = (page: Page) => page.locator(".story-dialog[open]");
 
 async function openGame(page: Page) {

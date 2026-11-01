@@ -1,7 +1,9 @@
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { ToodlesSprite } from "../../assets/pig/ToodlesSprite";
 import { WilburSprite } from "../../assets/pig/WilburSprite";
 import { StickerIcon } from "../Sticker/Sticker";
 import type { Discovery } from "../../content/animals/types";
-import { collectedFieldGuide, fieldGuideEntries } from "../../content/fieldGuide";
+import { collectedFieldGuide, fieldGuideEntries, type FieldGuideEntry } from "../../content/fieldGuide";
 
 /** Stickers the visitor picked up read in full. The rest stay as blank slots with a hint, so the roaming has a goal. */
 function Finds({
@@ -50,36 +52,92 @@ function Finds({
   );
 }
 
+function GuideSprite({ entry, reduced }: { entry: FieldGuideEntry; reduced: boolean }) {
+  if (entry.portrait === "toodles") {
+    return <ToodlesSprite pose="idle" playing={false} reduced={reduced} />;
+  }
+  return <WilburSprite pose="idle" playing={false} reduced={reduced} />;
+}
+
+function PageChevron({ direction }: { direction: "left" | "right" }) {
+  const points = direction === "left" ? "5,1 2,4 5,7" : "3,1 6,4 3,7";
+  return (
+    <svg viewBox="0 0 8 8" width="14" height="14" aria-hidden="true" shapeRendering="crispEdges">
+      <polyline
+        points={points}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="square"
+        strokeLinejoin="miter"
+      />
+    </svg>
+  );
+}
+
+function pageFor(entries: readonly FieldGuideEntry[], id: string | null | undefined): number {
+  if (!id) return 0;
+  const index = entries.findIndex((entry) => entry.id === id);
+  return index < 0 ? 0 : index;
+}
+
 export function FieldGuide({
   ids,
+  focusId = null,
   foundIds,
   reduced,
   onBack,
 }: {
   ids: readonly string[];
+  /** Opens the book on this animal. Null starts at the first page. */
+  focusId?: string | null;
   /** Discoveries the roaming pig has dug up so far. */
   foundIds: readonly string[];
   reduced: boolean;
   onBack: (() => void) | null;
 }) {
   const entries = collectedFieldGuide(ids);
+  const [page, setPage] = useState(() => pageFor(entries, focusId));
+  const pageRef = useRef<HTMLDivElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const turned = useRef(false);
+  const index = entries.length === 0 ? 0 : Math.min(page, entries.length - 1);
+  const entry = entries[index];
+
+  useEffect(() => {
+    pageRef.current?.scrollTo({ top: 0 });
+    if (!turned.current) return;
+    headingRef.current?.focus({ preventScroll: true });
+  }, [index]);
+
+  const turn = (delta: -1 | 1) => {
+    setPage((current) => {
+      const next = Math.min(entries.length - 1, Math.max(0, current + delta));
+      if (next !== current) turned.current = true;
+      return next;
+    });
+  };
+
+  const onKeyDown = (event: KeyboardEvent) => {
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    event.preventDefault();
+    turn(event.key === "ArrowLeft" ? -1 : 1);
+  };
 
   return (
-    <div className="guide-panel">
+    <div className="guide-panel" onKeyDown={onKeyDown}>
       {onBack ? (
-        <button type="button" className="btn btn-secondary guide-back" onClick={onBack}>
-          Back to the ending
-        </button>
-      ) : null}
-      {entries.length === 0 ? (
-        <div className="guide-empty" tabIndex={-1} data-autofocus="">
-          <p>Your Field Guide is empty. Explore an animal’s story, and it will be kept here.</p>
+        <div className="guide-toolbar">
+          <button type="button" className="btn btn-secondary guide-back" onClick={onBack}>
+            Back to the ending
+          </button>
         </div>
-      ) : (
-        entries.map((entry) => (
+      ) : null}
+      <div className="guide-page" ref={pageRef}>
+        {entry ? (
           <article className="guide-entry" key={entry.id}>
             <header className="guide-entry-head">
-              <h3 tabIndex={-1} data-autofocus="">
+              <h3 ref={headingRef} tabIndex={-1} data-autofocus="">
                 {entry.name}
               </h3>
               <p className="guide-entry-tag">
@@ -95,8 +153,8 @@ export function FieldGuide({
               </section>
               <section className="guide-story">
                 <h4>His story</h4>
-                {entry.story.map((paragraph, index) => (
-                  <p key={index}>{paragraph}</p>
+                {entry.story.map((paragraph, paragraphIndex) => (
+                  <p key={paragraphIndex}>{paragraph}</p>
                 ))}
               </section>
               <Finds name={entry.name} discoveries={entry.discoveries} foundIds={foundIds} />
@@ -105,7 +163,7 @@ export function FieldGuide({
               <div className="guide-photo">
                 <img src={entry.image} alt={entry.imageAlt} />
                 <span className="guide-photo-pixel" aria-hidden="true">
-                  <WilburSprite pose="idle" playing={false} reduced={reduced} />
+                  <GuideSprite entry={entry} reduced={reduced} />
                 </span>
               </div>
               {entry.personality ? (
@@ -116,8 +174,37 @@ export function FieldGuide({
               ) : null}
             </div>
           </article>
-        ))
-      )}
+        ) : (
+          <div className="guide-empty" tabIndex={-1} data-autofocus="">
+            <p>Your Field Guide is empty. Explore an animal’s story, and it will be kept here.</p>
+          </div>
+        )}
+      </div>
+      {entries.length > 0 ? (
+        <nav className="guide-pager" aria-label="Field guide pages">
+          <button
+            type="button"
+            className="guide-pager-arrow"
+            aria-label="Previous page"
+            disabled={index === 0}
+            onClick={() => turn(-1)}
+          >
+            <PageChevron direction="left" />
+          </button>
+          <p className="guide-pager-count">
+            {index + 1} <span className="guide-pager-of">of</span> {entries.length}
+          </p>
+          <button
+            type="button"
+            className="guide-pager-arrow"
+            aria-label="Next page"
+            disabled={index >= entries.length - 1}
+            onClick={() => turn(1)}
+          >
+            <PageChevron direction="right" />
+          </button>
+        </nav>
+      ) : null}
     </div>
   );
 }
