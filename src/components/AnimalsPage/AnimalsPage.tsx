@@ -1,15 +1,9 @@
 import { useEffect, useState } from "react";
 import { WilburSprite } from "../../assets/pig/WilburSprite";
-import {
-  cdnSrcSet,
-  crew,
-  crewHeading,
-  crewHeroCaption,
-  crewHeroImage,
-  crewRows,
-} from "../../content/crew";
+import { cdnSrcSet, crew, crewHeading, crewHeroCaption, crewHeroImage, crewRows } from "../../content/crew";
 import { fieldGuideButtonLabel } from "../../content/fieldGuide";
 import { site } from "../../content/site";
+import { SplitText } from "../SplitText/SplitText";
 import type { Phase } from "../../App";
 
 /** The crew heading. The ending's "meet the other animals" scrolls here. */
@@ -84,18 +78,18 @@ function SiteHeader() {
             <span className="nav-toggle-bars" aria-hidden="true" />
           </button>
           <nav id="site-nav" className="site-nav" aria-label="Primary">
-          {NAV.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              aria-current={"current" in item && item.current ? "page" : undefined}
-              onClick={() => setOpen(false)}
-              {...(item.href.startsWith("http") ? { rel: "noreferrer" } : {})}
-            >
-              {item.label}
-            </a>
-          ))}
-        </nav>
+            {NAV.map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                aria-current={"current" in item && item.current ? "page" : undefined}
+                onClick={() => setOpen(false)}
+                {...(item.href.startsWith("http") ? { rel: "noreferrer" } : {})}
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
         </div>
       </div>
     </header>
@@ -103,13 +97,7 @@ function SiteHeader() {
 }
 
 /** Floats in the bottom right corner so the guide stays one tap away while scrolling. */
-function GuideButton({
-  count,
-  onOpenGuide,
-}: {
-  count: number;
-  onOpenGuide: (opener: HTMLButtonElement) => void;
-}) {
+function GuideButton({ count, onOpenGuide }: { count: number; onOpenGuide: (opener: HTMLButtonElement) => void }) {
   const label = fieldGuideButtonLabel(count);
   return (
     <button
@@ -134,54 +122,11 @@ function GuideButton({
   );
 }
 
-function SplitText({
-  text,
-  hangLast = false,
-  hangerWord,
-}: {
-  text: string;
-  hangLast?: boolean;
-  hangerWord?: { word: string; character: string };
-}) {
-  const words = text.split(" ");
-  const last = Array.from(text.replace(/ /g, "")).length - 1;
-  let letterIndex = 0;
-  return (
-    <span aria-hidden="true" className="crew-title-art">
-      {words.map((word, wordIndex) => (
-        <span key={`${word}-${wordIndex}`}>
-          {wordIndex > 0 ? " " : null}
-          <span className="crew-word">
-            {Array.from(word).map((character) => {
-              const index = letterIndex;
-              letterIndex += 1;
-              const hang = hangLast
-                ? index === last
-                : hangerWord?.word === word && hangerWord.character === character;
-              return (
-                <span
-                  key={index}
-                  className="crew-letter"
-                  data-letter={index}
-                  data-word={word.toLowerCase()}
-                  {...(hang ? { "data-hanger": "1" } : {})}
-                >
-                  {character}
-                </span>
-              );
-            })}
-          </span>
-        </span>
-      ))}
-    </span>
-  );
-}
-
 function CrewTitle() {
   return (
     <h1 className="crew-title" id={CREW_ANCHOR} data-strain="heading">
       <span className="sr-only">{crewHeading}</span>
-      <SplitText text={crewHeading} hangerWord={{ word: "sanctuary", character: "y" }} />
+      <SplitText text={crewHeading} hanger={{ word: "sanctuary", character: "y" }} />
     </h1>
   );
 }

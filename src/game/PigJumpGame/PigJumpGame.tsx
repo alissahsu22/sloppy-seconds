@@ -43,6 +43,29 @@ const inputHints = (): InputHints => {
   return window.matchMedia("(any-pointer: coarse)").matches ? "both" : "keys";
 };
 
+/** A full jump arc needs this much room. Smaller stages draw the same world scaled down. */
+const MIN_WORLD_WIDTH = 280;
+const MIN_WORLD_HEIGHT = 220;
+
+/**
+ * Sizes the physics world to the stage and returns it. A stage shorter or narrower
+ * than the minimum (a phone on its side) keeps the minimum world and scales its
+ * drawing down to fit, so the floor and the planks below him are never cropped.
+ */
+const fitWorld = (frame: HTMLElement, worldEl: HTMLElement) => {
+  const stageWidth = frame.clientWidth;
+  const stageHeight = frame.clientHeight;
+  const view =
+    stageWidth > 0 && stageHeight > 0 ? Math.min(1, stageWidth / MIN_WORLD_WIDTH, stageHeight / MIN_WORLD_HEIGHT) : 1;
+  const width = Math.max(MIN_WORLD_WIDTH, stageWidth / view);
+  const height = Math.max(MIN_WORLD_HEIGHT, stageHeight / view);
+  const scaled = view < 1;
+  worldEl.style.width = scaled ? `${width}px` : "";
+  worldEl.style.height = scaled ? `${height}px` : "";
+  worldEl.style.transform = scaled ? `scale(${view})` : "";
+  return { width, height };
+};
+
 const BEGIN: Record<InputHints, string> = { keys: site.begin, touch: site.beginTouch, both: site.beginBoth };
 const STEER: Record<InputHints, string> = { keys: site.steer, touch: site.steerTouch, both: site.steerBoth };
 
@@ -81,7 +104,9 @@ export function PigJumpGame({ active, reduced, onCollapse, onLanding, onStart, o
   const [ready, setReady] = useState(false);
   const [pose, setPose] = useState<PigPose>("idle");
   const [fell, setFell] = useState(false);
-  const [platforms, setPlatforms] = useState<{ id: string; stage: World["platforms"][number]["stage"]; falling: boolean; wobble: boolean }[]>([]);
+  const [platforms, setPlatforms] = useState<
+    { id: string; stage: World["platforms"][number]["stage"]; falling: boolean; wobble: boolean }[]
+  >([]);
 
   onCollapseRef.current = onCollapse;
   onLandingRef.current = onLanding;
@@ -165,12 +190,10 @@ export function PigJumpGame({ active, reduced, onCollapse, onLanding, onStart, o
   };
 
   useLayoutEffect(() => {
+    const frame = frameRef.current;
     const worldEl = worldElRef.current;
-    if (!worldEl) return;
-    const world = createWorld({
-      width: Math.max(280, worldEl.clientWidth),
-      height: Math.max(220, worldEl.clientHeight),
-    });
+    if (!frame || !worldEl) return;
+    const world = createWorld(fitWorld(frame, worldEl));
     worldRef.current = world;
     syncPlatforms(world);
     setReady(true);
@@ -185,6 +208,8 @@ export function PigJumpGame({ active, reduced, onCollapse, onLanding, onStart, o
     const world = worldRef.current;
     if (!world || !ready) return;
     paint(world);
+    // paint, grow, showAge and release read only refs, so any render's copy is current.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [platforms, ready]);
 
   const release = () => {
@@ -246,22 +271,25 @@ export function PigJumpGame({ active, reduced, onCollapse, onLanding, onStart, o
     };
     frameId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frameId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
 
   useEffect(() => {
+    const frame = frameRef.current;
     const worldEl = worldElRef.current;
-    if (!worldEl || !ready) return;
+    if (!frame || !worldEl || !ready) return;
+    // Watches the stage, not the world: the world's own size is set from this.
     const observer = new ResizeObserver(() => {
       const world = worldRef.current;
       if (!world || world.over) return;
-      const width = Math.max(280, worldEl.clientWidth);
-      const height = Math.max(220, worldEl.clientHeight);
+      const { width, height } = fitWorld(frame, worldEl);
       if (width === world.width && height === world.height) return;
       resizeWorld(world, width, height);
       paint(world);
     });
-    observer.observe(worldEl);
+    observer.observe(frame);
     return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
 
   useEffect(() => {
@@ -289,6 +317,7 @@ export function PigJumpGame({ active, reduced, onCollapse, onLanding, onStart, o
       window.removeEventListener("keydown", onKey);
       frame.removeEventListener("pointerdown", onPointer);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, holding]);
 
   useEffect(() => {
@@ -391,7 +420,9 @@ export function PigJumpGame({ active, reduced, onCollapse, onLanding, onStart, o
           <span className="age-readout-label">{site.ageLabel}</span>
           <span className="age-readout-page">
             {MILESTONES.map((milestone) => (
-              <span className="age-readout-sizer" key={milestone.id}>{gameAgeLabel(milestone)}</span>
+              <span className="age-readout-sizer" key={milestone.id}>
+                {gameAgeLabel(milestone)}
+              </span>
             ))}
             <span className="age-readout-value">{START_AGE}</span>
           </span>
@@ -418,11 +449,7 @@ export function PigJumpGame({ active, reduced, onCollapse, onLanding, onStart, o
             </div>
           </div>
         ))}
-        <div
-          className="pig-slot"
-          ref={pigRef}
-          style={{ width: PIG_DRAW.width, height: PIG_DRAW.height }}
-        >
+        <div className="pig-slot" ref={pigRef} style={{ width: PIG_DRAW.width, height: PIG_DRAW.height }}>
           <WilburSprite pose={pose} reduced={reduced} />
         </div>
         <div
@@ -447,7 +474,9 @@ export function PigJumpGame({ active, reduced, onCollapse, onLanding, onStart, o
       {fell ? (
         <div className="intro game-over" role="group" aria-labelledby="game-over-title">
           <div className="intro-story">
-            <p className="intro-title" id="game-over-title">{site.fellTitle}</p>
+            <p className="intro-title" id="game-over-title">
+              {site.fellTitle}
+            </p>
             <p className="intro-tag">{site.fellNote}</p>
           </div>
           <div className="intro-action">

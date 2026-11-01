@@ -89,11 +89,7 @@ export function EscapeSequence({
           </div>
         ),
       )}
-      <div
-        ref={pigRef}
-        className="escape-pig"
-        style={{ width: PIG_DRAW.width, height: PIG_DRAW.height }}
-      >
+      <div ref={pigRef} className="escape-pig" style={{ width: PIG_DRAW.width, height: PIG_DRAW.height }}>
         <WilburSprite pose="fall" playing={!reduced} reduced={reduced} />
         <span className="fall-read" data-facing={payload.facing}>
           <span className="fall-line">coming through</span>

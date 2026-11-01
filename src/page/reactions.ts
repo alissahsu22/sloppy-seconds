@@ -72,8 +72,7 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
       ].filter((node): node is HTMLElement => !!node),
     );
   const hanger = () =>
-    dialogEl()?.querySelector<HTMLElement>("[data-hanger]") ??
-    root.querySelector<HTMLElement>("[data-hanger]");
+    dialogEl()?.querySelector<HTMLElement>("[data-hanger]") ?? root.querySelector<HTMLElement>("[data-hanger]");
   const windowEl = () => document.querySelector<HTMLElement>(".story-window");
   const photo = () => root.querySelector<HTMLElement>("[data-strain='photo']");
   const frame = () =>
@@ -313,13 +312,16 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
     letter.classList.add("is-loose", "is-hung");
   };
 
-  const spawnGhost = (snapshot: GhostSnapshot, options: {
-    index: number;
-    originX: number;
-    distance: number;
-    duration: number;
-    delay: number;
-  }) => {
+  const spawnGhost = (
+    snapshot: GhostSnapshot,
+    options: {
+      index: number;
+      originX: number;
+      distance: number;
+      duration: number;
+      delay: number;
+    },
+  ) => {
     const ghost = document.createElement("span");
     ghost.className = "letter-debris";
     ghost.textContent = snapshot.text;
@@ -397,7 +399,9 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
     const loose = activeLetters().filter(
       (letter) =>
         !letter.classList.contains("is-gone") &&
-        (letter.classList.contains("is-loose") || letter.classList.contains("is-hung") || letter.dataset.hanger === "1"),
+        (letter.classList.contains("is-loose") ||
+          letter.classList.contains("is-hung") ||
+          letter.dataset.hanger === "1"),
     );
     const extra = loosePool().filter((letter) => !loose.includes(letter));
     const chosen = [...loose, ...extra].slice(0, 16);
@@ -407,16 +411,13 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
       letter.classList.add("is-gone");
       if (reduced || snapshot.rect.width < 1) return;
       const travel = Math.max(36, Math.min(window.innerHeight * 0.62, window.innerHeight - snapshot.rect.bottom - 28));
-      spawnGhost(
-        snapshot,
-        {
-          index,
-          originX,
-          distance: travel,
-          duration: 0.92,
-          delay: 0.08 + index * 0.045,
-        },
-      );
+      spawnGhost(snapshot, {
+        index,
+        originX,
+        distance: travel,
+        duration: 0.92,
+        delay: 0.08 + index * 0.045,
+      });
     });
   };
 

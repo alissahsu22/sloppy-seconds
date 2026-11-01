@@ -27,6 +27,5 @@ export const site = {
   steer: "Use arrow keys or A and D to steer.",
   steerTouch: "Hold the left or right side to steer.",
   steerBoth: "Use arrow keys or A and D, or hold the left or right side, to steer.",
-  gameLabel:
-    "Wilbur jumps automatically. Use arrow keys or A and D to steer. On touchscreens, hold either side.",
+  gameLabel: "Wilbur jumps automatically. Use arrow keys or A and D to steer. On touchscreens, hold either side.",
 } as const;

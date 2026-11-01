@@ -285,6 +285,18 @@ button {
   background: var(--color-surface);
 }
 
+/* Very short stages (a phone on its side): keep the prompt inside the card so it is not clipped. */
+@media (max-height: 480px) {
+  .intro:not(.game-over) { top: 50%; }
+  .intro:not(.game-over) .intro-action {
+    position: static;
+    width: auto;
+    margin-top: var(--space-2);
+    padding: 0;
+    transform: none;
+  }
+}
+
 .stage[data-fallen="1"] .world { opacity: 0.22; }
 .stage[data-fallen="1"] .age-panel { opacity: 0; }
 
@@ -387,6 +399,8 @@ h1 { margin: 0; }
   inset: 0;
   z-index: 0;
   overflow: hidden;
+  /* A short stage scales the world down from its top left corner (see fitWorld). */
+  transform-origin: 0 0;
   transition: opacity 0.55s ease;
 }
 
@@ -699,23 +713,24 @@ h1 { margin: 0; }
   z-index: 1;
 }
 
+/*
+ * Beside his head, inside his lane, so it never reaches up over a window or the page.
+ * Pasture sets `left` to the side of him with room. A long line wraps rather than leave the screen.
+ */
 .bubble {
   position: absolute;
-  left: 64%;
-  /* The draw box is taller than the pig. Sit the line just above his back. */
-  bottom: 72px;
+  top: var(--space-1);
+  left: 0;
+  z-index: 6;
+  width: max-content;
+  max-width: calc(100% - var(--space-4));
   background: var(--color-surface);
   border: var(--border-pixel);
   border-radius: 2px;
   padding: var(--space-1) var(--space-2);
   font-size: var(--text-sm);
   font-weight: 600;
-  white-space: nowrap;
-}
-
-/* The anchor's scaleX flips the pig. Counter it so the words stay readable. */
-.pig-anchor[data-facing="-1"] .bubble {
-  transform: scaleX(-1);
+  pointer-events: none;
 }
 
 /* Stickers Wilbur pops out. They arc from his back to the grass and wait to be clicked. */

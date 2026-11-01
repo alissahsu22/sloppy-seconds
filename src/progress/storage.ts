@@ -12,6 +12,7 @@ export interface Progress {
   facing: 1 | -1;
 }
 
+/** Keeps the project's original name so visitors' saved progress still loads. */
 export const PROGRESS_KEY = "little-pig-big-world.v1";
 
 export const emptyProgress = (): Progress => ({
@@ -47,11 +48,10 @@ export function readProgress(): Progress {
       collectedIds: stringList(parsed.collectedIds),
       found: Array.isArray(parsed.found)
         ? parsed.found.filter(
-            (item): item is FoundDiscovery =>
-              !!item && typeof item.id === "string" && typeof item.x === "number",
+            (item): item is FoundDiscovery => !!item && typeof item.id === "string" && typeof item.x === "number",
           )
         : [],
-      pigX: typeof parsed.pigX === "number" ? parsed.pigX : null,
+      pigX: typeof parsed.pigX === "number" && Number.isFinite(parsed.pigX) ? parsed.pigX : null,
       facing: parsed.facing === -1 ? -1 : 1,
     };
   } catch {

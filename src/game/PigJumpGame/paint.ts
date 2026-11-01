@@ -98,6 +98,8 @@ export function measureEscape(
   scale: number,
 ): EscapePayload {
   const worldRect = worldEl.getBoundingClientRect();
+  // A short stage draws the world scaled down. Hand off his on-screen position and size.
+  const view = worldRect.height / world.height || 1;
   const footY = world.height - (world.pig.y - world.cameraBottom);
   const pieces: EscapePiece[] = [];
 
@@ -136,9 +138,9 @@ export function measureEscape(
   });
 
   return {
-    footX: worldRect.left + world.pig.x,
-    footY: worldRect.top + footY,
-    scale,
+    footX: worldRect.left + world.pig.x * view,
+    footY: worldRect.top + footY * view,
+    scale: scale * view,
     facing: world.pig.facing,
     tilt: reduced ? 0 : clamp((-world.pig.vx / MAX_VX) * 12, -12, 12),
     pieces,

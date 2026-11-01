@@ -1,12 +1,6 @@
 import type { NpcStateId, PigPose } from "../../model/types";
 import { clamp, lerp } from "../../utils/math";
-import type {
-  BehaviorProfile,
-  NpcContext,
-  NpcMemory,
-  NpcStep,
-  StateSpec,
-} from "./types";
+import type { BehaviorProfile, NpcContext, NpcMemory, NpcStep, StateSpec } from "./types";
 
 /**
  * Discrete behavior choices, not a per-frame coin flip.
@@ -48,10 +42,7 @@ export function createNpcMemory(now: number, x: number): NpcMemory {
   };
 }
 
-export function weightedPick<T extends string>(
-  options: readonly { to: T; weight: number }[],
-  rng: () => number,
-): T {
+export function weightedPick<T extends string>(options: readonly { to: T; weight: number }[], rng: () => number): T {
   const total = options.reduce((sum, option) => sum + Math.max(0, option.weight), 0);
   if (total <= 0) return options[options.length - 1].to;
   let roll = rng() * total;
@@ -73,9 +64,14 @@ function line(lines: string[], rng: () => number, fallback: string): string {
   return lines[index] ?? fallback;
 }
 
-export function pickWalkTarget(ctx: Pick<NpcContext, "x" | "width">, rng: () => number): number {
+/** The stretch of lane the pig walks within at a given viewport width. */
+export function walkBounds(width: number): { min: number; max: number } {
   const min = 78;
-  const max = Math.max(min + 48, ctx.width - 150);
+  return { min, max: Math.max(min + 48, width - 150) };
+}
+
+export function pickWalkTarget(ctx: Pick<NpcContext, "x" | "width">, rng: () => number): number {
+  const { min, max } = walkBounds(ctx.width);
   const direction = rng() < 0.5 ? -1 : 1;
   const distance = 90 + rng() * 200;
   return clamp(ctx.x + direction * distance, min, max);
@@ -133,11 +129,7 @@ export function stepNpc(
   }
 
   let unearthed = false;
-  if (
-    memory.state === "rooting" &&
-    ctx.discoveriesLeft > 0 &&
-    rng() < profile.discoveryChance
-  ) {
+  if (memory.state === "rooting" && ctx.discoveriesLeft > 0 && rng() < profile.discoveryChance) {
     unearthed = true;
   }
 

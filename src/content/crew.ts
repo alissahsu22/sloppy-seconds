@@ -30,11 +30,14 @@ const CDN_WIDTHS = [500, 750, 1000, 1500] as const;
 
 export function cdnSrcSet(url: string, sourceWidth: number): string {
   const base = url.split("?")[0];
-  const smaller = CDN_WIDTHS.filter((width) => width < sourceWidth).map((width) => `${base}?format=${width}w ${width}w`);
+  const smaller = CDN_WIDTHS.filter((width) => width < sourceWidth).map(
+    (width) => `${base}?format=${width}w ${width}w`,
+  );
   return [...smaller, `${base}?format=2500w ${sourceWidth}w`].join(", ");
 }
 
-export const crewHeroImage = "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/1515194718701-1YQ7OX7QVESGTG49VEQV/20729313_1415615008493780_4799500942525652990_n.jpg?format=1800w";
+export const crewHeroImage =
+  "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/1515194718701-1YQ7OX7QVESGTG49VEQV/20729313_1415615008493780_4799500942525652990_n.jpg?format=1800w";
 
 export const crewHeroCaption = "Meet the crew";
 
@@ -45,7 +48,8 @@ export const crew: readonly CrewAnimal[] = [
     id: "brewster",
     name: "Brewster",
     alt: "Brewster, a black pot-bellied pig, resting his wrinkled snout against a wall while a hand scratches his cheek",
-    image: "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/1523676548892-XJ3L31L9NUIVH96W3O34/brewster.JPG?format=900w",
+    image:
+      "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/1523676548892-XJ3L31L9NUIVH96W3O34/brewster.JPG?format=900w",
     imageWidth: 893,
     imagePosition: "72% 64%",
     paragraphs: [
@@ -57,7 +61,8 @@ export const crew: readonly CrewAnimal[] = [
     id: "frida",
     name: "Frida",
     alt: "Frida, a black and white pig, pushing her snout up to the camera in a straw-covered yard",
-    image: "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/1578851059730-XF9JENJP0GOWTOWBFRB0/frida.jpg?format=900w",
+    image:
+      "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/1578851059730-XF9JENJP0GOWTOWBFRB0/frida.jpg?format=900w",
     imageWidth: 400,
     paragraphs: [
       "Frida was surrendered to the San Gabriel Humane Society in Southern California after spending more than 12 years with the same family. By the time she arrived, she was severely depressed and beginning to show aggression toward the staff—her options were running out, and her mental health was a real concern. In November 2019, Frida came to live at Sloppy Seconds, where she faced a brand-new world. She had never met another pig in her life!",
@@ -68,7 +73,8 @@ export const crew: readonly CrewAnimal[] = [
     id: "bella",
     name: "Bella",
     alt: "Bella, a black pig with a white stripe down her face, standing in the dirt wearing her grin",
-    image: "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/1523676594093-VWGNVS8BRMDYH9B54MZY/Bella.jpg?format=900w",
+    image:
+      "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/1523676594093-VWGNVS8BRMDYH9B54MZY/Bella.jpg?format=900w",
     imageWidth: 1227,
     imagePosition: "50% 70%",
     paragraphs: [
@@ -81,7 +87,8 @@ export const crew: readonly CrewAnimal[] = [
     name: "Wilbur",
     alt: "Wilbur, a big black pig, lying on a sunny patio with his snout toward the camera",
     game: { kicker: site.kicker, title: site.title },
-    image: "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/1523676662624-C1IPK70UF0KDTMPYC5O7/wilbur.JPG?format=900w",
+    image:
+      "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/1523676662624-C1IPK70UF0KDTMPYC5O7/wilbur.JPG?format=900w",
     imageWidth: 960,
     imagePosition: "74% 48%",
     paragraphs: [
@@ -93,7 +100,8 @@ export const crew: readonly CrewAnimal[] = [
     id: "toodles",
     name: "Toodles",
     alt: "Toodles, a young grey Yucatan minipig, sprawled on the grass beside a green ball",
-    image: "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/5db72f77-db1c-4227-93e3-6fcc72c6ba99/Toodles.jpeg?format=900w",
+    image:
+      "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/5db72f77-db1c-4227-93e3-6fcc72c6ba99/Toodles.jpeg?format=900w",
     imageWidth: 1527,
     paragraphs: [
       "Toodles, the youngest of the bunch, looks a little different from the others because he is a Yucatan minipig—a breed specially raised for laboratories. Born in March 2022 and originally known only as “#47,” he was sold to a research lab in Silicon Valley. Luckily, he was considered an “extra” and never tested on. A sympathetic employee reached out to us, not wanting to see him euthanized, and in August 2022, Toodles arrived at Sloppy Seconds as a 5-month-old piglet.",
@@ -104,7 +112,8 @@ export const crew: readonly CrewAnimal[] = [
     id: "bentley",
     name: "Bentley",
     alt: "Bentley, an orange iguana, climbing a leafy branch",
-    image: "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/dc12159b-6474-4c00-b069-47d49e9dea04/Bent.jpg?format=900w",
+    image:
+      "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/dc12159b-6474-4c00-b069-47d49e9dea04/Bent.jpg?format=900w",
     imageWidth: 1000,
     paragraphs: [
       "Bentley was picked up by San Francisco Animal Control many years ago after being found living with severe metabolic bone disease. When he arrived, he was already an adult and in such poor condition that he was considered unadoptable. He came to us needing a safe, permanent home where he could be cared for and live out his life with comfort and dignity.",
@@ -115,7 +124,8 @@ export const crew: readonly CrewAnimal[] = [
     id: "mustachio",
     name: "Mustachio",
     alt: "Mustachio, a red-orange bearded dragon, perched on a stack of slate",
-    image: "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/ff4116c4-d2fb-47da-a0ba-240fc9161fb3/34D02A02-BE24-4003-98F2-0762AB894415.JPG?format=900w",
+    image:
+      "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/ff4116c4-d2fb-47da-a0ba-240fc9161fb3/34D02A02-BE24-4003-98F2-0762AB894415.JPG?format=900w",
     imageWidth: 640,
     paragraphs: [
       "Stash came to us in 2024 as a surrendered pet. His former owner paid an online reptile breeder $475 for him - a “Red Leatherback Hypo 66% Het Trans Male.” When he arrived, he was completely malnourished and could not walk! When she tried reaching out to the breeder, of course there was no response. The owner paid another $600 in vet bills and medicine. Nothing helped.",
@@ -126,17 +136,19 @@ export const crew: readonly CrewAnimal[] = [
     id: "phillip",
     name: "Phillip",
     alt: "Phillip, a black and white Muscovy duck, sitting in straw inside a wire enclosure",
-    image: "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/1569015126626-1TLY7ARCYEFVJOWQPD8H/phillip.jpg?format=900w",
+    image:
+      "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/1569015126626-1TLY7ARCYEFVJOWQPD8H/phillip.jpg?format=900w",
     imageWidth: 1199,
     paragraphs: [
-      "Meet Philip! Philip is a Muscovy duck, born in 2019. She was dumped at a park in Modesto, and brought to Cali_FID exotics. She is the undisputed queen of the flock.  Philip has \"angel wing syndrome” because she was fed an improper diet of grains (bread, crackers, chips, etc). She will never be able to fly so she needs a protected enclosure that caters specifically to her special needs. This ducky loves watermelon, scrambled eggs, and worms!! She’s also incredibly friendly to people.",
+      'Meet Philip! Philip is a Muscovy duck, born in 2019. She was dumped at a park in Modesto, and brought to Cali_FID exotics. She is the undisputed queen of the flock.  Philip has "angel wing syndrome” because she was fed an improper diet of grains (bread, crackers, chips, etc). She will never be able to fly so she needs a protected enclosure that caters specifically to her special needs. This ducky loves watermelon, scrambled eggs, and worms!! She’s also incredibly friendly to people.',
     ],
   },
   {
     id: "jojo",
     name: "JoJo",
     alt: "JoJo, a white and grey Muscovy duck with a red face, standing in a wood and wire pen",
-    image: "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/1622175945370-ACCQ33II64ETKKU343X9/Jojo.jpg?format=900w",
+    image:
+      "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/1622175945370-ACCQ33II64ETKKU343X9/Jojo.jpg?format=900w",
     imageWidth: 400,
     paragraphs: [
       "Welcome JoJo to the flock! Two year old JoJo came to us in October, 2019. This pretty muscovy lady was pinioned as a duckling, so is unable to fly. Jojo is an assertive, thoughtful and cautious duck who has transitioned into the flock quite nicely. We are in love with her noises and her curious stare.",
@@ -146,7 +158,8 @@ export const crew: readonly CrewAnimal[] = [
     id: "buscemi",
     name: "Buscemi",
     alt: "Buscemi, a black and white guinea pig, peeking out of a plush round hide",
-    image: "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/09f735fe-f0a4-43d7-b60f-43c5bb844ca0/IMG_6569.JPG?format=900w",
+    image:
+      "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/09f735fe-f0a4-43d7-b60f-43c5bb844ca0/IMG_6569.JPG?format=900w",
     imageWidth: 1434,
     paragraphs: [
       "Buscemi, the venerable old man of our guinea pig crew, came to us from the City of San Jose Animal Care Center after being surrendered along with dozens of others. He arrived with a mouth laceration and swollen lip, which made him unadoptable at the shelter. We don’t know exactly how old he is, but his calm, steady presence makes him feel like the wise elder of the group.",
@@ -157,7 +170,8 @@ export const crew: readonly CrewAnimal[] = [
     id: "nala",
     name: "Nala",
     alt: "Nala, a grey squirrel, holding a strawberry on a wooden perch in her enclosure",
-    image: "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/6590f2d2-27dd-4ae9-9f97-1c149e2373f9/IMG_6571.JPG?format=900w",
+    image:
+      "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/6590f2d2-27dd-4ae9-9f97-1c149e2373f9/IMG_6571.JPG?format=900w",
     imageWidth: 640,
     paragraphs: [
       "Nala was born in June 2020. She was found two months later and kept as a pet. She lived in a hamster cage and was fed an improper diet (scrambled eggs and peanuts). On November 27, 2020 she was surrendered to Yggdrasil Urban Wildlife Rescue (YUWR). It was determined that Nala had malnutrition and subsequent Metobolic Bone Disease. She was not a good candidate for the ReWild Program, unfortunately, so YUWR asked if we could keep her here permanently.",
@@ -168,7 +182,8 @@ export const crew: readonly CrewAnimal[] = [
     id: "phoebe",
     name: "Phoebe",
     alt: "Phoebe, a grey chinchilla, looking straight at the camera",
-    image: "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/06df6aa5-fe1d-4d48-8b74-d0acd282f1bf/image0.jpg?format=900w",
+    image:
+      "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/06df6aa5-fe1d-4d48-8b74-d0acd282f1bf/image0.jpg?format=900w",
     imageWidth: 1112,
     paragraphs: [
       "Phoebe came to us in 2024 from another local rescue. Phoebe had been there for many months with no interest. She chews her fur and often has missing chunks all over her body. When the rescue saw all of their furry chins getting adopted, they had to wonder why no one was choosing Phoebe.  It was said that she may be “too ugly to be adopted!!”",
@@ -179,7 +194,8 @@ export const crew: readonly CrewAnimal[] = [
     id: "blanche",
     name: "Blanche",
     alt: "Blanche, an ornate box turtle with a misshapen shell, held in a hand above the grass",
-    image: "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/1626047744156-85VW8JYBBJDLBDSRH22O/Blanche.jpg?format=900w",
+    image:
+      "https://images.squarespace-cdn.com/content/v1/5a4fec360100276da3e4dfa1/1626047744156-85VW8JYBBJDLBDSRH22O/Blanche.jpg?format=900w",
     imageWidth: 431,
     paragraphs: [
       "Blanche spent the first 18+ years of her life in a fish tank, living on sand. Her former owners thought she was a “sand turtle” (a desert tortoise), but in reality, she’s an Ornate Box Turtle. Sadly, that misunderstanding—and many years of improper care—left Blanche with a severely deformed shell and beak. Despite these challenges, she has shown incredible resilience and a gentle spirit.",
@@ -196,4 +212,3 @@ export const crewRows: readonly (readonly string[])[] = [
   ["buscemi", "nala"],
   ["phoebe", "blanche"],
 ];
-
