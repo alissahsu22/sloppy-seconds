@@ -22,6 +22,7 @@ await writeFile(
 await cp("docs/squarespace-handoff.md", resolve(folder, "INSTALL.md"));
 await cp("docs/squarespace.md", resolve(folder, "DEVELOPER-GUIDE.md"));
 await cp("docs/SQUARESPACE_WIDGET_INSTALL.md", resolve(folder, "SQUARESPACE_WIDGET_INSTALL.md"));
+await cp("docs/CLIENT_AI_INSTALL_PROMPT.md", resolve(folder, "CLIENT_AI_INSTALL_PROMPT.md"));
 await writeFile(resolve(folder, "01-footer-injection.html"), snippets.footer);
 await writeFile(resolve(folder, "02-launcher-code-block.html"), snippets.launcher);
 await mkdir(resolve(folder, "scripts"));
