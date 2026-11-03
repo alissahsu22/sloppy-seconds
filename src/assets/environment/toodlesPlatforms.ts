@@ -1,3 +1,4 @@
+import { assetUrl } from "../base";
 import platformsJson from "../toodles/environment/platforms.json";
 
 export const TOODLES_PLATFORM_DIR = "/assets/toodles/environment/platforms_128";
@@ -58,7 +59,7 @@ export const TOODLES_PLATFORM_OFFSET_Y = 0;
 export const TOODLES_PLATFORM_TILE_WIDTH = 200;
 
 export function toodlesPlatformUrl(name: ToodlesPlatformArt): string {
-  return `${TOODLES_PLATFORM_DIR}/${name}.png`;
+  return assetUrl(`${TOODLES_PLATFORM_DIR}/${name}.png`);
 }
 
 export function toodlesPlatformWalkY(name: ToodlesPlatformArt): number {

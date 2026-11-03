@@ -1,0 +1,87 @@
+/*
+ * Embed-only rules. These load inside the widget shadow roots, after the shared sheets.
+ * They keep the pigs and the guide button off host controls marked with data-ss-clearance,
+ * and they give the code-block launcher a surface of its own.
+ */
+:host {
+  box-sizing: border-box;
+  --ss-clear-top: 0px;
+  --ss-clear-bottom: 0px;
+}
+
+.ss-engine-root,
+.page,
+.strip,
+.strip * {
+  pointer-events: none;
+}
+
+.strip .pig-hit,
+.strip .sticker-drop {
+  pointer-events: auto;
+}
+
+.story-dialog,
+.guide-button,
+.ss-launcher,
+.ss-launcher button,
+.ss-launcher a {
+  pointer-events: auto;
+}
+
+.strip {
+  bottom: max(var(--ss-clear-bottom), env(safe-area-inset-bottom));
+}
+
+.guide-button {
+  bottom: calc(var(--space-5) + max(var(--ss-clear-bottom), env(safe-area-inset-bottom)));
+}
+
+.page[data-phase="roaming"] .guide-button {
+  bottom: calc(var(--strip) + max(var(--ss-clear-bottom), env(safe-area-inset-bottom)) + var(--space-3));
+}
+
+.page[data-phase="roaming"] .story-dialog {
+  --dialog-bottom: calc(var(--strip) + max(var(--ss-clear-bottom), env(safe-area-inset-bottom)));
+}
+
+.story-dialog {
+  padding-top: max(
+    var(--ss-clear-top),
+    env(safe-area-inset-top),
+    clamp(
+      var(--space-4),
+      calc(100dvh - var(--window-fit) - var(--dialog-bottom)),
+      calc(var(--space-8) + var(--space-5))
+    )
+  );
+  padding-left: max(var(--space-2), env(safe-area-inset-left));
+  padding-right: max(var(--space-2), env(safe-area-inset-right));
+}
+
+.ss-launcher {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(100%, 28rem);
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  border: var(--border-pixel);
+  box-shadow: var(--shadow-pixel-sm);
+  text-align: center;
+}
+
+.ss-launcher .hero-play-note {
+  color: var(--color-ink-muted);
+}
+
+.ss-launcher .character-switch[data-tone="game"] .character-switch-name {
+  color: var(--color-ink);
+  font-size: var(--text-sm);
+}
+
+.ss-launcher-guide {
+  margin-top: var(--space-1);
+}

@@ -1,3 +1,4 @@
+import { assetUrl } from "../base";
 import type { PigPose } from "../../model/types";
 import animationsJson from "../toodles/animations.json";
 import danceJson from "../toodles/dance/animations.json";
@@ -124,7 +125,7 @@ export function clipForToodlesPose(pose: PigPose): ToodlesClip {
 }
 
 export function toodlesFrameUrl(name: ToodlesFrame): string {
-  return `${TOODLES_FRAME_DIR}/${name}.png`;
+  return assetUrl(`${TOODLES_FRAME_DIR}/${name}.png`);
 }
 
 /** Cell origin on the gameplay atlas. The sprite translates the sheet by this. */
@@ -148,7 +149,7 @@ export function toodlesAnchorsMatch(): boolean {
 }
 
 export function toodlesDanceUrl(name: string): string {
-  return `${TOODLES_DANCE_DIR}/${name}.png`;
+  return assetUrl(`${TOODLES_DANCE_DIR}/${name}.png`);
 }
 
 /**

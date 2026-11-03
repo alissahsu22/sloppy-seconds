@@ -61,3 +61,13 @@ Run `npx playwright install chromium` once before the first `npm run e2e`. CI ru
 and pull request.
 
 Built with React 19, TypeScript, Vite, and GSAP.
+
+## Squarespace
+
+The standalone site stays as it is. A second build, `dist/widget/sanctuary.js`, can run inside the sanctuary's Our Animals page without an iframe. Squarespace keeps the header, biographies, photos, and donation links. The script adds the story buttons, games, Field Guide, breakout, and roaming pigs.
+
+`npm run build` produces both the site and the widget. Start with [docs/SQUARESPACE_WIDGET_INSTALL.md](docs/SQUARESPACE_WIDGET_INSTALL.md) for hosting, the Squarespace paste, testing, updates, and troubleshooting. Options, the API, and the limits of that embed are in [docs/squarespace.md](docs/squarespace.md). Progress saved on this Vercel site does not carry over to the Squarespace domain.
+
+**Ready-to-send handoff:** `npm run handoff` creates `handoff/sloppy-seconds-squarespace.zip` with compiled files, all assets, versioned install snippets for the real `/animals` page, source, a public hosting verifier, and browser evidence. Start with [the installer guide](docs/squarespace-handoff.md). Hosting and the Squarespace paste/save are installer steps; generating the archive does not publish anything.
+
+`npm run e2e:squarespace` adds Firefox and WebKit coverage. `npm run check:squarespace-page` tests the local build temporarily inside the real public Squarespace page in isolated browsers and saves screenshots, without editing Squarespace. Install the engines first with `npx playwright install chromium firefox webkit`.

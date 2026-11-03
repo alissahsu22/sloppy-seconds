@@ -1,3 +1,4 @@
+import { assetUrl } from "../base";
 import animationsJson from "../toodles/scientists/animations.json";
 
 /**
@@ -170,7 +171,7 @@ export interface LabActorState {
 }
 
 export function scientistFrameUrl(name: string): string {
-  return `${SCIENTIST_FRAME_DIR}/${name}.png`;
+  return assetUrl(`${SCIENTIST_FRAME_DIR}/${name}.png`);
 }
 
 export function scientistFrameNames(): string[] {

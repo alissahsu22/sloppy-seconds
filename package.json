@@ -5,13 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && vite build --config vite.widget.config.ts",
+    "build:widget": "vite build --config vite.widget.config.ts",
     "preview": "vite preview",
     "test": "vitest run",
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "e2e:squarespace": "playwright test --config playwright.squarespace.config.ts",
+    "check:squarespace-page": "node scripts/check-squarespace-page.mjs",
+    "handoff": "npm run build && node scripts/make-squarespace-handoff.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

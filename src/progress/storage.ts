@@ -20,7 +20,11 @@ export interface Progress {
   spots: Record<string, PigSpot>;
 }
 
-/** Keeps the project's original name so visitors' saved progress still loads. */
+/**
+ * Keeps the project's original name so visitors' saved progress still loads.
+ * The browser stores it for one site origin. Progress saved on the standalone
+ * Vercel site does not appear on the Squarespace domain, or the other way around.
+ */
 export const PROGRESS_KEY = "little-pig-big-world.v1";
 
 export const emptyProgress = (): Progress => ({

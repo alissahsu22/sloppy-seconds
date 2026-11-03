@@ -8,3 +8,6 @@ dist
 .vercel
 playwright-report
 test-results
+artifacts
+handoff
+public/**/CURSOR_PROMPT.txt

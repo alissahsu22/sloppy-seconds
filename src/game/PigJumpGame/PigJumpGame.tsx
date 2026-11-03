@@ -21,6 +21,34 @@ import type { LandingPulse } from "../physics/types";
 import { biomeAt } from "../variants/toodles";
 import { wilburVariant, type PigVariant } from "../variants";
 
+const HOST_CONTROL = "a, button, input, textarea, select, summary, [contenteditable='true']";
+
+/** The real target, including a control inside this embed's shadow root. */
+function eventOrigin(event: Event): EventTarget | null {
+  const path = event.composedPath();
+  return path.length > 0 ? (path[0] ?? null) : event.target;
+}
+
+function isHostControl(target: EventTarget | null): boolean {
+  return target instanceof HTMLElement && Boolean(target.closest(HOST_CONTROL));
+}
+
+/**
+ * Arrow keys steer when the stage, or nothing on the page, has focus.
+ * A focused control in the host page or inside the shadow dialog does not steer.
+ */
+function stageHasSteerFocus(frame: HTMLElement): boolean {
+  const activeElement = document.activeElement;
+  if (activeElement === document.body || activeElement === document.documentElement) return true;
+  if (frame.contains(activeElement)) return true;
+  const root = frame.getRootNode();
+  if (root instanceof ShadowRoot && activeElement === root.host) {
+    const inner = root.activeElement;
+    return inner === frame || (inner instanceof Node && frame.contains(inner));
+  }
+  return false;
+}
+
 interface PigJumpGameProps {
   active: boolean;
   reduced: boolean;
@@ -477,13 +505,13 @@ export function PigJumpGame({
     if (!frame) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape" || event.key === "Tab" || event.metaKey || event.ctrlKey || event.altKey) return;
-      const target = event.target;
-      if (target instanceof HTMLElement && target.closest("a, button, input, textarea, select, summary")) return;
+      if (isHostControl(eventOrigin(event))) return;
       event.preventDefault();
       release();
     };
     const onPointer = (event: PointerEvent) => {
-      if (event.target instanceof Node && !frame.contains(event.target)) return;
+      const origin = eventOrigin(event);
+      if (origin instanceof Node && !frame.contains(origin)) return;
       release();
     };
     window.addEventListener("keydown", onKey);
@@ -523,14 +551,9 @@ export function PigJumpGame({
     };
 
     const canSteer = (event: KeyboardEvent) => {
-      const target = event.target;
-      if (target instanceof HTMLElement && target.closest("input, textarea, select, a, button")) {
-        return false;
-      }
+      if (isHostControl(eventOrigin(event))) return false;
       if (!activeRef.current) return false;
-      const activeElement = document.activeElement;
-      if (activeElement === document.body || activeElement === document.documentElement) return true;
-      return frame.contains(activeElement);
+      return stageHasSteerFocus(frame);
     };
 
     const onKeyDown = (event: KeyboardEvent) => {

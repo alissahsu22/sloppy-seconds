@@ -3,6 +3,8 @@ playwright-report
 test-results
 package-lock.json
 public/assets
+artifacts
+handoff
 # Stylesheets keep their hand-set one-line rules.
 *.css
 *.md
