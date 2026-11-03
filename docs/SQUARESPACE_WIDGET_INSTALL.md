@@ -3,9 +3,10 @@
 Start here to put Wilbur and Toodles on the sanctuary's **Our Animals** page, https://www.sloppysecondsinc.org/animals. This guide covers the whole path: hosting, the Squarespace paste, testing, updates, and troubleshooting. Two companion documents go deeper:
 
 - [squarespace-handoff.md](squarespace-handoff.md): the installer guide shipped inside the handoff zip (as `INSTALL.md`).
+- [CLIENT_AI_INSTALL_PROMPT.md](CLIENT_AI_INSTALL_PROMPT.md): a prompt the site owner can give an AI browser assistant to do section 4 for them.
 - [squarespace.md](squarespace.md): every script option, the JavaScript API, page reactions, and limits.
 
-**Status on November 2, 2026:** the widget is built and tested locally and against the real public page. It is **not deployed** yet: `https://sloppy-seconds.vercel.app/widget/sanctuary.js` returns 404. It is **not installed** on Squarespace. Do not paste the snippets until step 1 passes.
+**Status on November 2, 2026:** release `83e201b40908` is **deployed** to `https://sloppy-seconds.vercel.app` (PR #3), and the hosting verifier prints READY. It is **not installed** on Squarespace yet. Only section 4 remains.
 
 ## 1. What it is
 
@@ -187,7 +188,9 @@ To hide the widget fast, delete the script from Footer Code Injection and save. 
 
 ## What has and hasn't been verified
 
-Verified locally on November 2, 2026, for release `83e201b40908`:
+Verified on November 2, 2026, for release `83e201b40908`:
+
+- Production deploy: the verifier printed READY for all 169 files at `https://sloppy-seconds.vercel.app`.
 
 - The build is reproducible: a rebuild gives the same widget checksum.
 - Lint, formatting, unit tests, and Playwright pass across Chromium, Firefox, and WebKit, at desktop, iPhone portrait, and iPhone landscape sizes. The tests ran on the stand-in host page.
@@ -196,7 +199,6 @@ Verified locally on November 2, 2026, for release `83e201b40908`:
 
 Not verified, because it needs access this work didn't have:
 
-- A production deploy that passes the verifier.
 - The paste and save in the Squarespace editor, on the owner's plan.
 - A logged-out visitor run on the published page.
 - A physical phone.
