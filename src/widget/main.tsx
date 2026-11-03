@@ -2,12 +2,13 @@ import { createRoot, type Root } from "react-dom/client";
 import { flushSync } from "react-dom";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
+import { isAnimalId } from "../animals/registry";
 import { setAssetBase } from "../assets/base";
 import characterCss from "../styles/character-slider.css?inline";
 import globalCss from "../styles/global.css?inline";
 import sanctuaryCss from "../styles/sanctuary.css?inline";
 import storyCss from "../styles/story.css?inline";
-import toodlesCss from "../styles/toodles.css?inline";
+import animalsCss from "../styles/animals.css?inline";
 import {
   optionsFromDataset,
   resolveOptions,
@@ -30,7 +31,7 @@ const FONT_ID = "ss-sanctuary-fonts";
 const FONT_HREF =
   "https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=Silkscreen:wght@400;700&family=Source+Sans+3:wght@400;600&display=swap";
 
-const WIDGET_CSS = [globalCss, sanctuaryCss, storyCss, toodlesCss, characterCss, widgetCss].join("\n");
+const WIDGET_CSS = [globalCss, sanctuaryCss, storyCss, animalsCss, characterCss, widgetCss].join("\n");
 
 interface ActiveEmbed {
   engine: HTMLElement;
@@ -237,7 +238,7 @@ function createApi(): ApiState {
     const story = origin.closest("[data-ss-story]");
     if (story instanceof HTMLElement) {
       const id = story.getAttribute("data-ss-story");
-      if (id === "wilbur" || id === "toodles") {
+      if (isAnimalId(id)) {
         event.preventDefault();
         api.active.handle.openStory(id, story);
       }
@@ -365,7 +366,8 @@ export function unmount(): void {
   slot().unmount();
 }
 
-export function openStory(id: "wilbur" | "toodles", opener?: HTMLElement | null): void {
+export function openStory(id: string, opener?: HTMLElement | null): void {
+  if (!isAnimalId(id)) return;
   slot().openStory(id, opener);
 }
 

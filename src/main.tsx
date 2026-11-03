@@ -6,7 +6,7 @@ import { App } from "./App";
 import "./styles/global.css";
 import "./styles/sanctuary.css";
 import "./styles/story.css";
-import "./styles/toodles.css";
+import "./styles/animals.css";
 import "./styles/character-slider.css";
 
 gsap.registerPlugin(useGSAP);

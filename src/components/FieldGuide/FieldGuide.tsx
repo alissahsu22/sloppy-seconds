@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { ToodlesSprite } from "../../assets/pig/ToodlesSprite";
-import { WilburSprite } from "../../assets/pig/WilburSprite";
+import { AnimalSprite } from "../../animals/AnimalSprite";
 import { StickerIcon } from "../Sticker/Sticker";
 import type { Discovery } from "../../content/animals/types";
 import { collectedFieldGuide, fieldGuideEntries, type FieldGuideEntry } from "../../content/fieldGuide";
@@ -53,10 +52,7 @@ function Finds({
 }
 
 function GuideSprite({ entry, reduced }: { entry: FieldGuideEntry; reduced: boolean }) {
-  if (entry.portrait === "toodles") {
-    return <ToodlesSprite pose="idle" playing={false} reduced={reduced} />;
-  }
-  return <WilburSprite pose="idle" playing={false} reduced={reduced} />;
+  return <AnimalSprite id={entry.portrait} pose="idle" playing={false} reduced={reduced} />;
 }
 
 function PageChevron({ direction }: { direction: "left" | "right" }) {

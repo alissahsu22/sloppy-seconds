@@ -22,7 +22,8 @@ export interface SanctuaryOptions {
 }
 
 export interface SanctuaryHandle {
-  openStory(id: "wilbur" | "toodles", opener?: HTMLElement | null): void;
+  /** Any registered animal id, e.g. "wilbur". Unknown ids are ignored. */
+  openStory(id: string, opener?: HTMLElement | null): void;
   openGuide(opener?: HTMLElement | null): void;
   unmount(): void;
 }
@@ -30,7 +31,8 @@ export interface SanctuaryHandle {
 export interface SanctuaryApi {
   mount(options?: SanctuaryOptions): SanctuaryHandle;
   unmount(): void;
-  openStory(id: "wilbur" | "toodles", opener?: HTMLElement | null): void;
+  /** Any registered animal id, e.g. "wilbur". Unknown ids are ignored. */
+  openStory(id: string, opener?: HTMLElement | null): void;
   openGuide(opener?: HTMLElement | null): void;
 }
 

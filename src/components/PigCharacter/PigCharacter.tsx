@@ -1,5 +1,4 @@
-import { ToodlesSprite } from "../../assets/pig/ToodlesSprite";
-import { WilburSprite } from "../../assets/pig/WilburSprite";
+import { AnimalSprite } from "../../animals/AnimalSprite";
 import type { SpriteId } from "../../game/variants/types";
 import type { PigPose } from "../../model/types";
 
@@ -16,11 +15,7 @@ export function PigCharacter({
 }) {
   return (
     <div className="pig-character">
-      {sprite === "toodles" ? (
-        <ToodlesSprite pose={pose} playing={ambient} reduced={reduced} />
-      ) : (
-        <WilburSprite pose={pose} playing={ambient} reduced={reduced} />
-      )}
+      <AnimalSprite id={sprite} pose={pose} playing={ambient} reduced={reduced} />
     </div>
   );
 }

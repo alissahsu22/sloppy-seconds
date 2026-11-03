@@ -1,0 +1,6 @@
+/*
+ * One stylesheet per animal: its game stage, scenery, and anything else only it uses.
+ * Scope rules with .stage[data-variant="<id>"] so they cannot touch another animal.
+ * The standalone site and the Squarespace widget both load this file.
+ */
+@import "./toodles.css";

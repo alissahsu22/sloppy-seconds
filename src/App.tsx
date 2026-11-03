@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import gsap from "gsap";
+import { getAnimalKit } from "./animals/registry";
 import { EscapeSequence } from "./animations/EscapeSequence";
 import { AnimalsPage, CREW_ANCHOR } from "./components/AnimalsPage/AnimalsPage";
 import { CharacterSwitch } from "./components/CharacterSlider/CharacterSwitch";
@@ -13,7 +14,6 @@ import { EndedCard } from "./components/SiteChrome/SiteChrome";
 import { StoryWindow } from "./components/StoryWindow/StoryWindow";
 import { animals } from "./content/animals";
 import { storyCharacters } from "./content/characters";
-import { wilbur } from "./content/animals/wilbur";
 import { collectedFieldGuide } from "./content/fieldGuide";
 import { site } from "./content/site";
 import { PigJumpGame } from "./game/PigJumpGame/PigJumpGame";
@@ -34,11 +34,10 @@ type DialogView = "game" | "guide";
 
 const centerX = () => clamp(window.innerWidth * 0.46, 96, window.innerWidth - 96);
 
-/** Toodles starts a step to the right so the two pigs are not standing on each other. */
+/** Each animal starts at its own offset so the pigs are not standing on each other. */
 function homeX(id: string): number {
   const center = centerX();
-  if (id === "toodles") return center + 120;
-  return center;
+  return center + getAnimalKit(id).art.homeOffset;
 }
 
 /** A saved spot may come from a wider window. Pull it back inside today's walk lane. */
@@ -73,7 +72,8 @@ export function App() {
   const restoreArmed = useRef(false);
   const revealRef = useRef<string | null>(null);
   /** True when he is out because he just landed, so he starts exactly where he fell. */
-  const landedRef = useRef(false);
+  /** The animal whose breakout just landed on the pasture, at progress.pigX. */
+  const landedRef = useRef<string | null>(null);
   collectedRef.current = progress.collectedIds;
 
   useEffect(() => {
@@ -140,7 +140,7 @@ export function App() {
   };
 
   const play = (id: string) => {
-    landedRef.current = false;
+    landedRef.current = null;
     setEscape(null);
     setRoaming(false);
     setEndingPreview(0);
@@ -152,7 +152,7 @@ export function App() {
   /** Plays Toodles' sanctuary dance again without climbing the course. */
   const replayEnding = () => {
     if (!activeId || getPigVariant(activeId).finale !== "arrival") return;
-    landedRef.current = false;
+    landedRef.current = null;
     setNoticeId(null);
     setRoaming(false);
     setPhase("playing");
@@ -160,7 +160,7 @@ export function App() {
   };
 
   const replay = () => {
-    landedRef.current = false;
+    landedRef.current = null;
     reactionsRef.current?.reset();
     setEscape(null);
     setNoticeId(null);
@@ -192,7 +192,7 @@ export function App() {
     const added = !collectedRef.current.includes(id);
     if (added) collectedRef.current = [...collectedRef.current, id];
     unlock(id, x, facing);
-    landedRef.current = true;
+    landedRef.current = id;
     if (added) setNoticeId(id);
     setEscape(null);
     setPhase("ended");
@@ -289,7 +289,7 @@ export function App() {
           {roaming
             ? herd.map((animal) => {
                 const saved = residentSpot(progress, animal.id);
-                const justLanded = animal.id === wilbur.id && landedRef.current;
+                const justLanded = animal.id === landedRef.current;
                 const facing = justLanded ? progress.facing : (saved?.facing ?? 1);
                 const x = justLanded ? (progress.pigX ?? homeX(animal.id)) : restoredX(saved?.x ?? homeX(animal.id));
                 return (
@@ -322,6 +322,7 @@ export function App() {
                 payload={escape}
                 ground={groundRef.current}
                 reduced={reduced}
+                sprite={variant.sprite}
                 gentle={variant.finale === "arrival"}
                 onDone={(landing) => {
                   if (!activeId) return;
@@ -372,7 +373,7 @@ export function App() {
                     variant={variant}
                     active={(phase === "playing" || phase === "collapsing") && dialog === "game"}
                     reduced={reduced}
-                    endingPreview={variant.id === "toodles" ? endingPreview : 0}
+                    endingPreview={variant.finale === "arrival" ? endingPreview : 0}
                     onStart={() => setPhase("playing")}
                     onRetry={replay}
                     onLanding={variant.pageStrain ? (landing) => reactionsRef.current?.land(landing) : undefined}
@@ -424,7 +425,7 @@ export function App() {
                       {site.skip}
                     </button>
                   ) : null}
-                  {variant.id === "toodles" ? (
+                  {variant.finale === "arrival" ? (
                     <button type="button" className="link-button skip-link ending-replay" onClick={replayEnding}>
                       Replay ending
                     </button>

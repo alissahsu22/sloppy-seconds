@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
-import { ToodlesSprite } from "../assets/pig/ToodlesSprite";
-import { WilburSprite } from "../assets/pig/WilburSprite";
+import { AnimalSprite } from "../animals/AnimalSprite";
 import { CharacterSwitch } from "../components/CharacterSlider/CharacterSwitch";
 import type { StoryCharacter } from "../content/characters";
 import { site } from "../content/site";
 
 function HeroSprite({ sprite, reduced }: { sprite: StoryCharacter["sprite"]; reduced: boolean }) {
-  if (sprite === "toodles") return <ToodlesSprite pose="idle" playing={!reduced} reduced={reduced} />;
-  return <WilburSprite pose="idle" playing={!reduced} reduced={reduced} />;
+  return <AnimalSprite id={sprite} pose="idle" playing={!reduced} reduced={reduced} />;
 }
 
 /**
