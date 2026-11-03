@@ -1,6 +1,6 @@
 import type { CrackStage, Facing } from "../../model/types";
 import type { AgeMilestone, StrainTier } from "../progression/age";
-import type { VariantId } from "../variants/types";
+import type { CourseRules, VariantId } from "../variants/types";
 
 export type PlatformSkin = "plank" | "bench" | "tube" | "tube-moss" | "overgrown" | "meadow";
 
@@ -67,6 +67,8 @@ export interface World {
   width: number;
   height: number;
   variant: VariantId;
+  /** The animal's course rules. Physics reads these instead of checking which animal is playing. */
+  course: CourseRules;
   /** Height that counts as the top of this run. Wilbur uses the shared finale. */
   finaleHeight: number;
   /** Growth and captions for this run. Wilbur's are the shared age milestones. */

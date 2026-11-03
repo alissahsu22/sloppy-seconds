@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { PASTURE_SCALE, PIG_DRAW } from "../assets/pig/metrics";
+import { PIG_DRAW } from "../assets/pig/metrics";
 import { PigCharacter } from "../components/PigCharacter/PigCharacter";
 import { StickerIcon } from "../components/Sticker/Sticker";
 import type { AnimalDefinition, Discovery } from "../content/animals/types";
@@ -10,7 +10,8 @@ import type { FoundDiscovery } from "../progress/storage";
 import { clamp } from "../utils/math";
 import { applyClick, applyHover, createNpcMemory, stepNpc } from "./behaviorMachine/machine";
 import type { NpcContext, NpcMemory } from "./behaviorMachine/types";
-import { BUBBLE_REACH, bubbleLeft, TOODLES_BUBBLE_REACH } from "./interactions/bubble";
+import { getAnimalKit } from "../animals/registry";
+import { bubbleLeft } from "./interactions/bubble";
 import { pointerIsNearPig } from "./interactions/proximity";
 
 interface View {
@@ -86,16 +87,15 @@ export function Pasture({
     const anchor = anchorRef.current;
     if (!anchor) return;
     const facing = memoryRef.current.facing;
-    const scale = PASTURE_SCALE[animal.portrait];
+    const { pastureScale: scale, bubbleReach: reach } = getAnimalKit(animal.id).art;
     anchor.style.transform = `translate(${motionRef.current.x - PIG_DRAW.width / 2}px, 0) scale(${facing * scale}, ${scale})`;
     // The bubble rides beside him in page pixels, so it can turn to whichever side has room.
     const bubble = bubbleRef.current;
     if (bubble) {
       const lane = bubble.offsetParent instanceof HTMLElement ? bubble.offsetParent.clientWidth : window.innerWidth;
-      const reach = animal.portrait === "toodles" ? TOODLES_BUBBLE_REACH : BUBBLE_REACH;
       bubble.style.left = `${bubbleLeft(motionRef.current.x, facing, bubble.offsetWidth, lane, reach)}px`;
     }
-  }, [animal.portrait]);
+  }, [animal.id]);
 
   // A new line has a new width, and a turn puts it on his other side.
   useLayoutEffect(() => {

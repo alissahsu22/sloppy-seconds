@@ -1,16 +1,9 @@
-import {
-  MILESTONES,
-  growthAlong,
-  impactForLanding,
-  milestoneAlong,
-  runProgress,
-  strainTierAt,
-} from "../progression/age";
-import { clamp, clamp01 } from "../../utils/math";
-import { caughtInSpill, landToodles, spawnBloom, tickToodles, TOODLES, TOODLES_MILESTONES } from "../variants/toodles";
+import { growthAlong, milestoneAlong } from "../progression/age";
+import { clamp } from "../../utils/math";
+import { getPigVariant } from "../variants";
 import type { VariantId } from "../variants/types";
-import { BASE_HALF_WIDTH, FINALE_HEIGHT, FRICTION, GRAVITY, MAX_DT, MAX_VX, MOVE_ACCEL } from "./constants";
-import { evaluateLanding, layCourse } from "./platforms";
+import { BASE_HALF_WIDTH, FRICTION, GRAVITY, MAX_DT, MAX_VX, MOVE_ACCEL } from "./constants";
+import { layCourse } from "./platforms";
 import type { Platform, StepEvents, World } from "./types";
 
 const emptyEvents = (): StepEvents => ({
@@ -69,12 +62,8 @@ export function stepWorld(world: World, dtSeconds: number): StepEvents {
   }
 
   world.maxHeight = Math.max(world.maxHeight, pig.y);
-  // Wilbur can finish on the timer, so a wobbly visit still gets the ending.
-  // Toodles only advances by height. The name and the dance wait for the summit.
-  const progress =
-    world.variant === "toodles"
-      ? clamp01(world.maxHeight / world.finaleHeight)
-      : runProgress(world.maxHeight, world.elapsed, world.finaleHeight);
+  const course = world.course;
+  const progress = course.progress(world);
   world.progress = progress;
   const growth = growthAlong(world.milestones, progress);
   // Frame-rate independent ease so scale doesn't pop between milestones.
@@ -95,49 +84,22 @@ export function stepWorld(world: World, dtSeconds: number): StepEvents {
 
   if (pig.vy <= 0) {
     const hit = highestLanding(world.platforms, pig.x, half, previousY, pig.y);
-    const summit = !!hit && world.variant === "toodles" && hit.y >= world.finaleHeight - 0.5;
-    if (hit && (summit || (world.variant !== "toodles" && progress >= 1))) {
+    const ends = !!hit && (course.ending === "summit" ? hit.y >= world.finaleHeight - 0.5 : progress >= 1);
+    if (hit && ends) {
       pig.y = hit.y;
       pig.vy = 0;
-      if (world.variant === "toodles") spawnBloom(world, pig.x, hit.y);
+      course.onSummit?.(world, pig.x, hit.y);
       events.finale = true;
       return events;
     }
-    if (hit && world.variant === "toodles") {
-      events.landed = landToodles(world, hit, progress);
-    } else if (hit) {
-      const landing = evaluateLanding(hit, pig.mass);
-      events.landed = {
-        outcome: landing.outcome,
-        mass: pig.mass,
-        progress,
-        impact: impactForLanding(pig.mass, hit.integrity, landing.outcome),
-        tier: strainTierAt(progress),
-      };
-      if (landing.outcome === "break") {
-        hit.broken = true;
-        hit.stage = "broken";
-        hit.falling = true;
-        hit.fellAt = world.time;
-      } else {
-        pig.y = hit.y;
-        pig.vy = landing.bounceVy;
-        pig.landUntil = world.time + 0.16;
-        hit.stage = landing.nextStage;
-        if (landing.outcome === "wobble") {
-          hit.wobbleUntil = world.time + 0.48;
-        }
-      }
-    }
+    if (hit) events.landed = course.land(world, hit, progress);
   }
 
-  if (world.variant === "toodles") {
-    tickToodles(world);
-    if (!events.finale && !events.landed && caughtInSpill(world)) {
-      world.over = true;
-      events.fell = true;
-      return events;
-    }
+  course.tick?.(world);
+  if (!events.landed && course.caught?.(world)) {
+    world.over = true;
+    events.fell = true;
+    return events;
   }
 
   const followLine = pig.y - world.height * CAMERA_ANCHOR;
@@ -146,8 +108,8 @@ export function stepWorld(world: World, dtSeconds: number): StepEvents {
   }
 
   if (pig.y < world.cameraBottom - 48) {
-    // A late miss is Wilbur's collapse. Toodles has to land the summit.
-    if (world.variant !== "toodles" && world.progress >= 0.97) {
+    // A late miss still reaches an overshoot ending. A summit has to be landed.
+    if (course.ending === "overshoot" && world.progress >= 0.97) {
       pig.y = world.cameraBottom + 12;
       pig.vy = -180;
       events.finale = true;
@@ -195,14 +157,15 @@ export function createWorld(options: {
   bare?: boolean;
   variant?: VariantId;
 }): World {
-  const variant = options.variant ?? "wilbur";
-  const milestones = variant === "toodles" ? TOODLES_MILESTONES : MILESTONES;
+  const variant = getPigVariant(options.variant);
+  const milestones = variant.milestones;
   const growth = growthAlong(milestones, 0);
   const world: World = {
     width: options.width,
     height: options.height,
-    variant,
-    finaleHeight: variant === "toodles" ? TOODLES.finaleHeight : FINALE_HEIGHT,
+    variant: variant.id,
+    course: variant.course,
+    finaleHeight: variant.course.finaleHeight,
     milestones,
     pig: {
       x: options.width / 2,

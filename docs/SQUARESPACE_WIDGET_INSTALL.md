@@ -6,7 +6,7 @@ Start here to put Wilbur and Toodles on the sanctuary's **Our Animals** page, ht
 - [CLIENT_AI_INSTALL_PROMPT.md](CLIENT_AI_INSTALL_PROMPT.md): a prompt the site owner can give an AI browser assistant to do section 4 for them.
 - [squarespace.md](squarespace.md): every script option, the JavaScript API, page reactions, and limits.
 
-**Status on November 2, 2026:** release `83e201b40908` is **deployed** to `https://sloppy-seconds.vercel.app` (PR #3), and the hosting verifier prints READY. It is **not installed** on Squarespace yet. Only section 4 remains.
+**Status on November 2, 2026:** release `cd5cd873eac5` is **deployed** to `https://sloppy-seconds.vercel.app`, and the hosting verifier prints READY. It is **not installed** on Squarespace yet. Only section 4 remains.
 
 ## 1. What it is
 
@@ -25,6 +25,7 @@ Squarespace keeps everything else: the header, biographies, photos, and donation
 
 | Path | What it is |
 | --- | --- |
+| `src/animals/registry.ts` | The list of playable animals. Each animal is one kit in `src/animals/`. See [ADDING_AN_ANIMAL.md](ADDING_AN_ANIMAL.md). |
 | `src/widget/main.tsx` | Entry point. Reads the `data-*` options, mounts and unmounts, exposes `window.SloppySeconds`, and follows Squarespace navigation. |
 | `src/widget/SanctuaryWidget.tsx` | The dialog, the games, the roaming lane, and the Field Guide on a host page. |
 | `src/widget/Launcher.tsx` | The card drawn inside the Code block. |
@@ -84,14 +85,14 @@ You need a Squarespace login that can edit pages and Code Injection. The site's 
 
 3. **Add the script to the site-wide footer.** Go to **Settings → Advanced → Code Injection → Footer** (or search Settings for "Code Injection"). Add the release snippet below any existing code. Don't remove other integrations. Save.
 
-   For release `83e201b40908`, the release built and tested on November 2, 2026, the snippet is:
+   For release `cd5cd873eac5`, the current release, the snippet is:
 
    ```html
    <script
-     src="https://sloppy-seconds.vercel.app/widget/sanctuary.js?v=83e201b40908"
+     src="https://sloppy-seconds.vercel.app/widget/sanctuary.js?v=cd5cd873eac5"
      defer
      crossorigin="anonymous"
-     integrity="sha384-RrdmBfBVWuF0wxEHdUAJyjDMByLhGpbTOxTQeW+BRXmnPySeCoM/gx4hZ3gXDc+a"
+     integrity="sha384-Ppv+l++sFdDRmAwxUR/NGpBYoSO3vt4Di7cENnjb3Uxhi2nel6L9/3e4/E6bEese"
      data-asset-base="https://sloppy-seconds.vercel.app"
      data-only-path="/animals"
      data-help-href="https://www.sloppysecondsinc.org/ways-to-help"
@@ -147,6 +148,7 @@ Install the browser engines once with `npx playwright install chromium firefox w
 
 | Change | What to do |
 | --- | --- |
+| A new animal | Follow [ADDING_AN_ANIMAL.md](ADDING_AN_ANIMAL.md), then do the row below. |
 | A script option (selectors, help link, path) | Edit the footer snippet in Squarespace. No deploy. Update `squarespace/install.json` to keep it. |
 | Widget or game code, or images | Rebuild and deploy (section 3), run the verifier, then replace the footer snippet with the new `01-footer-injection.html`. |
 | Images only | Deploy, then run the verifier. The script and snippet don't change, but the verifier checks the image checksums against the new `release.json`. |
@@ -188,7 +190,7 @@ To hide the widget fast, delete the script from Footer Code Injection and save. 
 
 ## What has and hasn't been verified
 
-Verified on November 2, 2026, for release `83e201b40908`:
+Verified on November 2, 2026, for release `cd5cd873eac5`:
 
 - Production deploy: the verifier printed READY for all 169 files at `https://sloppy-seconds.vercel.app`.
 

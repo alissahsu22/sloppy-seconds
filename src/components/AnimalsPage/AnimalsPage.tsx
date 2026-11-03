@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { ToodlesSprite } from "../../assets/pig/ToodlesSprite";
-import { WilburSprite } from "../../assets/pig/WilburSprite";
+import { AnimalSprite } from "../../animals/AnimalSprite";
 import { CharacterSwitch } from "../CharacterSlider/CharacterSwitch";
 import { storyCharacters, type StoryCharacter } from "../../content/characters";
 import { cdnSrcSet, crew, crewHeading, crewHeroCaption, crewHeroImage, crewRows } from "../../content/crew";
@@ -155,7 +154,7 @@ function StoryLaunch({
   onPlay,
 }: {
   name: string;
-  sprite: "wilbur" | "toodles";
+  sprite: string;
   reduced: boolean;
   played: boolean;
   onPlay: (opener: HTMLButtonElement) => void;
@@ -169,11 +168,7 @@ function StoryLaunch({
     <div className="story-launch" onMouseEnter={hop} onFocus={hop}>
       <span className="story-launch-pig" aria-hidden="true">
         <span className="story-launch-hop" key={hops} data-hop={hops > 0 ? "" : undefined}>
-          {sprite === "toodles" ? (
-            <ToodlesSprite pose="idle" playing={false} reduced={reduced} />
-          ) : (
-            <WilburSprite pose="idle" playing={false} reduced={reduced} />
-          )}
+          <AnimalSprite id={sprite} pose="idle" playing={false} reduced={reduced} />
         </span>
       </span>
       <div className="story-launch-actions">
@@ -253,8 +248,7 @@ function Profiles({ reduced, activeId, phase, playedIds, onPlay, pageStrain }: P
 }
 
 function HeroSprite({ sprite, reduced }: { sprite: StoryCharacter["sprite"]; reduced: boolean }) {
-  if (sprite === "toodles") return <ToodlesSprite pose="idle" playing={!reduced} reduced={reduced} />;
-  return <WilburSprite pose="idle" playing={!reduced} reduced={reduced} />;
+  return <AnimalSprite id={sprite} pose="idle" playing={!reduced} reduced={reduced} />;
 }
 
 /** Puts a story above the fold. Arrows choose which animal the button opens. */

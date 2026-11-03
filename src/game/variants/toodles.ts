@@ -2,11 +2,12 @@ import type { CrackStage } from "../../model/types";
 import { site } from "../../content/site";
 import { artAtLeast, isToodlesPlatformArt, type ToodlesPlatformArt } from "../../assets/environment/toodlesPlatforms";
 import { toodlesEndingDuration } from "../../assets/pig/toodles";
+import { clamp01, lerp } from "../../utils/math";
 import { BASE_HALF_WIDTH, BOUNCE_VY } from "../physics/constants";
+import { START_Y } from "../physics/platforms";
 import type { LandingPulse, Platform, PlatformSkin, PlatformTemper, World, WorldEffect } from "../physics/types";
 import type { AgeMilestone } from "../progression/age";
-import { lerp } from "../../utils/math";
-import type { PigVariant } from "./types";
+import type { CourseRules, PigVariant } from "./types";
 
 /**
  * Facts from the sanctuary bio, and the line the level is not allowed to cross:
@@ -105,6 +106,8 @@ function toodlesAnnouncement(milestone: AgeMilestone): string {
 
 export const toodlesVariant: PigVariant = {
   id: "toodles",
+  // Function declarations below are hoisted, so the course can be built here.
+  course: toodlesCourse(),
   displayName: "Toodles",
   sprite: "toodles",
   finale: "arrival",
@@ -345,7 +348,6 @@ export function landToodles(world: World, platform: Platform, progress: number):
 
 /** Shatter tubes whose delay has run out, and drop effects that have faded or scrolled off. */
 export function tickToodles(world: World): void {
-  if (world.variant !== "toodles") return;
   for (const platform of world.platforms) {
     if (!platform.breakAt || platform.broken || world.time < platform.breakAt) continue;
     platform.broken = true;
@@ -364,7 +366,7 @@ export function tickToodles(world: World): void {
 
 /** True when his feet drop into a puddle that is still hot. */
 export function caughtInSpill(world: World): boolean {
-  if (world.variant !== "toodles" || world.pig.vy > 0) return false;
+  if (world.pig.vy > 0) return false;
   const pig = world.pig;
   const half = BASE_HALF_WIDTH * Math.max(0.55, pig.scale);
   for (const effect of world.effects) {
@@ -377,4 +379,61 @@ export function caughtInSpill(world: World): boolean {
     if (inY && inX) return true;
   }
   return false;
+}
+
+function toodlesFloor(world: World): Platform {
+  return {
+    id: "floor",
+    x: 20,
+    y: START_Y,
+    width: Math.max(80, world.width - 40),
+    thickness: 20,
+    integrity: 4,
+    stage: "intact",
+    skin: "bench",
+    art: "tube_01_clean",
+    temper: "anchor",
+    broken: false,
+    wobbleUntil: 0,
+    falling: false,
+    fellAt: 0,
+  };
+}
+
+function toodlesPlatform(world: World, y: number, t: number, placed: { x: number; width: number }): Platform {
+  const spec = toodlesPlatformSpec(t);
+  return {
+    id: `p${world.nextId++}`,
+    x: placed.x,
+    y,
+    width: placed.width,
+    thickness: spec.thickness,
+    integrity: 1,
+    stage: spec.stage,
+    skin: spec.skin,
+    art: spec.art,
+    temper: spec.temper,
+    broken: false,
+    wobbleUntil: 0,
+    falling: false,
+    fellAt: 0,
+  };
+}
+
+/** Lab glass to grass. Progress is height only; the name and the dance wait for the summit. */
+function toodlesCourse(): CourseRules {
+  return {
+    finaleHeight: TOODLES.finaleHeight,
+    ending: "summit",
+    progress: (world) => clamp01(world.maxHeight / world.finaleHeight),
+    // He always gets the full hop.
+    bounceSpeeds: [BOUNCE_VY],
+    floor: toodlesFloor,
+    platformWidth: (t) => toodlesPlatformSpec(t).width,
+    platform: toodlesPlatform,
+    land: landToodles,
+    onSummit: spawnBloom,
+    tick: tickToodles,
+    caught: caughtInSpill,
+  };
 }

@@ -1,10 +1,46 @@
+import type { LandingPulse, Platform, World } from "../physics/types";
 import type { AgeMilestone } from "../progression/age";
 
-export type VariantId = "wilbur" | "toodles";
+/** An animal's id, as registered in src/animals/registry.ts. */
+export type VariantId = string;
 
 export type FinaleKind = "collapse" | "arrival";
 
-export type SpriteId = "wilbur" | "toodles";
+/** Same id as the animal. Picks the kit whose sprite is drawn. */
+export type SpriteId = string;
+
+/**
+ * How one animal's climb is built and played. The physics loop, camera, and
+ * jump reach are shared; this is the part a new game supplies.
+ */
+export interface CourseRules {
+  /** World height that counts as the top of the run. */
+  finaleHeight: number;
+  /**
+   * How the run ends.
+   * - "overshoot": planks continue past the finale. Any landing at full progress, or a late miss, ends it.
+   * - "summit": the course stops on one top platform. Only landing that platform ends it.
+   */
+  ending: "overshoot" | "summit";
+  /** 0 at the floor, 1 at the ending. */
+  progress: (world: World) => number;
+  /** Bounce speeds the course builder makes sure can still reach the next platform. */
+  bounceSpeeds: readonly number[];
+  /** Starting platform. Its id must be "floor". */
+  floor: (world: World) => Platform;
+  /** Preferred width of a platform at `t` (0–1 up the course). The builder may widen it so a jump lands. */
+  platformWidth: (t: number) => number;
+  /** Builds the platform at height `y`, already placed so it can be reached. */
+  platform: (world: World, y: number, t: number, placed: { x: number; width: number }) => Platform;
+  /** A landing on a platform. Sets the pig's bounce and returns the pulse the page reacts to. */
+  land: (world: World, platform: Platform, progress: number) => LandingPulse;
+  /** Landing that ends a "summit" run. */
+  onSummit?: (world: World, x: number, y: number) => void;
+  /** Runs every frame after landings. */
+  tick?: (world: World) => void;
+  /** True when a hazard ends the run as a fall. */
+  caught?: (world: World) => boolean;
+}
 
 /**
  * One record per playable pig. Physics, camera, and the frame loop stay shared.
@@ -13,6 +49,8 @@ export type SpriteId = "wilbur" | "toodles";
  */
 export interface PigVariant {
   id: VariantId;
+  /** How the course is built, how landings behave, and how the run ends. */
+  course: CourseRules;
   displayName: string;
   sprite: SpriteId;
   /** Wilbur breaks out of the page. Toodles dances, then drops onto the pasture. */

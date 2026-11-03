@@ -1,8 +1,6 @@
 import type { CrackStage } from "../../model/types";
 import { clamp, clamp01, lerp } from "../../utils/math";
-import { furniturePiece, furnitureThickness, wilburFurniture } from "../../assets/environment/wilburFurniture";
 import { growthAlong } from "../progression/age";
-import { toodlesPlatformSpec } from "../variants/toodles";
 import {
   BASE_HALF_WIDTH,
   BOUNCE_VY,
@@ -23,7 +21,8 @@ export interface LandingResult {
   bounceVy: number;
 }
 
-const START_Y = 52;
+/** Top of the floor platform. The pig starts standing here. */
+export const START_Y = 52;
 
 export function stageFromIntegrity(integrity: number): CrackStage {
   if (integrity > 0.9) return "intact";
@@ -129,15 +128,10 @@ function arc(launch: Launch, dir: -1 | 1, gap: number, vy0: number, worldWidth: 
   return { x: clamp(x, half, worldWidth - half), vx };
 }
 
-function bounceSpeeds(world: World): number[] {
-  // Wilbur's weak bounce still has to land. Toodles always gets the full hop.
-  return world.variant === "toodles" ? [BOUNCE_VY] : [BOUNCE_VY, BOUNCE_VY * WOBBLE_BOUNCE_SCALE];
-}
-
 function jumpsTo(world: World, launches: Launch[], dir: -1 | 1, gap: number, half: number): Launch[] {
   const landed: Launch[] = [];
   for (const launch of launches) {
-    for (const vy of bounceSpeeds(world)) landed.push(arc(launch, dir, gap, vy, world.width, half));
+    for (const vy of world.course.bounceSpeeds) landed.push(arc(launch, dir, gap, vy, world.width, half));
   }
   return landed;
 }
@@ -217,121 +211,38 @@ function placeNext(world: World, previous: Platform, gap: number, desired: numbe
   return best ?? { x: EDGE, width: desired };
 }
 
-function makePlatform(world: World, y: number, t: number, placed: { x: number; width: number }): Platform {
-  const kind = wilburFurniture(world.spawnIndex);
-  const width = placed.width;
-  const piece = furniturePiece(kind);
-  const cols = piece.art[0].length;
-  const body = piece.art.length - piece.seat;
-  const integrity = lerp(1, 0.66, t);
-  return {
-    id: `p${world.nextId++}`,
-    x: placed.x,
-    y,
-    width,
-    thickness: Math.max(16, Math.round((width * body) / cols)),
-    integrity,
-    stage: stageFromIntegrity(integrity),
-    skin: "plank",
-    art: kind,
-    temper: "strain",
-    broken: false,
-    wobbleUntil: 0,
-    falling: false,
-    fellAt: 0,
-  };
-}
-
-function makeToodlesPlatform(world: World, y: number, t: number, placed: { x: number; width: number }): Platform {
-  const spec = toodlesPlatformSpec(t);
-  const width = placed.width;
-  return {
-    id: `p${world.nextId++}`,
-    x: placed.x,
-    y,
-    width,
-    thickness: spec.thickness,
-    integrity: 1,
-    stage: spec.stage,
-    skin: spec.skin,
-    art: spec.art,
-    temper: spec.temper,
-    broken: false,
-    wobbleUntil: 0,
-    falling: false,
-    fellAt: 0,
-  };
-}
-
-function wilburFloor(world: World): Platform {
-  return {
-    id: "floor",
-    x: 20,
-    y: START_Y,
-    width: Math.max(80, world.width - 40),
-    thickness: furnitureThickness("sectional"),
-    integrity: 4,
-    stage: "intact",
-    skin: "plank",
-    art: "sectional",
-    temper: "strain",
-    broken: false,
-    wobbleUntil: 0,
-    falling: false,
-    fellAt: 0,
-  };
-}
-
-function toodlesFloor(world: World): Platform {
-  return {
-    id: "floor",
-    x: 20,
-    y: START_Y,
-    width: Math.max(80, world.width - 40),
-    thickness: 20,
-    integrity: 4,
-    stage: "intact",
-    skin: "bench",
-    art: "tube_01_clean",
-    temper: "anchor",
-    broken: false,
-    wobbleUntil: 0,
-    falling: false,
-    fellAt: 0,
-  };
-}
-
-/** Shortest step that still reads as a jump. The last Toodles plank will not be squeezed under this. */
+/** Shortest step that still reads as a jump. A summit platform will not be squeezed under this. */
 const SUMMIT_GAP = 96;
 
 export function layCourse(world: World, finaleHeight: number): void {
-  const toodles = world.variant === "toodles";
-  world.platforms.push(toodles ? toodlesFloor(world) : wilburFloor(world));
+  const course = world.course;
+  const summit = course.ending === "summit";
+  world.platforms.push(course.floor(world));
   world.spawnCursor = START_Y;
   world.spawnIndex = 0;
-  // Wilbur keeps planks past the breakthrough so the fall still has something under him.
-  // Toodles stops on one summit. Nothing is placed above it.
-  const ceiling = toodles ? finaleHeight : finaleHeight + 280;
+  // An overshoot run keeps planks past the finale so the fall still has something under him.
+  // A summit run stops on one top platform. Nothing is placed above it.
+  const ceiling = summit ? finaleHeight : finaleHeight + 280;
   while (world.spawnCursor < ceiling) {
     const t = clamp01(world.spawnCursor / finaleHeight);
     const gap = clamp(lerp(112, MAX_GAP, t) + (world.rng() - 0.5) * 8, 104, MAX_GAP);
     let y = world.spawnCursor + gap;
-    if (toodles && y >= finaleHeight) {
+    if (summit && y >= finaleHeight) {
       const room = finaleHeight - world.spawnCursor;
       if (room < SUMMIT_GAP) break;
       y = finaleHeight;
     }
     const previous = world.platforms[world.platforms.length - 1];
-    const desired = Math.min(toodles ? toodlesPlatformSpec(t).width : lerp(168, 136, t), world.width - EDGE * 2);
+    const desired = Math.min(course.platformWidth(t), world.width - EDGE * 2);
     const placed = placeNext(world, previous, y - world.spawnCursor, desired);
-    world.platforms.push(toodles ? makeToodlesPlatform(world, y, t, placed) : makePlatform(world, y, t, placed));
+    world.platforms.push(course.platform(world, y, t, placed));
     world.spawnCursor = y;
     world.spawnIndex += 1;
-    if (toodles && y >= finaleHeight) break;
+    if (summit && y >= finaleHeight) break;
   }
-  if (toodles) {
-    const summit = world.platforms.reduce((highest, platform) => Math.max(highest, platform.y), 0);
-    world.finaleHeight = summit;
+  if (summit) {
+    const top = world.platforms.reduce((highest, platform) => Math.max(highest, platform.y), 0);
+    world.finaleHeight = top;
   }
 }
 

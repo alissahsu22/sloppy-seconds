@@ -1,6 +1,6 @@
 # Prompt for the site owner's AI browser assistant
 
-Give this to the Sloppy Seconds site owner. They log in to Squarespace in their own browser, open an AI assistant that can control that browser (for example Claude in Chrome), and paste everything below the line. The hosting is already live and verified for release `83e201b40908`.
+Give this to the Sloppy Seconds site owner. They log in to Squarespace in their own browser, open an AI assistant that can control that browser (for example Claude in Chrome), and paste everything below the line. The hosting is already live and verified for release `cd5cd873eac5`.
 
 ---
 
@@ -20,10 +20,10 @@ In Code Injection, find the **Footer** box. That's the site-wide footer, not a s
 
 ```html
 <script
-  src="https://sloppy-seconds.vercel.app/widget/sanctuary.js?v=83e201b40908"
+  src="https://sloppy-seconds.vercel.app/widget/sanctuary.js?v=cd5cd873eac5"
   defer
   crossorigin="anonymous"
-  integrity="sha384-RrdmBfBVWuF0wxEHdUAJyjDMByLhGpbTOxTQeW+BRXmnPySeCoM/gx4hZ3gXDc+a"
+  integrity="sha384-Ppv+l++sFdDRmAwxUR/NGpBYoSO3vt4Di7cENnjb3Uxhi2nel6L9/3e4/E6bEese"
   data-asset-base="https://sloppy-seconds.vercel.app"
   data-only-path="/animals"
   data-help-href="https://www.sloppysecondsinc.org/ways-to-help"

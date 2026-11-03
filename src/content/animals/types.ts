@@ -21,7 +21,8 @@ export interface AnimalDefinition {
   id: string;
   displayName: string;
   species: string;
-  portrait: "wilbur" | "toodles";
+  /** Kit whose sprite draws this animal. Same as `id`. */
+  portrait: string;
   ground: {
     terrain: TerrainId;
     label: string;

@@ -2,11 +2,10 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { PlatformArt } from "../../assets/environment/scenery";
 import { BloomArt, ChipArt, CourseFx, GrowthArt, ScorchArt, SpillArt } from "../../assets/environment/courseArt";
-import { LabBackdrop } from "../../assets/environment/LabBackdrop";
 import { site } from "../../content/site";
 import { milestoneAlong, type AgeMilestone } from "../progression/age";
-import { WilburSprite } from "../../assets/pig/WilburSprite";
-import { ToodlesSprite } from "../../assets/pig/ToodlesSprite";
+import { AnimalSprite } from "../../animals/AnimalSprite";
+import { getAnimalKit } from "../../animals/registry";
 import { PIG_DRAW } from "../../assets/pig/metrics";
 import type { PigPose } from "../../model/types";
 import { effectSignature, platformSignature, resizeWorld } from "../physics/platforms";
@@ -18,7 +17,6 @@ import { measureEscape, paintEcho, paintWorld, poseForBody, writeCaption, type G
 import { clamp01, lerp } from "../../utils/math";
 import type { EscapePayload } from "./types";
 import type { LandingPulse } from "../physics/types";
-import { biomeAt } from "../variants/toodles";
 import { wilburVariant, type PigVariant } from "../variants";
 
 const HOST_CONTROL = "a, button, input, textarea, select, summary, [contenteditable='true']";
@@ -108,35 +106,6 @@ const fitWorld = (frame: HTMLElement, worldEl: HTMLElement) => {
 const BEGIN: Record<InputHints, string> = { keys: site.begin, touch: site.beginTouch, both: site.beginBoth };
 const STEER: Record<InputHints, string> = { keys: site.steer, touch: site.steerTouch, both: site.steerBoth };
 
-function VariantSprite({
-  sprite,
-  pose,
-  reduced,
-  dancing,
-  danceRun,
-  onDanceComplete,
-}: {
-  sprite: PigVariant["sprite"];
-  pose: PigPose;
-  reduced: boolean;
-  dancing: boolean;
-  danceRun: number;
-  onDanceComplete?: () => void;
-}) {
-  if (sprite === "toodles") {
-    return (
-      <ToodlesSprite
-        pose={pose}
-        reduced={reduced}
-        dancing={dancing}
-        danceRun={danceRun}
-        onDanceComplete={onDanceComplete}
-      />
-    );
-  }
-  return <WilburSprite pose={pose} reduced={reduced} />;
-}
-
 /**
  * Rendering is a copy of the physics world onto transforms.
  * React state changes only when a plank's crack state changes. The age readout, its note, and the growth echo are written directly.
@@ -186,7 +155,7 @@ export function PigJumpGame({
   const arrivalRef = useRef(false);
   const arrivedRef = useRef(false);
   const spillCountRef = useRef(0);
-  const biomeRef = useRef(biomeAt(0));
+  const biomeRef = useRef(getAnimalKit(variant.sprite).art.biomeAt?.(0));
   const [hints] = useState(inputHints);
   const [holding, setHolding] = useState(endingPreview === 0);
   const [ready, setReady] = useState(false);
@@ -194,7 +163,7 @@ export function PigJumpGame({
   const [fell, setFell] = useState(false);
   const [dancing, setDancing] = useState(false);
   const [danceRun, setDanceRun] = useState(0);
-  const [biome, setBiome] = useState(biomeAt(0));
+  const [biome, setBiome] = useState(() => getAnimalKit(variant.sprite).art.biomeAt?.(0));
   const [platforms, setPlatforms] = useState<
     {
       id: string;
@@ -326,8 +295,9 @@ export function PigJumpGame({
     setPose("dance");
     setDancing(true);
     setDanceRun((value) => value + 1);
-    biomeRef.current = "sanctuary";
-    setBiome("sanctuary");
+    const finalBiome = getAnimalKit(variantRef.current.sprite).art.biomeAt?.(1);
+    biomeRef.current = finalBiome;
+    setBiome(finalBiome);
     const frame = frameRef.current;
     if (frame) frame.style.setProperty("--climb", "1");
     const finale = variantRef.current.milestones[variantRef.current.milestones.length - 1];
@@ -362,7 +332,7 @@ export function PigJumpGame({
   }, [platforms, effects, ready]);
 
   useLayoutEffect(() => {
-    if (!endingPreview || !ready || variantRef.current.id !== "toodles") return;
+    if (!endingPreview || !ready || variantRef.current.finale !== "arrival") return;
     const world = worldRef.current;
     if (!world) return;
     const sanctuary = world.platforms.reduce<World["platforms"][number] | null>((best, platform) => {
@@ -416,18 +386,21 @@ export function PigJumpGame({
         const events = stepWorld(world, dt);
         paint(world);
         const current = variantRef.current;
-        if (current.id === "toodles") {
+        const biomeAt = getAnimalKit(current.sprite).art.biomeAt;
+        if (biomeAt) {
           const nextBiome = biomeAt(world.progress);
           if (nextBiome !== biomeRef.current) {
             biomeRef.current = nextBiome;
             setBiome(nextBiome);
           }
           frame.style.setProperty("--climb", world.progress.toFixed(3));
+        }
+        if (current.scorchFlashMs > 0) {
           const spills = world.effects.reduce(
             (count, effect) => count + (effect.kind === "spill" && effect.hazard ? 1 : 0),
             0,
           );
-          if (current.scorchFlashMs > 0 && spills > spillCountRef.current) {
+          if (spills > spillCountRef.current) {
             gsap.fromTo(
               frame,
               { "--scorch": 1 },
@@ -602,6 +575,7 @@ export function PigJumpGame({
   }, [ready]);
 
   const openingReadout = variant.readout(opening);
+  const { Backdrop } = getAnimalKit(variant.sprite).art;
 
   return (
     <section
@@ -609,7 +583,7 @@ export function PigJumpGame({
       ref={frameRef}
       tabIndex={0}
       data-variant={variant.id}
-      data-biome={variant.id === "toodles" ? biome : undefined}
+      data-biome={biome}
       data-holding={holding ? "1" : undefined}
       data-fallen={fell ? "1" : undefined}
       data-dancing={dancing ? "1" : undefined}
@@ -646,7 +620,7 @@ export function PigJumpGame({
         </div>
       </div>
       <div className="world" ref={worldElRef}>
-        {variant.id === "toodles" ? <LabBackdrop reduced={reduced} /> : null}
+        {Backdrop ? <Backdrop reduced={reduced} /> : null}
         {platforms.map((platform) => (
           <div
             key={platform.id}
@@ -689,8 +663,8 @@ export function PigJumpGame({
           </div>
         ))}
         <div className="pig-slot" ref={pigRef} style={{ width: PIG_DRAW.width, height: PIG_DRAW.height }}>
-          <VariantSprite
-            sprite={variant.sprite}
+          <AnimalSprite
+            id={variant.sprite}
             pose={pose}
             reduced={reduced}
             dancing={dancing}
@@ -705,7 +679,7 @@ export function PigJumpGame({
             data-on="0"
             style={{ width: PIG_DRAW.width, height: PIG_DRAW.height }}
           >
-            <WilburSprite pose={pose} playing={false} reduced />
+            <AnimalSprite id={variant.sprite} pose={pose} playing={false} reduced />
           </div>
         ) : null}
       </div>

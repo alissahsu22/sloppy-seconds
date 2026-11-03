@@ -62,6 +62,10 @@ and pull request.
 
 Built with React 19, TypeScript, Vite, and GSAP.
 
+## Adding an animal
+
+Each playable animal is one kit in `src/animals/`, registered in `src/animals/registry.ts`. The site, the games, the pasture, the Field Guide, and the Squarespace widget all read from that list. Steps are in [docs/ADDING_AN_ANIMAL.md](docs/ADDING_AN_ANIMAL.md).
+
 ## Squarespace
 
 The standalone site stays as it is. A second build, `dist/widget/sanctuary.js`, can run inside the sanctuary's Our Animals page without an iframe. Squarespace keeps the header, biographies, photos, and donation links. The script adds the story buttons, games, Field Guide, breakout, and roaming pigs.

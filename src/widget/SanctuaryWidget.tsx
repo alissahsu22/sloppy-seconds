@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal, flushSync } from "react-dom";
+import { getAnimalKit } from "../animals/registry";
 import { EscapeSequence } from "../animations/EscapeSequence";
 import { readCharacterChoice, writeCharacterChoice } from "../components/CharacterSlider/memory";
 import { resolveCharacterId, stepCharacter } from "../components/CharacterSlider/slide";
@@ -13,7 +14,6 @@ import { animals } from "../content/animals";
 import { storyCharacters } from "../content/characters";
 import { collectedFieldGuide, fieldGuideButtonLabel } from "../content/fieldGuide";
 import { site } from "../content/site";
-import { wilbur } from "../content/animals/wilbur";
 import { PigJumpGame } from "../game/PigJumpGame/PigJumpGame";
 import type { EscapePayload } from "../game/PigJumpGame/types";
 import { getPigVariant, isPlayableStory } from "../game/variants";
@@ -35,8 +35,7 @@ const centerX = () => clamp(window.innerWidth * 0.46, 96, window.innerWidth - 96
 
 function homeX(id: string): number {
   const center = centerX();
-  if (id === "toodles") return center + 120;
-  return center;
+  return center + getAnimalKit(id).art.homeOffset;
 }
 
 function restoredX(saved: number | null): number {
@@ -120,7 +119,8 @@ export function SanctuaryWidget({
   const scrollRef = useRef(0);
   const restoreArmed = useRef(false);
   const revealRef = useRef<HTMLElement | null>(null);
-  const landedRef = useRef(false);
+  /** The animal whose breakout just landed on the pasture, at progress.pigX. */
+  const landedRef = useRef<string | null>(null);
   collectedRef.current = progress.collectedIds;
 
   useEffect(() => {
@@ -204,7 +204,7 @@ export function SanctuaryWidget({
   };
 
   const play = (id: string) => {
-    landedRef.current = false;
+    landedRef.current = null;
     setEscape(null);
     setRoaming(false);
     setEndingPreview(0);
@@ -215,7 +215,7 @@ export function SanctuaryWidget({
 
   const replayEnding = () => {
     if (!activeId || getPigVariant(activeId).finale !== "arrival") return;
-    landedRef.current = false;
+    landedRef.current = null;
     setNoticeId(null);
     setRoaming(false);
     setPhase("playing");
@@ -223,7 +223,7 @@ export function SanctuaryWidget({
   };
 
   const replay = () => {
-    landedRef.current = false;
+    landedRef.current = null;
     reactionsRef.current?.reset();
     setEscape(null);
     setNoticeId(null);
@@ -259,7 +259,7 @@ export function SanctuaryWidget({
     const added = !collectedRef.current.includes(id);
     if (added) collectedRef.current = [...collectedRef.current, id];
     unlock(id, x, facing);
-    landedRef.current = true;
+    landedRef.current = id;
     if (added) setNoticeId(id);
     setEscape(null);
     setPhase("ended");
@@ -369,7 +369,7 @@ export function SanctuaryWidget({
             {roaming
               ? herd.map((animal) => {
                   const saved = residentSpot(progress, animal.id);
-                  const justLanded = animal.id === wilbur.id && landedRef.current;
+                  const justLanded = animal.id === landedRef.current;
                   const facing = justLanded ? progress.facing : (saved?.facing ?? 1);
                   const x = justLanded ? (progress.pigX ?? homeX(animal.id)) : restoredX(saved?.x ?? homeX(animal.id));
                   return (
@@ -402,6 +402,7 @@ export function SanctuaryWidget({
                   payload={escape}
                   ground={groundRef.current}
                   reduced={reduced}
+                  sprite={variant.sprite}
                   gentle={variant.finale === "arrival"}
                   onDone={(landing) => {
                     if (!activeId) return;
@@ -452,7 +453,7 @@ export function SanctuaryWidget({
                       variant={variant}
                       active={(phase === "playing" || phase === "collapsing") && dialog === "game"}
                       reduced={reduced}
-                      endingPreview={variant.id === "toodles" ? endingPreview : 0}
+                      endingPreview={variant.finale === "arrival" ? endingPreview : 0}
                       onStart={() => setPhase("playing")}
                       onRetry={replay}
                       onLanding={variant.pageStrain ? (landing) => reactionsRef.current?.land(landing) : undefined}
@@ -502,7 +503,7 @@ export function SanctuaryWidget({
                         {site.skip}
                       </button>
                     ) : null}
-                    {variant.id === "toodles" ? (
+                    {variant.finale === "arrival" ? (
                       <button type="button" className="link-button skip-link ending-replay" onClick={replayEnding}>
                         Replay ending
                       </button>
