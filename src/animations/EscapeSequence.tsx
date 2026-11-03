@@ -35,7 +35,7 @@ export function EscapeSequence({
       const layer = layerRef.current;
       if (!pig || !layer || !ground) return;
       const strip = ground.getBoundingClientRect();
-      const bar = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--bar")) || 0;
+      const bar = Number.parseFloat(getComputedStyle(ground).getPropertyValue("--bar")) || 0;
       const lane = walkBounds(window.innerWidth);
       const landing = {
         x: gentle

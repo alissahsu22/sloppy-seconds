@@ -1,10 +1,11 @@
+import { assetUrl } from "../base";
 import { LabScientists } from "./LabStaff";
 
 const SET = "/assets/toodles/environment/backdrops";
 
 /** Background drawing. It never joins the course, so it cannot be landed on. */
 function Piece({ name, className }: { name: string; className: string }) {
-  return <img className={`set-piece ${className}`} src={`${SET}/${name}.png`} alt="" draggable={false} />;
+  return <img className={`set-piece ${className}`} src={assetUrl(`${SET}/${name}.png`)} alt="" draggable={false} />;
 }
 
 /**

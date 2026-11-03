@@ -17,14 +17,30 @@ interface GhostSnapshot {
   color: string;
 }
 
+export interface PageReactionOptions {
+  /** Where the game window lives. The standalone page uses the document. */
+  scope?: ParentNode;
+  /**
+   * The standalone animals page also shakes `.crew-title`.
+   * The embed leaves that off and passes host nodes it was explicitly given.
+   */
+  includePageChrome?: boolean;
+  hostPhotos?: () => HTMLElement[];
+  hostLetters?: () => HTMLElement[];
+  hostHeadings?: () => HTMLElement[];
+}
+
 /**
  * Page reactions stay off the physics loop. Landings, the age tier, and the
  * one breakthrough call this. Tweens are tracked so replay and skip can clear them.
  */
-export function createPageReactions(root: HTMLElement, reduced: boolean) {
+export function createPageReactions(root: HTMLElement, reduced: boolean, options?: PageReactionOptions) {
+  const scope = options?.scope ?? document;
+  const pageChrome = options?.includePageChrome !== false;
   const tweens: gsap.core.Tween[] = [];
   const ghosts = new Set<HTMLElement>();
   const cracks = new Set<Element>();
+  const savedTransform = new Map<HTMLElement, string>();
   let dead = false;
   let sealed = false;
   let lastLanding = 0;
@@ -32,24 +48,38 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
   let tiltSign = 1;
   let frameToken = 0;
 
-  const dialogEl = () => document.querySelector<HTMLElement>(".story-dialog");
+  const dialogEl = () => scope.querySelector<HTMLElement>(".story-dialog");
+  const noteHost = (node: HTMLElement) => {
+    if (!node.closest("[data-ss-strain]") || savedTransform.has(node)) return;
+    savedTransform.set(node, node.style.transform);
+  };
+  const restoreHostTransforms = () => {
+    for (const [node, value] of savedTransform) {
+      if (node.isConnected) node.style.transform = value;
+    }
+    savedTransform.clear();
+  };
   const unique = (nodes: HTMLElement[]) => [...new Set(nodes)];
   const inView = (node: HTMLElement) => {
     const rect = node.getBoundingClientRect();
     return rect.width > 1 && rect.bottom > 0 && rect.top < window.innerHeight;
   };
-  const pageLetters = () =>
-    [...document.querySelectorAll<HTMLElement>(".crew-title .crew-letter")].filter(
+  const pageLetters = () => {
+    if (!pageChrome) return [];
+    return [...document.querySelectorAll<HTMLElement>(".crew-title .crew-letter")].filter(
       (letter) => LOOSE_WORDS.has(letter.dataset.word ?? "") && inView(letter),
     );
+  };
+  const hostLetters = () => (options?.hostLetters?.() ?? []).filter(inView);
   const allLetters = () =>
     unique([
       ...root.querySelectorAll<HTMLElement>(".crew-letter"),
       ...(dialogEl()?.querySelectorAll<HTMLElement>(".crew-letter") ?? []),
-      ...document.querySelectorAll<HTMLElement>(".crew-title .crew-letter"),
+      ...(pageChrome ? document.querySelectorAll<HTMLElement>(".crew-title .crew-letter") : []),
+      ...hostLetters(),
     ]);
   const coveredByWindow = (node: HTMLElement) => {
-    const box = document.querySelector(".story-window")?.getBoundingClientRect();
+    const box = windowEl()?.getBoundingClientRect();
     if (!box) return false;
     const rect = node.getBoundingClientRect();
     const x = rect.left + rect.width / 2;
@@ -59,7 +89,7 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
   const activeLetters = () =>
     unique([
       ...(dialogEl()?.querySelectorAll<HTMLElement>(".crew-letter") ?? []),
-      ...[...root.querySelectorAll<HTMLElement>(".crew-letter"), ...pageLetters()].filter(
+      ...[...root.querySelectorAll<HTMLElement>(".crew-letter"), ...pageLetters(), ...hostLetters()].filter(
         (letter) => !coveredByWindow(letter),
       ),
     ]);
@@ -68,13 +98,19 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
       [
         dialogEl()?.querySelector<HTMLElement>("[data-strain='heading']") ?? null,
         root.querySelector<HTMLElement>("[data-strain='heading']"),
-        document.querySelector<HTMLElement>(".crew-title"),
+        pageChrome ? document.querySelector<HTMLElement>(".crew-title") : null,
+        ...(options?.hostHeadings?.() ?? []),
       ].filter((node): node is HTMLElement => !!node),
     );
   const hanger = () =>
     dialogEl()?.querySelector<HTMLElement>("[data-hanger]") ?? root.querySelector<HTMLElement>("[data-hanger]");
-  const windowEl = () => document.querySelector<HTMLElement>(".story-window");
-  const photo = () => root.querySelector<HTMLElement>("[data-strain='photo']");
+  const windowEl = () => scope.querySelector<HTMLElement>(".story-window");
+  const photos = () =>
+    unique(
+      [root.querySelector<HTMLElement>("[data-strain='photo']"), ...(options?.hostPhotos?.() ?? [])].filter(
+        (node): node is HTMLElement => !!node,
+      ),
+    );
   const frame = () =>
     root.querySelector<HTMLElement>("[data-strain='frame']") ??
     dialogEl()?.querySelector<HTMLElement>("[data-strain='frame']") ??
@@ -126,8 +162,7 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
       gsap.killTweensOf(title);
       gsap.set(title, { clearProps: "transform" });
     }
-    const picture = photo();
-    if (picture) {
+    for (const picture of photos()) {
       gsap.killTweensOf(picture);
       gsap.set(picture, { clearProps: "transform" });
     }
@@ -139,6 +174,7 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
       gsap.set(box, { clearProps: "transform" });
     }
     restoreLetters();
+    restoreHostTransforms();
     delete root.dataset.strainTier;
   };
 
@@ -148,6 +184,7 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
       (node) => inView(node) && (node.closest(".story-dialog") !== null || !coveredByWindow(node)),
     );
     if (titles.length === 0) return;
+    for (const title of titles) noteHost(title);
     const base = tier === "cramped" || tier === "breakthrough" ? 5 : 3;
     const amp = Math.min(16, base + power * 10);
     for (const title of titles) {
@@ -167,20 +204,23 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
   };
 
   const tiltPhoto = (impact: number) => {
-    const picture = photo();
-    if (!picture || reduced) return;
+    const pictures = photos();
+    if (pictures.length === 0 || reduced) return;
     tiltSign *= -1;
     const angle = tiltSign * Math.min(6, 1.6 + impact * 4.4);
-    gsap.killTweensOf(picture);
-    track(
-      gsap.to(picture, {
-        rotation: angle,
-        scale: 1.08,
-        duration: 0.42,
-        ease: "power3.out",
-        transformOrigin: "50% 42%",
-      }),
-    );
+    for (const picture of pictures) {
+      noteHost(picture);
+      gsap.killTweensOf(picture);
+      track(
+        gsap.to(picture, {
+          rotation: angle,
+          scale: 1.08,
+          duration: 0.42,
+          ease: "power3.out",
+          transformOrigin: "50% 42%",
+        }),
+      );
+    }
   };
 
   const deformFrame = (impact: number) => {
@@ -284,6 +324,7 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
 
   const loosen = (letter: HTMLElement, impact: number) => {
     if (reduced) return;
+    noteHost(letter);
     const index = Number(letter.dataset.letter ?? "0");
     const direction = index % 2 === 0 ? -1 : 1;
     gsap.killTweensOf(letter);
@@ -300,6 +341,7 @@ export function createPageReactions(root: HTMLElement, reduced: boolean) {
 
   const hang = (letter: HTMLElement, impact: number) => {
     if (reduced) return;
+    noteHost(letter);
     gsap.killTweensOf(letter);
     track(
       gsap.to(letter, {

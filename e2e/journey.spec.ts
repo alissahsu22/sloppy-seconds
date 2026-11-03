@@ -130,12 +130,12 @@ test.describe("keyboard", () => {
     await expect(page.locator(".stage[data-holding='1']")).toHaveCount(0);
     const start = await pigX(page);
     await page.keyboard.down("ArrowLeft");
-    await page.waitForTimeout(400);
+    await expect.poll(() => pigX(page), { intervals: [16, 32, 50] }).toBeLessThan(start - 3);
     await page.keyboard.up("ArrowLeft");
     const left = await pigX(page);
     expect(left).toBeLessThan(start);
     await page.keyboard.down("d");
-    await page.waitForTimeout(600);
+    await expect.poll(() => pigX(page), { intervals: [16, 32, 50] }).toBeGreaterThan(left + 3);
     await page.keyboard.up("d");
     expect(await pigX(page)).toBeGreaterThan(left);
   });

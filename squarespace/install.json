@@ -1,0 +1,10 @@
+{
+  "siteUrl": "https://www.sloppysecondsinc.org/animals",
+  "assetBase": "https://sloppy-seconds.vercel.app",
+  "onlyPath": "/animals",
+  "helpHref": "https://www.sloppysecondsinc.org/ways-to-help",
+  "animals": "#team",
+  "clearance": "#header, .sqs-announcement-bar, .sqs-mobile-info-bar, [data-ss-clearance]",
+  "strainPhotos": "#block-da733b122b1ccc336d09",
+  "strainLetters": "#team h1"
+}

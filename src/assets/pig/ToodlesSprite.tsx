@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import type { PigPose } from "../../model/types";
 import { TOODLES_HOP_PX, playToodlesCelebration } from "../../animations/toodlesCelebration";
+import { assetUrl } from "../base";
 import { isPigPose } from "./atlas";
 import {
   TOODLES_ATLAS,
@@ -170,7 +171,7 @@ export function ToodlesSprite({
         <img
           className="toodles-atlas"
           alt=""
-          src={TOODLES_ATLAS_URL}
+          src={assetUrl(TOODLES_ATLAS_URL)}
           width={TOODLES_ATLAS.width}
           height={TOODLES_ATLAS.height}
           draggable={false}
@@ -184,7 +185,7 @@ export function ToodlesSprite({
         <img
           className="toodles-atlas"
           alt=""
-          src={TOODLES_DANCE_ATLAS_URL}
+          src={assetUrl(TOODLES_DANCE_ATLAS_URL)}
           width={TOODLES_DANCE_ATLAS.width}
           height={TOODLES_DANCE_ATLAS.height}
           draggable={false}

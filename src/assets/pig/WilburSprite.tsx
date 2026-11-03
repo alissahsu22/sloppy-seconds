@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { PigPose } from "../../model/types";
+import { assetUrl } from "../base";
 import { ATLAS_URL, FOOT, clipForPose, frameFacesLeft, frameRect, frameTrim, isPigPose } from "./atlas";
 
 /**
@@ -68,7 +69,7 @@ export function WilburSprite({
         marginLeft: -footX,
         bottom: footY - trim.h,
         transformOrigin: `${footX}px ${footY}px`,
-        backgroundImage: `url("${ATLAS_URL}")`,
+        backgroundImage: `url("${assetUrl(ATLAS_URL)}")`,
         backgroundPosition: `-${rect.x + trim.x}px -${rect.y + trim.y}px`,
       }}
     />

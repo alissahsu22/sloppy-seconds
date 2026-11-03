@@ -1,5 +1,10 @@
 /// <reference types="vite/client" />
 
+declare module "*.css?inline" {
+  const css: string;
+  export default css;
+}
+
 declare module "node:fs" {
   export function existsSync(path: string): boolean;
 }

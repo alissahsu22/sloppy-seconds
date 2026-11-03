@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Host page fixture</title>
+    <style>
+      body {
+        margin: 40px;
+        background: #f4efe4;
+        color: #243028;
+        font-family: Georgia, serif;
+        font-size: 18px;
+        line-height: 1.5;
+      }
+
+      .host-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        height: 56px;
+        padding: 0 16px;
+        background: #1d3c34;
+        color: #fff;
+        font-family: Georgia, serif;
+      }
+
+      .host-header a {
+        color: #fff;
+      }
+
+      .host-donate {
+        position: fixed;
+        right: 12px;
+        bottom: 0;
+        left: 12px;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 52px;
+        background: #c4552a;
+        color: #fff;
+        font-family: Georgia, serif;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .host-main {
+        max-width: 38rem;
+        margin: 0 auto;
+        padding: 72px 0 88px;
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        color: #0b6b3a;
+        font-family: Georgia, serif;
+        font-size: 32px;
+        font-weight: 700;
+      }
+
+      .host-chip {
+        display: inline-block;
+        margin: 0 8px 8px 0;
+        padding: 8px 14px;
+        border: 0;
+        border-radius: 16px;
+        background: #d7ecff;
+        color: #123;
+        font-family: Georgia, serif;
+        font-size: 16px;
+      }
+
+      .host-photo {
+        display: block;
+        width: 180px;
+        height: 120px;
+        object-fit: cover;
+        background: #ddd;
+      }
+
+      .host-aside {
+        margin: 24px 0;
+        padding: 12px;
+        background: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="host-header" data-ss-clearance>
+      <a href="#host-about">About the sanctuary</a>
+      <a href="#host-visit">Visit</a>
+      <a href="https://example.test/unrelated">News</a>
+    </header>
+    <a class="host-donate" data-ss-clearance href="https://example.test/donate">Donate</a>
+    <main class="host-main">
+      <h1>Animals who live here</h1>
+      <p>
+        This page stands in for Squarespace. Its navigation, type, and buttons are unrelated to the game and should keep
+        their own styles.
+      </p>
+      <p>
+        <button type="button" class="host-chip" data-ss-story="wilbur">Wilbur's story</button>
+        <button type="button" class="host-chip" data-ss-story="toodles">Toodles's story</button>
+        <button type="button" class="host-chip" data-ss-guide>Open Field Guide</button>
+      </p>
+      <img class="host-photo" data-ss-strain="photo" src="/favicon.svg" alt="A marked host photograph" />
+      <h2 class="host-aside" data-ss-strain="letters">The rescued animals at the sanctuary</h2>
+      <div data-ss-mount></div>
+      <section id="host-about">
+        <h2>About</h2>
+        <p>A plain biography stays put. The game does not replace this copy.</p>
+      </section>
+      <section id="host-visit" data-ss-animals>
+        <h2>Visit the animals</h2>
+        <p>The ending can scroll here because this section is marked.</p>
+      </section>
+    </main>
+    <script
+      src="/widget/sanctuary.js"
+      defer
+      data-asset-base=""
+      data-help-href="https://example.test/ways-to-help"
+    ></script>
+  </body>
+</html>
